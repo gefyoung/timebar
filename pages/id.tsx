@@ -21,8 +21,6 @@ export default function Id({ data }: any) {
 
   let day = 84000
 
-
-
   interface FlipEvent {
     dayBegins: number
     dayEnds: number
@@ -33,54 +31,51 @@ export default function Id({ data }: any) {
   }
 
   const FlipComponent = ({ flipEvent }: any) => {
-    let duration = Math.ceil(flipEvent.duration / 1000000)
-    // let newDuration = duration * 10000
-    // console.log(duration)
+    console.log(flipEvent.summary, flipEvent.minutes)
+    const eventSpan: any[] = []
 
-    // let customClass = `w-${10} ` + returnColor(flipEvent.summary)
-    // console.log(customClass)
+    // for (let duration = flipEvent.duration; duration > 0; duration - 1) {
+    //   flipEvent.className = `w-${duration} ` + flipEvent.className
+    // }
+    
+    return <div>
+      {
+            eventSpan.map((sliver) => {
+              return <span 
+              className={sliver.className}
+            ></span>
+            })
+      }
+    </div>
 
-    return <div 
-      key={flipEvent.summary + flipEvent.duration} 
-      className={flipEvent.className}
-      //   flipEvent.summary === "Jerkin" ? flipEvent.className
-      //   : flipEvent.summary === "Learning" ? " p-1 bg-yellow-600"
-      //   : flipEvent.summary === "Eating" ? "p-1 bg-purple-600"
-      //   : flipEvent.summary === "Sleeping" ? "p-1 bg-orange-600"
-      //   : flipEvent.summary === "Weed" ? "p-1 bg-amber-600"
-      //   : flipEvent.summary === "Socializing" ? "w-0.5 bg-lime-600"
-      //   : flipEvent.summary === "Beer" ? "p-1 bg-teal-600"
-      //   : flipEvent.summary === "Working out" ? "p-1 bg-violet-600"
-      //   : flipEvent.summary === "Insta/tv/youtub" ? "p-1 bg-pink-600"
-      //   : flipEvent.summary === "Shop/Chores" ? "p-1 bg-rose-600"
-      //   : flipEvent.summary === "Weed" ? "p-1 bg-indigo-600"
-      //   : flipEvent.summary === "Skiing" ? "p-1 bg-cyan-600"
-      //   : "p-1 bg-white"
-      // }
-    ></div>
+
   }
 
   const DayComponent = ({ day }: any) => {
+    console.log(day)
     return <div className="flex my-10 w-96 bg-green-50">{
       day.map((flipEvent: FlipEvent) =>
-      <div>
-        <FlipComponent flipEvent={flipEvent} />
-        </div>
+        <FlipComponent key={flipEvent.start}  flipEvent={flipEvent} />
       )}</div>
   }
 
+  // return (
+  //   <div className="mx-10">
+  //     {keylessArray.map((day) => 
+  //       <div key={keylessArray.indexOf(day)}>
+  //       <DayComponent key={day} day={day} />
+  //       </div>
+  //     )}
+  //   </div>
+  // )
   return (
-    <div className="mx-10">
-      {keylessArray.map((day) => 
-        <DayComponent key={day} day={day} />
-      )}
-    </div>
+        <div key={keylessArray.indexOf(day)}>
+        <DayComponent key={day} day={keylessArray[2]} />
+        </div>
   )
 }
 
-
 const returnColor = (summary: any) => {
-  console.log(summary)
   switch (summary) {
     case "Jerkin": return "bg-red-600"
     case "Learning": return "bg-yellow-600"
@@ -99,6 +94,14 @@ const returnColor = (summary: any) => {
   }
 }
 
+const returnWidth = (duration: any) => {
+
+  return `py-${duration}`
+}
+const getMinutes = (duration: any) => {
+  return Math.ceil(duration / 60000)
+}
+
 export async function getStaticProps() {
   try {
     const parsedICAL = await ical.async.fromURL('https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff')
@@ -109,7 +112,7 @@ export async function getStaticProps() {
 
       const userTZ = 'America/Denver'
 
-      const className = "p-1 " + returnColor(calEvent.summary)
+      
 
       if (calEvent.start instanceof Date) {
         const utcDate = new Date(calEvent.start)
@@ -126,25 +129,30 @@ export async function getStaticProps() {
           duration: null,
           startDate: convertedTZ,
           summary: calEvent.summary,
-          className: className
+          className: null
         }
         eventArray.push(newShit)
       }
     }
 
+
     const sorted = eventArray.sort((a, b) => {
       if (a.start > b.start) {
         b.duration = a.start - b.start
+        b.className = returnColor(b.summary)
+        b.minutes = getMinutes(b.duration)
         return 1
       } else if (b.start > a.start) {
         a.duration = b.start - a.start
+        a.className = returnColor(a.summary)
+        a.minutes = getMinutes(b.minutes)
         return -1
       } else {
         return 0
       }
     })
 
-    return { props: { data: eventArray }, revalidate: 1 }
+    return { props: { data: sorted }, revalidate: 1 }
   } catch (err) {
     return { props: { data: null }, revalidate: 1 }
   }
