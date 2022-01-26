@@ -31,7 +31,7 @@ export default function Id({ data }: any) {
   }
 
   const FlipComponent = ({ flipEvent }: any) => {
-    console.log(flipEvent.summary, flipEvent.minutes)
+    console.log(flipEvent.summary, flipEvent.duration)
     const eventSpan: any[] = []
 
     // for (let duration = flipEvent.duration; duration > 0; duration - 1) {
@@ -101,6 +101,13 @@ const returnWidth = (duration: any) => {
 const getMinutes = (duration: any) => {
   return Math.ceil(duration / 60000)
 }
+function durate(sorted: any){
+  for (let i = 0; i < sorted.length - 1; i++) {
+    sorted[i].duration = sorted[i + 1].start - sorted[i].start
+  }
+  return sorted
+}
+
 
 export async function getStaticProps() {
   try {
@@ -122,7 +129,7 @@ export async function getStaticProps() {
 
         const dayBegins = Date.parse(convertedDate.toDateString())
 
-        const newShit = {
+        let newShit = {
           dayBegins: dayBegins,
           dayEnds: dayBegins + 8640000,
           start: startTime,
@@ -135,24 +142,17 @@ export async function getStaticProps() {
       }
     }
 
-
     const sorted = eventArray.sort((a, b) => {
-      if (a.start > b.start) {
-        b.duration = a.start - b.start
-        b.className = returnColor(b.summary)
-        b.minutes = getMinutes(b.duration)
-        return 1
-      } else if (b.start > a.start) {
-        a.duration = b.start - a.start
-        a.className = returnColor(a.summary)
-        a.minutes = getMinutes(b.minutes)
+      if (a.start < b.start) {
         return -1
+      } else if (b.start < a.start) {
+        return 1
       } else {
         return 0
       }
     })
 
-    return { props: { data: sorted }, revalidate: 1 }
+    return { props: { data: durate(sorted) }, revalidate: 1 }
   } catch (err) {
     return { props: { data: null }, revalidate: 1 }
   }
