@@ -1,6 +1,9 @@
 import ical from 'node-ical'
+import { useState } from 'react'
 
 export default function Id({ data }: any) {
+
+  const [selectedEventState, setSelectedEventState] = useState(null)
 
   function groupBy(objectArray: any, property: any) {
     return objectArray.reduce(function (acc: any, obj: any) {
@@ -31,48 +34,44 @@ export default function Id({ data }: any) {
   }
 
   const FlipComponent = ({ flipEvent }: any) => {
-    console.log(flipEvent.summary, flipEvent.duration)
     const eventSpan: any[] = []
-
-    // for (let duration = flipEvent.duration; duration > 0; duration - 1) {
-    //   flipEvent.className = `w-${duration} ` + flipEvent.className
-    // }
     
-    return <div>
-      {
-            eventSpan.map((sliver) => {
-              return <span 
-              className={sliver.className}
-            ></span>
-            })
-      }
-    </div>
-
-
+    return <div  onClick={() => setSelectedEventState(flipEvent.summary)} className="flex">
+      <div className={flipEvent.className}>
+      {/* {
+        eventSpan.map((sliver) => {
+          return <span 
+          className={sliver.className}
+        ></span>
+        })
+      } */}
+    </div></div>
   }
 
   const DayComponent = ({ day }: any) => {
-    console.log(day)
-    return <div className="flex my-10 w-96 bg-green-50">{
+    return <div className="flex my-20 overflow-hidden max-w-prose">{
       day.map((flipEvent: FlipEvent) =>
         <FlipComponent key={flipEvent.start}  flipEvent={flipEvent} />
       )}</div>
   }
 
-  // return (
-  //   <div className="mx-10">
-  //     {keylessArray.map((day) => 
-  //       <div key={keylessArray.indexOf(day)}>
-  //       <DayComponent key={day} day={day} />
-  //       </div>
-  //     )}
-  //   </div>
-  // )
   return (
+    <div className="mx-10">
+      <div>{selectedEventState}</div>
+      {keylessArray.map((day) => 
         <div key={keylessArray.indexOf(day)}>
-        <DayComponent key={day} day={keylessArray[2]} />
+        <DayComponent key={day} day={day} />
         </div>
+      )}
+    </div>
   )
+
+  // return (
+  //       <div key={keylessArray.indexOf(day)}>
+  //         <div>{selectedEventState}</div>
+  //       <DayComponent key={day} day={keylessArray[2]} />
+  //       </div>
+  // )
 }
 
 const returnColor = (summary: any) => {
@@ -95,15 +94,39 @@ const returnColor = (summary: any) => {
 }
 
 const returnWidth = (duration: any) => {
+  let minutes = duration / 60000
+  let height = " h-8"
+  const min4 = Math.ceil(minutes / 4)
+  console.log("min4s", min4)
+  return `w-${min4} h-8`
+  
 
-  return `py-${duration}`
+  // if (minutes < 2) {
+  //   return "w-0.5" + height
+  // } else if (minutes < 4) {
+  //   return `w-1` + height
+  // } else if (minutes < 8) {
+  //   return `w-2` + height
+  // } else if (minutes < 16) {
+  //   return `w-4` + height
+  // } else if (minutes < 32) {
+  //   return `w-8` + height
+  // } else if (minutes < 64) {
+  //   return `w-16` + height
+  // } else if (minutes < 128) {
+  //   return `w-32` + height
+  // } else if (minutes < 256) {
+  //   return `w-48` + height
+  // } else if (minutes > 256) {
+  //   return `w-96` + height
+  // }
+  
 }
-const getMinutes = (duration: any) => {
-  return Math.ceil(duration / 60000)
-}
+
 function durate(sorted: any){
   for (let i = 0; i < sorted.length - 1; i++) {
     sorted[i].duration = sorted[i + 1].start - sorted[i].start
+    sorted[i].className = returnWidth(sorted[i].duration) + " " + returnColor(sorted[i].summary)
   }
   return sorted
 }
