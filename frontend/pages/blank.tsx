@@ -1,17 +1,17 @@
 export default function Blank() {
   return (<>
-    <div className="w-1 bg-purple-600"></div>
-    <div className="w-2"></div>
-    <div className="w-3"></div>
-    <div className="w-4"></div>
-    <div className="w-5"></div>
-    <div className="w-6"></div>
-    <div className="w-7"></div>
-    <div className="w-8"></div>
-    <div className="w-9"></div>
-    <div className="w-10"></div>
-    <div className="w-11"></div>
-    <div className="w-12"></div>
+    <div className="w-1 h-8 bg-purple-600"></div>
+    <div className="w-2 bg-red-600"></div>
+    <div className="w-3 bg-yellow-600"></div>
+    <div className="w-4 bg-orange-600"></div>
+    <div className="w-5 bg-amber-600"></div>
+    <div className="w-6 bg-lime-600"></div>
+    <div className="bg-teal-600 w-7"></div>
+    <div className="w-8 bg-blue-600"></div>
+    <div className="bg-pink-600 w-9"></div>
+    <div className="w-10 bg-rose-600"></div>
+    <div className="w-11 bg-cyan-600"></div>
+    <div className="w-12 bg-black"></div>
     <div className="w-13"></div>
     <div className="w-14"></div>
     <div className="w-15"></div>

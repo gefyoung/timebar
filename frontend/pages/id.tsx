@@ -35,7 +35,7 @@ export default function Id({ data }: any) {
   }
 
   const DayComponent = ({ day }: any) => {
-    return <><div className="flex my-20 overflow-hidden">{
+    return <><div key={day} className="flex my-20 overflow-hidden">{
       day.map((flipEvent: FlipEvent) =>
         <FlipComponent key={flipEvent.start}  flipEvent={flipEvent} />
       )}</div></>
@@ -46,7 +46,7 @@ export default function Id({ data }: any) {
       {
       Object.entries(data).map(([key, day]) => 
       <>
-        <div className='flex '>
+        <div key={key} className='flex '>
           {new Date(parseInt(key)).toLocaleDateString() + ' '} 
           {new Date(parseInt(key)).toLocaleString('en-us', {  weekday: 'long' })}
         </div>
@@ -58,10 +58,7 @@ export default function Id({ data }: any) {
       }
     </div>
   )
-
-  return null
 }
-
 
 
 
