@@ -1,5 +1,5 @@
 {
-  "name": "tback",
+  "name": "back",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,11 @@
   },
   "eslintConfig": {
     "extends": ["serverless-stack"]
+  },
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
+    "@types/aws-lambda": "^8.10.70",
+    "@types/node": "<15.0.0"
   },
   "dependencies": {
     "@serverless-stack/cli": "0.61.0",
