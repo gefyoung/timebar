@@ -7,7 +7,7 @@ interface FlipEvent {
   dayEnds: number
   start: number
   duration: number
-  startDate: Date
+  // startDate: Date
   summary: string,
   className: string
 }
@@ -16,14 +16,15 @@ interface FlipEvent {
 export default function Id({ data }: any) {
 
   const [selectedEventState, setSelectedEventState] = useState({
-    summary: null,
-    className: null,
-    startDate: null
+    summary: "",
+    className: "",
+    startDate: 0
   })
 
   const selectFlip = (e: FlipEvent) => {
-    console.log(e.startDate)
-    // setSelectedEventState({ ...e, startDate: e.startDate.getDate() })
+    const startDate = new Date(e.dayBegins)
+    console.log(e.dayBegins)
+    setSelectedEventState({ className: e.className, summary: e.summary, startDate: e.dayBegins })
   }
 
   const FlipComponent = ({ flipEvent }: any) => {
@@ -48,7 +49,7 @@ export default function Id({ data }: any) {
           {new Date(parseInt(key)).toLocaleDateString() + ' '} 
           {new Date(parseInt(key)).toLocaleString('en-us', {  weekday: 'long' })}
         </div>
-        { selectedEventState.startDate === new Date(parseInt(key)) && <div className='flex '>
+        { selectedEventState.startDate === parseInt(key) && <div className='flex '>
           { selectedEventState.summary + " " + selectedEventState.className }
         </div> }
           <DayComponent key={day} day={day} />
@@ -58,7 +59,6 @@ export default function Id({ data }: any) {
     </div>
   )
 }
-
 
 const userTZ = 'America/Denver'
 
@@ -112,8 +112,6 @@ function durate(sorted: any){
   return sorted
 }
 
-// add up a day's of duration
-
 function sortFlips(arr: any){
   return arr.sort((a: FlipEvent, b: FlipEvent) => {
     if (a.start < b.start) {
@@ -152,7 +150,7 @@ export async function getStaticProps() {
           dayEnds: dayBegins + 8640000,
           start: startTime,
           duration: null,
-          startDate: calEvent.start,
+          // startDate: calEvent.start,
           summary: calEvent.summary,
           className: null
         }
