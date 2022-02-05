@@ -1,4 +1,4 @@
-import AWS from "aws-sdk"
+// import AWS from "aws-sdk"
 import { APIGatewayProxyHandlerV2 } from "aws-lambda"
 import ical from 'node-ical'
 
@@ -8,14 +8,13 @@ import ical from 'node-ical'
 
 interface FlipEvent {
   dayBegins: number
-  dayEnds: number
   start: number
   duration: number
   summary: string,
   className: string
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler: APIGatewayProxyHandlerV2 = async () => {
 
   const fakeEvent = 'https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff'
   const userTZ = 'America/Denver'
@@ -39,45 +38,85 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     }
   }
 
-function returnWidth(duration: number) {
-  const minutes = duration / 60000
-  const part180 = (minutes / 8) * 10
-  const rounded5 = (Math.round(part180/5)*5) / 10
-  const not0 = rounded5 === 0 ? rounded5 + 0.5 : rounded5
-  return `w-${not0}ch h-8`
-}
-
-function groupByDays(objectArray: FlipEvent[]) {
-  return objectArray.reduce<Record<number, FlipEvent[]>>((acc, cur) => {
-    console.log()
-    const key = cur.dayBegins
-    if (!acc[key]) {
-      acc[key] = []
-    }
-    acc[key].push(cur)
-    return acc
-  }, {})
-}
-
-function durate(sorted: FlipEvent[]){
-  for (let i = 0; i < sorted.length - 1; i++) {
-    sorted[i].duration = sorted[i + 1].start - sorted[i].start
-    sorted[i].className = returnWidth(sorted[i].duration) + " " + returnColor(sorted[i].summary)
+  function sortFlips(arr: FlipEvent[]) {
+    return arr.sort((a: FlipEvent, b: FlipEvent) => {
+      if (a.start < b.start) {
+        return -1
+      } else if (b.start < a.start) {
+        return 1
+      } else {
+        return 0
+      }
+    })
   }
-  return sorted
-}
+  // function sortDuration(arr: FlipEvent[]) {
+  //   return arr.sort((a: FlipEvent, b: FlipEvent) => {
+  //     if (a.duration < b.duration) {
+  //       return 1
+  //     } else if (b.duration < a.duration) {
+  //       return -1
+  //     } else {
+  //       return 0
+  //     }
+  //   })
+  // }
+  function returnWidth(duration: number) {
+    const minutes = duration / 60000
+    const part180 = (minutes / 16) * 10
+    const rounded5 = (Math.round(part180/5)*5) / 10
+    return rounded5 === 0 ? rounded5 + 0.5 : rounded5
+  }
+  function addDuration(sorted: FlipEvent[]){
+    const newEvents = []
+    for (let i = 0; i < sorted.length - 1; i++) {
+      sorted[i].duration = sorted[i + 1].start - sorted[i].start
+      const unmodifiedDuration = sorted[i + 1].start - sorted[i].start
+      if ((sorted[i].duration + sorted[i].start) > (sorted[i].dayBegins + 86400000)) {
+        sorted[i].duration = (sorted[i].dayBegins + 86400000) - sorted[i].start
+        const nextDayDuration = unmodifiedDuration - sorted[i].duration
+        const newFlip = {
+          dayBegins: sorted[i].dayBegins + 86400000,
+          start: sorted[i].dayBegins + 86400000,
+          duration: nextDayDuration,
+          summary: sorted[i].summary,
+          className: "w-" + returnWidth(nextDayDuration) + "ch h-8 " + returnColor(sorted[i].summary)
+        }
+        newEvents.push({i: i, newFlip: newFlip})
+      }
+      sorted[i].className = "w-" + returnWidth(sorted[i].duration) + "ch h-8 " + returnColor(sorted[i].summary)
 
-function sortFlips(arr: FlipEvent[]){
-  return arr.sort((a: FlipEvent, b: FlipEvent) => {
-    if (a.start < b.start) {
-      return -1
-    } else if (b.start < a.start) {
-      return 1
-    } else {
-      return 0
     }
-  })
-}
+    newEvents.forEach((newFlip) => {
+      console.log(newFlip)
+      sorted.splice(newFlip.i, 0, newFlip.newFlip)
+    })
+    return sorted
+  }
+  function groupByDays(objectArray: FlipEvent[]) {
+    return objectArray.reduce<Record<number, FlipEvent[]>>((acc, cur) => {
+      const key = cur.dayBegins
+      if (!acc[key]) {
+        acc[key] = []
+      }
+      acc[key].push(cur)
+      return acc
+    }, {})
+  }
+
+  // function getDayWidth(arr: any) { // mutates data, causes shit to go out of order
+  //   Object.entries(arr).forEach(([key, day]) => {
+  //     let dayWidth = 0
+  //     day.forEach((flipEvent: any) => dayWidth = dayWidth + returnWidth(flipEvent.duration))
+  //     console.log(key, dayWidth)
+  //     if (dayWidth > 90) {
+  //       const overflowWidth = dayWidth - 90
+  //       const sortedDay = sortDuration(day)
+  //       const newWidth = sortedDay[0] - overflowWidth
+  //     }
+  //   })
+    
+  // }
+
   try {
     const parsedICAL = await ical.async.fromURL(fakeEvent)
 
@@ -96,7 +135,6 @@ function sortFlips(arr: FlipEvent[]){
 
         const newShit = {
           dayBegins: dayBegins,
-          dayEnds: dayBegins + 8640000,
           start: startTime,
           duration: null,
           summary: calEvent.summary,
@@ -106,9 +144,10 @@ function sortFlips(arr: FlipEvent[]){
       }
     }
     const sorted = sortFlips(eventArray)
-    const withDuration = durate(sorted)
+    const withDuration = addDuration(sorted)
     const groupedDays = groupByDays(withDuration)
-    console.log('groupedDaysLength:', groupedDays)
+    // const shit = getDayWidth(groupedDays)
+    // console.log(shit)
   
   return {
     statusCode: 200,
