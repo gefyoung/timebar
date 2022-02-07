@@ -49,17 +49,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
     })
   }
-  // function sortDuration(arr: FlipEvent[]) {
-  //   return arr.sort((a: FlipEvent, b: FlipEvent) => {
-  //     if (a.duration < b.duration) {
-  //       return 1
-  //     } else if (b.duration < a.duration) {
-  //       return -1
-  //     } else {
-  //       return 0
-  //     }
-  //   })
-  // }
+
   function returnWidth(duration: number) {
     const minutes = duration / 60000
     const part180 = (minutes / 16) * 10
@@ -103,20 +93,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     }, {})
   }
 
-  // function getDayWidth(arr: any) { // mutates data, causes shit to go out of order
-  //   Object.entries(arr).forEach(([key, day]) => {
-  //     let dayWidth = 0
-  //     day.forEach((flipEvent: any) => dayWidth = dayWidth + returnWidth(flipEvent.duration))
-  //     console.log(key, dayWidth)
-  //     if (dayWidth > 90) {
-  //       const overflowWidth = dayWidth - 90
-  //       const sortedDay = sortDuration(day)
-  //       const newWidth = sortedDay[0] - overflowWidth
-  //     }
-  //   })
-    
-  // }
-
   try {
     const parsedICAL = await ical.async.fromURL(fakeEvent)
 
@@ -146,9 +122,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     const sorted = sortFlips(eventArray)
     const withDuration = addDuration(sorted)
     const groupedDays = groupByDays(withDuration)
-    // const shit = getDayWidth(groupedDays)
-    // console.log(shit)
-  
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "text/plain" },

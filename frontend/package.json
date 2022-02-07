@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/ical": "^0.8.0",
+    "aws-amplify": "^4.3.14",
     "axios": "^0.24.0",
     "ical": "^0.8.0",
     "moment": "^2.29.1",
