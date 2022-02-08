@@ -108,7 +108,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
         const dayBegins = Date.parse(convertedDate.toDateString())
 
-
         const newShit = {
           dayBegins: dayBegins,
           start: startTime,

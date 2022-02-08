@@ -4,16 +4,17 @@ export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props)
 
-    const table = new sst.Table(this, "Counter", {
+    const table = new sst.Table(this, "UserDays", {
       fields: {
-        counter: sst.TableFieldType.STRING,
+        user: sst.TableFieldType.STRING,
       },
       primaryIndex: { partitionKey: "user" },
     })
 
     const api = new sst.Api(this, "Api", {
       routes: {
-        "GET /getIcal": "src/lambda.handler",
+        "GET /getIcal": "src/getIcal.handler",
+        "POST /saveFlip": "src/saveFlip.handler"
       },
     })
 

@@ -1,5 +1,5 @@
 import ical from 'node-ical'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { API } from 'aws-amplify'
 import axios from 'axios'
 
@@ -12,29 +12,43 @@ interface FlipEvent {
 }
 
 export default function Id({ data }: any) {
-
-  const userTZ = 'America/Denver'
-
+  console.log(data)
   const [selectedEventState, setSelectedEventState] = useState({
     summary: "",
     className: "",
-    startDate: 0,
-    startTime: new Date(),
+    dayBegins: 0,
+    startTime: 0,
     duration: 0
   })
-
   const [editState, setEditState] = useState('day')
 
+  const dayTextRef = useRef<HTMLTextAreaElement>(null)
+  const startRef = useRef<HTMLInputElement>(null)
+  const endRef = useRef<HTMLInputElement>(null)
+  const summaryRef = useRef<HTMLInputElement>(null)
+  const flipTextRef = useRef<HTMLTextAreaElement>(null)
+
+  const userTZ = 'America/Denver'
+
   const editFlip = () => {
-    axios.post(process.env.backendHTTPapi)
+    console.log(startRef.current)
+
+    const newFlipObj = {
+      flipId: selectedEventState.startTime,
+      startTime: startRef.current?.value,
+      endTime: endRef.current?.value,
+      summary: summaryRef.current?.value,
+      text: flipTextRef.current?.value
+    }
+    axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', newFlipObj)
   }
 
   const selectFlip = (e: FlipEvent) => {
     setSelectedEventState({ 
       className: e.className, 
       summary: e.summary, 
-      startDate: e.dayBegins, 
-      startTime: (new Date(e.start)),
+      dayBegins: e.dayBegins, 
+      startTime: e.start,
       duration: e.duration
     })
     setEditState('flip')
@@ -43,8 +57,8 @@ export default function Id({ data }: any) {
     setSelectedEventState({ 
       className: selectedEventState.className || '', 
       summary: selectedEventState.summary || '', 
-      startDate: e, 
-      startTime: selectedEventState.startTime || new Date(),
+      dayBegins: e, 
+      startTime: selectedEventState.startTime,
       duration: selectedEventState.duration || 0
     })
     setEditState('day')
@@ -76,17 +90,18 @@ export default function Id({ data }: any) {
         <TimeBar key={day} day={day} />
         
         <div>
-          { (parseInt(key) === selectedEventState.startDate) && (editState === 'day')
+          { (parseInt(key) === selectedEventState.dayBegins) && (editState === 'day')
             && <div ><textarea className="bg-gray-200"></textarea></div> 
           }
-          { selectedEventState.startDate === parseInt(key) && (editState === 'flip')
+          { selectedEventState.dayBegins === parseInt(key) && (editState === 'flip')
           && <div className='bg-gray-100'>
             <div><input type="text" defaultValue={selectedEventState.summary}></input></div>
             <div>
-              Start time: <input type="Date" defaultValue={selectedEventState.startTime}></input>
-              End time: <input type="Date" defaultValue={selectedEventState.startTime}></input>
+              Start time: <input ref={startRef} type="text" defaultValue={selectedEventState.startTime}></input>
+              End time: <input ref={endRef} type="text" defaultValue={selectedEventState.startTime + selectedEventState.duration}></input>
               </div>
-            <div><textarea></textarea></div>
+            <div><textarea ref={dayTextRef}></textarea></div>
+            <button onClick={editFlip} className="outline">submit</button>
           </div>
         }
         </div>
