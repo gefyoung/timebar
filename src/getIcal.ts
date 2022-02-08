@@ -1,10 +1,7 @@
-// import AWS from "aws-sdk"
+import { DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyHandlerV2 } from "aws-lambda"
 import ical from 'node-ical'
-
-// const dynamoDb = new AWS.DynamoDB.DocumentClient({
-//   region: process.env.REGION,
-// })
+const dynamoDb = new DynamoDB.DocumentClient()
 
 interface FlipEvent {
   dayBegins: number
@@ -77,7 +74,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
     }
     newEvents.forEach((newFlip) => {
-      console.log(newFlip)
       sorted.splice(newFlip.i, 0, newFlip.newFlip)
     })
     return sorted
@@ -121,6 +117,26 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     const sorted = sortFlips(eventArray)
     const withDuration = addDuration(sorted)
     const groupedDays = groupByDays(withDuration)
+
+    const getDays = {
+      Key: { user: 'gty' },
+      TableName: process.env.UserDays?? 'noTable'
+    }
+    const updateDb = {
+
+    }
+
+    const userExists = await dynamoDb.get(getDays).promise()
+    console.log(userExists)
+
+    if (userExists) {
+      // await dynamoDb.update(updateDb).promise()
+    } else {
+
+    }
+
+
+
 
   return {
     statusCode: 200,

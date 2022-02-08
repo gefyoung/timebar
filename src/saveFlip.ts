@@ -7,6 +7,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     const flipEvent = JSON.parse(event.body ?? '')
 
     const flipId = flipEvent.flipId
+    console.log("FI", flipId)
     // const { startTime, duration, summary, className } = eventBody
 
     // const identityId = event.requestContext.authorizer?.iam?.cognitoIdentity.identityId
@@ -15,7 +16,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       ExpressionAttributeValues: { ":f": flipEvent },
       Key: { user: 'gty' },
       ReturnValues: "ALL_NEW",
-      TableName: process.env.UsersDays?? '',
+      TableName: process.env.UserDays?? 'noTable',
       UpdateExpression: "SET #DA.#FI = :f"
     }
     await dynamoDb.update(params).promise()

@@ -30,8 +30,9 @@ export default function Id({ data }: any) {
 
   const userTZ = 'America/Denver'
 
-  const editFlip = () => {
+  const submitFlipEdit = async () => {
     console.log(startRef.current)
+
 
     const newFlipObj = {
       flipId: selectedEventState.startTime,
@@ -40,7 +41,7 @@ export default function Id({ data }: any) {
       summary: summaryRef.current?.value,
       text: flipTextRef.current?.value
     }
-    axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', newFlipObj)
+    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', newFlipObj)
   }
 
   const selectFlip = (e: FlipEvent) => {
@@ -101,7 +102,7 @@ export default function Id({ data }: any) {
               End time: <input ref={endRef} type="text" defaultValue={selectedEventState.startTime + selectedEventState.duration}></input>
               </div>
             <div><textarea ref={dayTextRef}></textarea></div>
-            <button onClick={editFlip} className="outline">submit</button>
+            <button onClick={() => submitFlipEdit()} className="outline">submit</button>
           </div>
         }
         </div>
@@ -113,7 +114,6 @@ export default function Id({ data }: any) {
 
 export async function getStaticProps() {
   try {
-
     const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
     const response = await res.text()
 
