@@ -126,22 +126,48 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
     }
 
-    const userExists = await dynamoDb.get(getDays).promise()
-    console.log(userExists)
-
-    if (userExists) {
-      // await dynamoDb.update(updateDb).promise()
-    } else {
-
+    const newDbEntry = {
+      Item: {
+        user: 'gty',
+        days: groupedDays
+      },
+      TableName: process.env.UserDays?? 'noTable'
     }
 
+    const userExists = await dynamoDb.get(getDays).promise()
+    const userItem = userExists.Item ?? {}
+    let dynamoDays = userItem.days
 
+    if ('user' in userItem) {
 
+      const newMap = new Map(Object.entries(dynamoDays))
+
+      for await (const [key, value] of Object.entries(groupedDays)) {
+
+        if (!newMap.has(key)) {
+          const updateMap = {
+            ExpressionAttributeNames: { "#DA": "days", "#ID": key },
+            ExpressionAttributeValues: { ":dm": value },
+            Key: { user: 'gty' },
+            ReturnValues: "ALL_NEW",
+            TableName: process.env.UserDays?? 'noTable',
+            UpdateExpression: "SET #DA.#ID = :dm"
+          }
+          dynamoDays = await dynamoDb.update(updateMap).promise()
+        } 
+      }
+
+    } else {
+      const dbput = await dynamoDb.put(newDbEntry).promise()
+      console.log(dbput)
+    }
+
+    console.log('dynamodays', dynamoDays)
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(groupedDays),
+    body: JSON.stringify(dynamoDays),
   }
   } catch (err) {
     console.log(err)

@@ -33,7 +33,6 @@ export default function Id({ data }: any) {
   const submitFlipEdit = async () => {
     console.log(startRef.current)
 
-
     const newFlipObj = {
       flipId: selectedEventState.startTime,
       startTime: startRef.current?.value,
