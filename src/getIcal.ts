@@ -8,7 +8,7 @@ interface FlipEvent {
   start: number
   duration: number
   summary: string,
-  className: string
+  // className: string
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async () => {
@@ -16,24 +16,24 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   const fakeEvent = 'https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff'
   const userTZ = 'America/Denver'
 
-  function returnColor(summary: string){
-    switch (summary) {
-      case "Jerkin": return "bg-red-600"
-      case "Learning": return "bg-yellow-600"
-      case "Eating": return "bg-orange-600"
-      case "Sleeping": return "bg-purple-600"
-      case "Weed": return "bg-amber-600"
-      case "Socializing": return "bg-lime-600"
-      case "Beer": return "bg-teal-600"
-      case "Working out": return "bg-blue-600"
-      case "Insta/tv/youtub": return "bg-pink-600"
-      case "Shop/Chores": return "bg-rose-600"
-      case "Skiing": return "bg-cyan-600"
-      case "Norski": return "bg-black"
-      default:
-        "bg-white"
-    }
-  }
+  // function returnColor(summary: string){
+  //   switch (summary) {
+  //     case "Jerkin": return "bg-red-600"
+  //     case "Learning": return "bg-yellow-600"
+  //     case "Eating": return "bg-orange-600"
+  //     case "Sleeping": return "bg-purple-600"
+  //     case "Weed": return "bg-amber-600"
+  //     case "Socializing": return "bg-lime-600"
+  //     case "Beer": return "bg-teal-600"
+  //     case "Working out": return "bg-blue-600"
+  //     case "Insta/tv/youtub": return "bg-pink-600"
+  //     case "Shop/Chores": return "bg-rose-600"
+  //     case "Skiing": return "bg-cyan-600"
+  //     case "Norski": return "bg-black"
+  //     default:
+  //       "bg-white"
+  //   }
+  // }
 
   function sortFlips(arr: FlipEvent[]) {
     return arr.sort((a: FlipEvent, b: FlipEvent) => {
@@ -46,13 +46,24 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
     })
   }
-
-  function returnWidth(duration: number) {
-    const minutes = duration / 60000
-    const part180 = (minutes / 16) * 10
-    const rounded5 = (Math.round(part180/5)*5) / 10
-    return rounded5 === 0 ? rounded5 + 0.5 : rounded5
+  function sortDays(dayMap: any) {
+    return new Map([...dayMap].sort((dayKey1: number, dayKey2: number) => {
+      if (dayKey1 < dayKey2) {
+        return -1
+      } else if (dayKey2 < dayKey1) {
+        return 1
+      } else {
+        return 0
+      }
+    }))
   }
+
+  // function returnWidth(duration: number) {
+  //   const minutes = duration / 60000
+  //   const part180 = (minutes / 16) * 10
+  //   const rounded5 = (Math.round(part180/5)*5) / 10
+  //   return rounded5 === 0 ? rounded5 + 0.5 : rounded5
+  // }
   function addDuration(sorted: FlipEvent[]){
     const newEvents = []
     for (let i = 0; i < sorted.length - 1; i++) {
@@ -66,11 +77,11 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
           start: sorted[i].dayBegins + 86400000,
           duration: nextDayDuration,
           summary: sorted[i].summary,
-          className: "w-" + returnWidth(nextDayDuration) + "ch h-8 " + returnColor(sorted[i].summary)
+          // className: "w-" + returnWidth(nextDayDuration) + "ch h-8 " + returnColor(sorted[i].summary)
         }
         newEvents.push({i: i, newFlip: newFlip})
       }
-      sorted[i].className = "w-" + returnWidth(sorted[i].duration) + "ch h-8 " + returnColor(sorted[i].summary)
+      // sorted[i].className = "w-" + returnWidth(sorted[i].duration) + "ch h-8 " + returnColor(sorted[i].summary)
 
     }
     newEvents.forEach((newFlip) => {
@@ -78,6 +89,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     })
     return sorted
   }
+
   function groupByDays(objectArray: FlipEvent[]) {
     return objectArray.reduce<Record<number, FlipEvent[]>>((acc, cur) => {
       const key = cur.dayBegins
@@ -134,13 +146,11 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       TableName: process.env.UserDays?? 'noTable'
     }
 
+
     const userExists = await dynamoDb.get(getDays).promise()
-    const userItem = userExists.Item ?? {}
-    let dynamoDays = userItem.days
-
-    if ('user' in userItem) {
-
-      const newMap = new Map(Object.entries(dynamoDays))
+    if (userExists.Item) {
+      // const reSorted = sortDays(Object.entries(userExists.Item.days))
+      const newMap = new Map(Object.entries(userExists.Item.days))
 
       for await (const [key, value] of Object.entries(groupedDays)) {
 
@@ -153,21 +163,34 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             TableName: process.env.UserDays?? 'noTable',
             UpdateExpression: "SET #DA.#ID = :dm"
           }
-          dynamoDays = await dynamoDb.update(updateMap).promise()
-        } 
+          const updatedRes = await dynamoDb.update(updateMap).promise()
+          const sortUpdateRes = sortDays(updatedRes)
+          return {
+            statusCode: 200,
+            body: JSON.stringify(Object.fromEntries(sortUpdateRes)),
+          }
+        } else {
+          const getResSorted = sortDays(newMap)
+          return {
+            statusCode: 200,
+            body: JSON.stringify(Object.fromEntries(getResSorted)),
+          }
+        }
       }
 
     } else {
-      const dbput = await dynamoDb.put(newDbEntry).promise()
-      console.log(dbput)
+      await dynamoDb.put(newDbEntry).promise()
+      return {
+        statusCode: 200,
+        body: JSON.stringify(groupedDays),
+      } 
     }
 
-    console.log('dynamodays', dynamoDays)
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(dynamoDays),
+    body: JSON.stringify('outside if/else'),
   }
   } catch (err) {
     console.log(err)
