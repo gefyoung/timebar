@@ -146,22 +146,28 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
 
       /* might be able to have unfinished days never update */
-      const getLastValueInMap = (map: Map<string, FlipEvent[]>) => {
+      const getLastDayArr = (map: Map<string, FlipEvent[]>) => {
         const lastDayArr = Array.from(map)[map.size-1][1]
-        return new Map(Object.entries(lastDayArr.map((fe) => {
-          return { [fe.start]: fe }
-        })))
+        return lastDayArr.reduce((feMap, feObj) => {
+          feMap[feObj.start] = feObj
+          return feMap
+        }, {})
       }
-      const lastDayDynamo = getLastValueInMap(mutatedData)
-      const lastDayIcal = getLastValueInMap(new Map(Object.entries(groupedDays)))
-      console.log(lastDayIcal, 'lasty')
 
-      for (const [key, value] of Object.entries(lastDayIcal)) { // keys not working
-        if (!lastDayDynamo.has(key)) {
+      const lastDayDynamo = getLastDayArr(mutatedData)
+      const lastMapDynamo = new Map(Object.entries(lastDayDynamo))
+      const lastDayIcal = getLastDayArr(new Map(Object.entries(groupedDays)))
+      const lastMapIcal = new Map(Object.entries(lastDayIcal))
+
+      const shitArray = Array.from(lastMapIcal)
+
+      for (const [key, value] of Object.entries(lastDayIcal)) {
+        if (!lastMapDynamo.has(key)) {
           console.log('found new flip event key')
           console.log(value, 'value', key)
+
           const updateMap = {
-            ExpressionAttributeNames: { "#DA": "days", "#DI": lastDayIcal[0].dayBegins },
+            ExpressionAttributeNames: { "#DA": "days", "#DI": shitArray[0][1].dayBegins },
             ExpressionAttributeValues: { ":fe": value },
             Key: { user: 'gty' },
             ReturnValues: "ALL_NEW",
@@ -172,7 +178,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
           console.log(updatedRes, 'updatedDay res')
         }
       }
-
 
       // console.log(lastDayDynamo.map((flip) => { return {[flip.start]: flip}} ))
       // const mapified = new Map(lastDayDynamo.map((flip) => [flip.start]: flip ))
