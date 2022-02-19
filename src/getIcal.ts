@@ -1,11 +1,12 @@
 import { DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyHandlerV2 } from "aws-lambda"
 import ical from 'node-ical'
+
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface FlipEvent {
-  dayBegins: number
-  start: number
+  dayBegins?: number
+  start?: number
   duration: number
   summary: string,
   // className: string
@@ -29,7 +30,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   }
 
 
-  function addDuration(sorted: FlipEvent[]){
+  function addDuration(sorted: FlipEvent[]) {
     const newEvents = []
     for (let i = 0; i < sorted.length - 1; i++) {
       sorted[i].duration = sorted[i + 1].start - sorted[i].start
@@ -43,7 +44,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
           duration: nextDayDuration,
           summary: sorted[i].summary,
         }
-        newEvents.push({i: i, newFlip: newFlip})
+        newEvents.push({ i: i, newFlip: newFlip })
       }
 
     }
@@ -51,17 +52,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       sorted.splice(newFlip.i, 0, newFlip.newFlip)
     })
     return sorted
-  }
-
-  function groupByDays(objectArray: FlipEvent[]) {
-    return objectArray.reduce<Record<string, FlipEvent[]>>((acc, cur) => {
-      const key = cur.dayBegins
-      if (!acc[key]) {
-        acc[key] = []
-      }
-      acc[key].push(cur)
-      return acc
-    }, {})
   }
 
   function sortDays(dayMap: Map<string, FlipEvent[]>) {
@@ -75,133 +65,138 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
     }))
   }
-  
 
-  try {
-    const parsedICAL = await ical.async.fromURL(fakeEvent)
-
-    const eventArray: any[] = []
-
-    for (const calEvent of Object.values(parsedICAL)) {
-
-      if (calEvent.start instanceof Date) {
-        const utcDate = new Date(calEvent.start)
-        const convertedTZ = utcDate.toLocaleString("en-US", { timeZone: userTZ })
-        const convertedDate = new Date(convertedTZ)
-        const startTime = convertedDate.getTime()
-
-        const dayBegins = Date.parse(convertedDate.toDateString())
-
-        const newShit = {
-          dayBegins: dayBegins,
-          start: startTime,
-          duration: null,
-          summary: calEvent.summary,
-        }
-        eventArray.push(newShit)
-      }
+  function utcToLocal(utcDate: ical.DateWithTimeZone) {
+    const start = new Date(utcDate.toLocaleString("en-US", { timeZone: userTZ }))
+    return {
+      start: start.getTime(),
+      dayBegins: Date.parse(start.toDateString())
     }
-    const sorted = sortFlips(eventArray)
-    const withDuration = addDuration(sorted)
-    const groupedDays = groupByDays(withDuration)
+  }
 
-    const getDays = {
+  function parseICAL(icalMap: ical.CalendarResponse) { // i still need to add the split event
+
+    const icalArray = Array.from(Object.values(icalMap))
+    
+    return icalArray.reduce((acc: any, cur, i) => {
+      const PTS = cur.duration.match(/PT(.+)S/)
+
+      if (!cur.start) { return acc }
+      const { start, dayBegins } = utcToLocal(cur.start)
+
+      if (!acc[dayBegins]) {
+        acc[dayBegins] = {}
+      }
+      if (!acc[dayBegins][start]) {
+        acc[dayBegins][start] = {}
+      }
+      acc[dayBegins][start] = {
+        // dayBegins: dayBegins,
+        // start: start,
+        duration: PTS[1],
+        summary: cur.summary,
+      }
+
+      return acc
+    }, {})
+  }
+
+  const getDays = {
       Key: { user: 'gty' },
       TableName: process.env.UserDays?? 'noTable'
     }
 
-    const newDbEntry = {
-      Item: {
-        user: 'gty',
-        days: groupedDays
-      },
-      TableName: process.env.UserDays?? 'noTable'
-    }
+  try {
+    const ICALmap = await ical.async.fromURL(fakeEvent)
+    const parsedICAL: Map<string, Map<string, FlipEvent>> = parseICAL(ICALmap)
 
     const userExists = await dynamoDb.get(getDays).promise()
 
-    let mutatedData: Map<string, FlipEvent[]> | null = null
-
     if (userExists.Item) {
-      const newMap: Map<string, FlipEvent[]> = new Map(Object.entries(userExists.Item.days))
+      const dynamoDaysMap: Map<string, Map<string, FlipEvent>> = new Map(Object.entries(userExists.Item.days))
 
-      for (const [key, value] of Object.entries(groupedDays)) {
-        if (!newMap.has(key)) {
-          console.log('found new day key')
-          const updateMap = {
-            ExpressionAttributeNames: { "#DA": "days", "#ID": key },
-            ExpressionAttributeValues: { ":dm": value },
-            Key: { user: 'gty' },
-            ReturnValues: "ALL_NEW",
-            TableName: process.env.UserDays?? 'noTable',
-            UpdateExpression: "SET #DA.#ID = :dm"
+      for (const [dayKey, dayValue] of Object.entries(parsedICAL)) {
+        
+        if (dynamoDaysMap.has(dayKey)) {
+          const dynamoDay = new Map(Object.entries(dynamoDaysMap.get(dayKey)))
+
+          if (Object.keys(dayKey).length !== Object.keys(dynamoDay).length) {
+             for await (const [feKey, feValue] of Object.entries(dayValue)) {
+              if (!dynamoDay.has(feKey)) {
+                const updateMap = {
+                  ExpressionAttributeNames: { "#DA": "days", "#DI": dayKey, "#FI": feKey },
+                  ExpressionAttributeValues: { ":fe": feValue },
+                  Key: { user: 'gty' },
+                  ReturnValues: "ALL_NEW",
+                  TableName: process.env.UserDays?? 'noTable',
+                  UpdateExpression: "SET #DA.#DI.#FI = :fe"
+                }
+                await dynamoDb.update(updateMap).promise()
+              }
+            }
+
+            
+            // Object.entries(dayKey).forEach(([feKey, feValue]) => {
+
           }
-          const updatedRes = await dynamoDb.update(updateMap).promise()
-          const days: Record<string, FlipEvent[]> = updatedRes.Attributes?.days
-          const updatedMap = new Map(Object.entries(days))
-          mutatedData = sortDays(updatedMap)
+          
         } else {
-          mutatedData = sortDays(newMap)
-        }
-      }
-
-      /* might be able to have unfinished days never update */
-      const getLastDayArr = (map: Map<string, FlipEvent[]>) => {
-        const lastDayArr = Array.from(map)[map.size-1][1]
-        return lastDayArr.reduce((feMap, feObj) => {
-          feMap[feObj.start] = feObj
-          return feMap
-        }, {})
-      }
-
-      const lastDayDynamo = getLastDayArr(mutatedData)
-      const lastMapDynamo = new Map(Object.entries(lastDayDynamo))
-      const lastDayIcal = getLastDayArr(new Map(Object.entries(groupedDays)))
-      const lastMapIcal = new Map(Object.entries(lastDayIcal))
-
-      const shitArray = Array.from(lastMapIcal)
-
-      for (const [key, value] of Object.entries(lastDayIcal)) {
-        if (!lastMapDynamo.has(key)) {
-          console.log('found new flip event key')
-          console.log(value, 'value', key)
-
           const updateMap = {
-            ExpressionAttributeNames: { "#DA": "days", "#DI": shitArray[0][1].dayBegins },
-            ExpressionAttributeValues: { ":fe": value },
+            ExpressionAttributeNames: { "#DA": "days", "#DI": dayKey },
+            ExpressionAttributeValues: { ":dm": dayValue },
             Key: { user: 'gty' },
             ReturnValues: "ALL_NEW",
             TableName: process.env.UserDays?? 'noTable',
-            UpdateExpression: "SET #DA.#DI = list_append(#DA.#DI, :fe)"
+            UpdateExpression: "SET #DA.#DI = :dm"
           }
           const updatedRes = await dynamoDb.update(updateMap).promise()
-          console.log(updatedRes, 'updatedDay res')
+          // const days: Record<string, FlipEvent[]> = updatedRes.Attributes?.days
+          // const updatedMap = new Map(Object.entries(days))
+          // mutatedData = sortDays(updatedMap)
         }
       }
 
-      // console.log(lastDayDynamo.map((flip) => { return {[flip.start]: flip}} ))
-      // const mapified = new Map(lastDayDynamo.map((flip) => [flip.start]: flip ))
+      // const lastDayDynamo = getLastDayArr(mutatedData)
+      // const lastMapDynamo = new Map(Object.entries(lastDayDynamo))
+      // const lastDayIcal = getLastDayArr(new Map(Object.entries(groupedDays)))
+      // const lastMapIcal = new Map(Object.entries(lastDayIcal))
 
-      // console.log(mapified)
-      // const lastDayIcal = getLastValueInMap(groupedDays)
-      // //compare mutatedData to dynamodata
+      // const shitArray = Array.from(lastMapIcal)
 
-      // console.log('lastDay', lastDay)
+      // for (const [key, value] of Object.entries(lastDayIcal)) {
+      //   if (!lastMapDynamo.has(key)) {
+      //     console.log('found new flip event key')
+      //     console.log(value, 'value', key)
 
-    } else {
-      mutatedData = groupedDays
+      //     const updateMap = {
+      //       ExpressionAttributeNames: { "#DA": "days", "#DI": shitArray[0][1].dayBegins },
+      //       ExpressionAttributeValues: { ":fe": value },
+      //       Key: { user: 'gty' },
+      //       ReturnValues: "ALL_NEW",
+      //       TableName: process.env.UserDays?? 'noTable',
+      //       UpdateExpression: "SET #DA.#DI = list_append(#DA.#DI, :fe)"
+      //     }
+      //     const updatedRes = await dynamoDb.update(updateMap).promise()
+      //     console.log(updatedRes, 'updatedDay res')
+      //   }
+      // }
+
+    } 
+    else {
+      const newDbEntry = {
+        Item: { user: 'gty', days: parsedICAL },
+        TableName: process.env.UserDays?? 'noTable'
+      }
+  
+      // mutatedData = parsedICAL
       await dynamoDb.put(newDbEntry).promise()
     }
 
-
-
-    const returnData = mutatedData ? Object.fromEntries(mutatedData) : groupedDays
-
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(returnData),
-  }
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ shit: 'shit' }),
+    }
   } catch (err) {
     console.log(err)
     return {
@@ -210,5 +205,5 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       error: err
     }
   }
-  
 }
+
