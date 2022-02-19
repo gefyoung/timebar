@@ -13,7 +13,7 @@ interface FlipEvent {
 }
 
 export default function Id({ data }: any) {
-
+  
   const [selectedEventState, setSelectedEventState] = useState({
     summary: "",
     className: "",
@@ -149,16 +149,26 @@ function returnColor(summary: string){
   }
 }
 
+interface FlipInterface {
+  duration: number
+  summary: string,
+  // className: string
+}
+
 export async function getStaticProps() {
   try {
     const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
     const response = await res.text()
-    const data = JSON.parse(response)
-    Object.values(data).forEach((day: any) => {
-      day.forEach((flip: any) => {
-        flip.className = getClassName(flip)
-      })
-    })
+    console.log(response)
+    const data: Map<string, Map<string, FlipInterface>> = JSON.parse(response)
+    console.log(data,'data')
+
+    // Object.values(data).forEach((day: Map<string, FlipInterface>) => {
+    //   console.log(day, 'day')
+    //   day.forEach((flip: any) => {
+    //     flip.className = getClassName(flip)
+    //   })
+    // })
     
     return { props: { data: data }, revalidate: 1 }
   } catch (err) {

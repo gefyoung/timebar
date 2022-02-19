@@ -11,59 +11,49 @@ interface FlipEvent {
   summary: string,
   // className: string
 }
+type DaysMap = Map<string, Map<string, FlipEvent>>
+type DayArray = [string, Map<string, FlipEvent>]
+// type FlipArray = [string, FlipEvent]
+interface FlipArray {
+  dayKey: string
+  dayValue: FlipEvent
+}
+
 
 export const handler: APIGatewayProxyHandlerV2 = async () => {
 
   const fakeEvent = 'https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff'
   const userTZ = 'America/Denver'
 
-  function sortFlips(arr: FlipEvent[]) {
-    return arr.sort((a: FlipEvent, b: FlipEvent) => {
-      if (a.start < b.start) {
-        return -1
-      } else if (b.start < a.start) {
-        return 1
-      } else {
-        return 0
-      }
-    })
-  }
-
-
-  function addDuration(sorted: FlipEvent[]) {
-    const newEvents = []
-    for (let i = 0; i < sorted.length - 1; i++) {
-      sorted[i].duration = sorted[i + 1].start - sorted[i].start
-      const unmodifiedDuration = sorted[i + 1].start - sorted[i].start
-      if ((sorted[i].duration + sorted[i].start) > (sorted[i].dayBegins + 86400000)) {
-        sorted[i].duration = (sorted[i].dayBegins + 86400000) - sorted[i].start
-        const nextDayDuration = unmodifiedDuration - sorted[i].duration
-        const newFlip = {
-          dayBegins: sorted[i].dayBegins + 86400000,
-          start: sorted[i].dayBegins + 86400000,
-          duration: nextDayDuration,
-          summary: sorted[i].summary,
+  function sortFlips(dayArr: DayArray) {
+    for (const [dayKey, dayValue] of dayArr) {
+      Object.entries(dayValue).sort((a: FlipEvent, b: FlipEvent) => {
+        const flipA = Number(a[0])
+        const flipB = Number(b[0])
+        if (flipA < flipB) {
+          return -1
+        } else if (flipB < flipA) {
+          return 1
+        } else {
+          return 0
         }
-        newEvents.push({ i: i, newFlip: newFlip })
-      }
-
+      })
     }
-    newEvents.forEach((newFlip) => {
-      sorted.splice(newFlip.i, 0, newFlip.newFlip)
-    })
-    return sorted
+    return Object.fromEntries(new Map(dayArr))
   }
 
-  function sortDays(dayMap: Map<string, FlipEvent[]>) {
-    return new Map([...dayMap].sort((dayKey1: [string, FlipEvent[]], dayKey2: [string, FlipEvent[]]) => {
-      if (dayKey1 < dayKey2) {
+  function sortDays(dayMap: DaysMap) {
+    return Object.entries(dayMap).sort((dayA: DayArray, dayB: DayArray) => {
+      const dayAst = Number(dayA[0])
+      const dayBst = Number(dayB[0])
+      if (dayAst < dayBst) {
         return -1
-      } else if (dayKey2 < dayKey1) {
+      } else if (dayBst < dayAst) {
         return 1
       } else {
         return 0
       }
-    }))
+    })
   }
 
   function utcToLocal(utcDate: ical.DateWithTimeZone) {
@@ -80,6 +70,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     
     return icalArray.reduce((acc: any, cur, i) => {
       const PTS = cur.duration.match(/PT(.+)S/)
+      const duration = Number(PTS[1]) * 1000
 
       if (!cur.start) { return acc }
       const { start, dayBegins } = utcToLocal(cur.start)
@@ -90,10 +81,14 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       if (!acc[dayBegins][start]) {
         acc[dayBegins][start] = {}
       }
+
+      if (start + duration > dayBegins + 86400000) {
+        console.log('found an event lasting longer than day, start + duration', start, '%', duration, 'day ends', dayBegins + 86400000)
+      }
       acc[dayBegins][start] = {
         // dayBegins: dayBegins,
         // start: start,
-        duration: PTS[1],
+        duration: duration,
         summary: cur.summary,
       }
 
@@ -109,7 +104,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   try {
     const ICALmap = await ical.async.fromURL(fakeEvent)
     const parsedICAL: Map<string, Map<string, FlipEvent>> = parseICAL(ICALmap)
-
+    let returnData = parsedICAL
     const userExists = await dynamoDb.get(getDays).promise()
 
     if (userExists.Item) {
@@ -131,13 +126,10 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
                   TableName: process.env.UserDays?? 'noTable',
                   UpdateExpression: "SET #DA.#DI.#FI = :fe"
                 }
-                await dynamoDb.update(updateMap).promise()
+                const updatedRes = await dynamoDb.update(updateMap).promise()
+                returnData = updatedRes.Attributes?.days
               }
             }
-
-            
-            // Object.entries(dayKey).forEach(([feKey, feValue]) => {
-
           }
           
         } else {
@@ -150,52 +142,24 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             UpdateExpression: "SET #DA.#DI = :dm"
           }
           const updatedRes = await dynamoDb.update(updateMap).promise()
-          // const days: Record<string, FlipEvent[]> = updatedRes.Attributes?.days
-          // const updatedMap = new Map(Object.entries(days))
-          // mutatedData = sortDays(updatedMap)
+          returnData = updatedRes.Attributes?.days
         }
       }
 
-      // const lastDayDynamo = getLastDayArr(mutatedData)
-      // const lastMapDynamo = new Map(Object.entries(lastDayDynamo))
-      // const lastDayIcal = getLastDayArr(new Map(Object.entries(groupedDays)))
-      // const lastMapIcal = new Map(Object.entries(lastDayIcal))
-
-      // const shitArray = Array.from(lastMapIcal)
-
-      // for (const [key, value] of Object.entries(lastDayIcal)) {
-      //   if (!lastMapDynamo.has(key)) {
-      //     console.log('found new flip event key')
-      //     console.log(value, 'value', key)
-
-      //     const updateMap = {
-      //       ExpressionAttributeNames: { "#DA": "days", "#DI": shitArray[0][1].dayBegins },
-      //       ExpressionAttributeValues: { ":fe": value },
-      //       Key: { user: 'gty' },
-      //       ReturnValues: "ALL_NEW",
-      //       TableName: process.env.UserDays?? 'noTable',
-      //       UpdateExpression: "SET #DA.#DI = list_append(#DA.#DI, :fe)"
-      //     }
-      //     const updatedRes = await dynamoDb.update(updateMap).promise()
-      //     console.log(updatedRes, 'updatedDay res')
-      //   }
-      // }
-
-    } 
-    else {
+    } else {
       const newDbEntry = {
         Item: { user: 'gty', days: parsedICAL },
         TableName: process.env.UserDays?? 'noTable'
       }
-  
-      // mutatedData = parsedICAL
       await dynamoDb.put(newDbEntry).promise()
     }
+    const sortedDays = sortDays(returnData)
+    const sorted = sortFlips(sortedDays)
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ shit: 'shit' }),
+      body: JSON.stringify(sorted),
     }
   } catch (err) {
     console.log(err)
