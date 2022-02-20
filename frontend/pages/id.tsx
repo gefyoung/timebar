@@ -13,7 +13,7 @@ interface FlipEvent {
 }
 
 export default function Id({ data }: any) {
-  
+  console.log('data', data)
   const [selectedEventState, setSelectedEventState] = useState({
     summary: "",
     className: "",
@@ -80,8 +80,8 @@ export default function Id({ data }: any) {
 
   const TimeBar = ({ day }: any) => {
     return <><div key={day} className="flex overflow-hidden max-w-g">{
-      day.map((flipEvent: FlipEvent, arrayPos: number) =>
-        <FlipComponent key={flipEvent.start} arrayPos={arrayPos} flipEvent={flipEvent} />
+      Object.entries(day).map(([flipKey, flipValue], arrayPos: number) =>
+        <FlipComponent key={flipKey} arrayPos={arrayPos} flipEvent={flipValue} />
       )}</div></>
   }
 
@@ -120,7 +120,7 @@ export default function Id({ data }: any) {
   )
 }
 
-function getClassName(flip: FlipEvent) {
+function getClassName(flip: FlipInterface) {
   const minutes = flip.duration / 60000
   const part180 = (minutes / 16) * 10
   const rounded5 = (Math.round(part180/5)*5) / 10
@@ -130,7 +130,7 @@ function getClassName(flip: FlipEvent) {
   return "w-" + width + "ch h-8 " + color
 }
 
-function returnColor(summary: string){
+function returnColor(summary: string) {
   switch (summary) {
     case "Jerkin": return "bg-red-600"
     case "Learning": return "bg-yellow-600"
@@ -152,23 +152,20 @@ function returnColor(summary: string){
 interface FlipInterface {
   duration: number
   summary: string,
-  // className: string
+  className?: string
 }
 
 export async function getStaticProps() {
   try {
     const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
     const response = await res.text()
-    console.log(response)
     const data: Map<string, Map<string, FlipInterface>> = JSON.parse(response)
-    console.log(data,'data')
 
-    // Object.values(data).forEach((day: Map<string, FlipInterface>) => {
-    //   console.log(day, 'day')
-    //   day.forEach((flip: any) => {
-    //     flip.className = getClassName(flip)
-    //   })
-    // })
+    Object.values(data).forEach((day: Map<string, FlipInterface>) => {
+      Object.values(day).forEach((flip) => {
+        flip.className = getClassName(flip)
+      })
+    })
     
     return { props: { data: data }, revalidate: 1 }
   } catch (err) {
