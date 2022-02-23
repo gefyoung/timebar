@@ -25,36 +25,76 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   const fakeEvent = 'https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff'
   const userTZ = 'America/Denver'
 
-  function sortFlips(dayArr: DayArray) {
-    for (const [dayKey, dayValue] of dayArr) {
-      Object.entries(dayValue).sort((a: FlipEvent, b: FlipEvent) => {
-        const flipA = Number(a[0])
-        const flipB = Number(b[0])
-        if (flipA < flipB) {
-          return -1
-        } else if (flipB < flipA) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-    }
-    return Object.fromEntries(new Map(dayArr))
-  }
+  function sort(daysMap: Map<string, Map<string, FlipEvent> | FlipEvent[]>) {
+    const arr = [...new Map(Object.entries(daysMap))].map(([dayKey, dayValue]) => ({ dayKey, dayValue }))
+    return arr.sort((dayA, dayB) => {
 
-  function sortDays(dayMap: DaysMap) {
-    return Object.entries(dayMap).sort((dayA: DayArray, dayB: DayArray) => {
-      const dayAst = Number(dayA[0])
-      const dayBst = Number(dayB[0])
-      if (dayAst < dayBst) {
-        return -1
-      } else if (dayBst < dayAst) {
-        return 1
-      } else {
-        return 0
-      }
+        if (!Array.isArray(dayA.dayValue)) {
+            dayA.dayValue = Object.values(dayA.dayValue).sort((flipA, flipB) => {
+                if (Number(flipA.start) < Number(flipB.start)) {
+                    return -1
+                } else if (Number(flipB.start) < Number(flipA.start)) {
+                    return 1
+                } else {
+                    return 0
+                }
+            })
+        }
+        if (!Array.isArray(dayB.dayValue)) {
+            dayB.dayValue = Object.values(dayB.dayValue).sort((flipA, flipB) => {
+                if (Number(flipA.start) < Number(flipB.start)) {
+                    return -1
+                } else if (Number(flipB.start) < Number(flipA.start)) {
+                    return 1
+                } else {
+                    return 0
+                }
+            })
+        }
+
+        if (Number(dayA.dayKey) < Number(dayB.dayKey)) {
+            return 1
+        } else if (Number(dayB.dayKey) < Number(dayA.dayKey)) {
+            return -1
+        } else {
+            return 0
+        }
+
     })
-  }
+}
+
+  // function sortFlips(dayArr: DayArray) {
+  //  return dayArr.map(([dayKey, dayValue]) => {
+  //     return {[dayKey]: Object.values(dayValue).sort((a: FlipEvent, b: FlipEvent) => {
+  //       const flipA = Number(a.start)
+  //       const flipB = Number(b.start)
+  //       // console.log(flipA, '& ', flipB, 'a,b')
+  //       if (flipA < flipB) {
+  //         return -1
+  //       } else if (flipB < flipA) {
+  //         return 1
+  //       } else {
+  //         return 0
+  //       }
+  //     })
+  //   }
+  //   })
+  // }
+
+  // function sortDays(dayMap: DaysMap): [string, FlipEvent][] {
+  //   console.log(dayMap, 'daysMap')
+  //   return Object.entries(dayMap).sort((dayA: DayArray, dayB: DayArray) => {
+  //     const dayAst = Number(dayA[0])
+  //     const dayBst = Number(dayB[0])
+  //     if (dayAst < dayBst) {
+  //       return 1
+  //     } else if (dayBst < dayAst) {
+  //       return -1
+  //     } else {
+  //       return 0
+  //     }
+  //   })
+  // }
 
   function utcToLocal(utcDate: ical.DateWithTimeZone) {
     const start = new Date(utcDate.toLocaleString("en-US", { timeZone: userTZ }))
@@ -87,7 +127,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
       acc[dayBegins][start] = {
         // dayBegins: dayBegins,
-        // start: start,
+        start: start,
         duration: duration,
         summary: cur.summary,
       }
@@ -102,15 +142,17 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     }
 
   try {
+    console.time('getTimeFlip')
     const ICALmap = await ical.async.fromURL(fakeEvent)
     const parsedICAL: Map<string, Map<string, FlipEvent>> = parseICAL(ICALmap)
     let returnData = parsedICAL
+    console.timeEnd('getTimeFlip')
     const userExists = await dynamoDb.get(getDays).promise()
 
     if (userExists.Item) {
       const dynamoDaysMap: Map<string, Map<string, FlipEvent>> = new Map(Object.entries(userExists.Item.days))
 
-      for (const [dayKey, dayValue] of Object.entries(parsedICAL)) {
+      for await (const [dayKey, dayValue] of Object.entries(parsedICAL)) {
         
         if (dynamoDaysMap.has(dayKey)) {
           const dynamoDay = new Map(Object.entries(dynamoDaysMap.get(dayKey)))
@@ -153,13 +195,16 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       }
       await dynamoDb.put(newDbEntry).promise()
     }
-    const sortedDays = sortDays(returnData)
-    const sorted = sortFlips(sortedDays)
+    console.time('sorted')
+    // const sortedDays = sortDays(returnData)
+    // const sorted = sortFlips(sortedDays)
+    const sortedArray = sort(returnData)
+    console.timeEnd('sorted')
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(sorted),
+      body: JSON.stringify(sortedArray),
     }
   } catch (err) {
     console.log(err)
