@@ -15,10 +15,14 @@ export default class MyStack extends sst.Stack {
       defaultFunctionProps: {
         environment: {
           UserDays: UserDays.tableName
-        }
+        },
+        timeout: 20
       },
       routes: {
-        "GET /getIcal": "src/getIcal.handler",
+        "GET /getIcal": {
+          // timeout: 20,
+          function: "src/getIcal.handler"
+        },
         "POST /saveFlip": "src/saveFlip.handler"
       },
     })

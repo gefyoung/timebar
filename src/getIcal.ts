@@ -5,18 +5,12 @@ import ical from 'node-ical'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface FlipEvent {
-  dayBegins?: number
+  // dayBegins?: number
   start?: number
   duration: number
   summary: string,
+  text?: string
   // className: string
-}
-type DaysMap = Map<string, Map<string, FlipEvent>>
-type DayArray = [string, Map<string, FlipEvent>]
-// type FlipArray = [string, FlipEvent]
-interface FlipArray {
-  dayKey: string
-  dayValue: FlipEvent
 }
 
 
@@ -26,10 +20,17 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   const userTZ = 'America/Denver'
 
   function sort(daysMap: Map<string, Map<string, FlipEvent> | FlipEvent[]>) {
-    const arr = [...new Map(Object.entries(daysMap))].map(([dayKey, dayValue]) => ({ dayKey, dayValue }))
+    // console.log(daysMap, 'daysMap')
+    // need to have a condition if map or if record???
+    const arr = [...daysMap].map(([dayKey, dayValue]) => ({ dayKey, dayValue }))
+    // console.log('arr', Object.entries(daysMap))
     return arr.sort((dayA, dayB) => {
-
         if (!Array.isArray(dayA.dayValue)) {
+            // dayA.dayText = Object.values(dayA.dayValue).map((flipEvent) => {
+            //   if (flipEvent.start === dayA.dayKey) {
+            //     return flipEvent.text
+            //   }
+            // })
             dayA.dayValue = Object.values(dayA.dayValue).sort((flipA, flipB) => {
                 if (Number(flipA.start) < Number(flipB.start)) {
                     return -1
@@ -59,42 +60,8 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
         } else {
             return 0
         }
-
     })
 }
-
-  // function sortFlips(dayArr: DayArray) {
-  //  return dayArr.map(([dayKey, dayValue]) => {
-  //     return {[dayKey]: Object.values(dayValue).sort((a: FlipEvent, b: FlipEvent) => {
-  //       const flipA = Number(a.start)
-  //       const flipB = Number(b.start)
-  //       // console.log(flipA, '& ', flipB, 'a,b')
-  //       if (flipA < flipB) {
-  //         return -1
-  //       } else if (flipB < flipA) {
-  //         return 1
-  //       } else {
-  //         return 0
-  //       }
-  //     })
-  //   }
-  //   })
-  // }
-
-  // function sortDays(dayMap: DaysMap): [string, FlipEvent][] {
-  //   console.log(dayMap, 'daysMap')
-  //   return Object.entries(dayMap).sort((dayA: DayArray, dayB: DayArray) => {
-  //     const dayAst = Number(dayA[0])
-  //     const dayBst = Number(dayB[0])
-  //     if (dayAst < dayBst) {
-  //       return 1
-  //     } else if (dayBst < dayAst) {
-  //       return -1
-  //     } else {
-  //       return 0
-  //     }
-  //   })
-  // }
 
   function utcToLocal(utcDate: ical.DateWithTimeZone) {
     const start = new Date(utcDate.toLocaleString("en-US", { timeZone: userTZ }))
@@ -152,13 +119,13 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     if (userExists.Item) {
       const dynamoDaysMap: Map<string, Map<string, FlipEvent>> = new Map(Object.entries(userExists.Item.days))
 
-      for await (const [dayKey, dayValue] of Object.entries(parsedICAL)) {
+      for (const [dayKey, dayValue] of Object.entries(parsedICAL)) {
         
         if (dynamoDaysMap.has(dayKey)) {
           const dynamoDay = new Map(Object.entries(dynamoDaysMap.get(dayKey)))
 
           if (Object.keys(dayKey).length !== Object.keys(dynamoDay).length) {
-             for await (const [feKey, feValue] of Object.entries(dayValue)) {
+             for (const [feKey, feValue] of Object.entries(dayValue)) {
               if (!dynamoDay.has(feKey)) {
                 const updateMap = {
                   ExpressionAttributeNames: { "#DA": "days", "#DI": dayKey, "#FI": feKey },
@@ -169,9 +136,15 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
                   UpdateExpression: "SET #DA.#DI.#FI = :fe"
                 }
                 const updatedRes = await dynamoDb.update(updateMap).promise()
-                returnData = updatedRes.Attributes?.days
+                const updatedRecord: Record<string, Map<string, FlipEvent>> = updatedRes.Attributes?.days
+                returnData = new Map(Object.entries(updatedRes.Attributes?.days))
+                //this did fail, added new map entries
+              } else {
+                returnData = dynamoDaysMap
               }
             }
+          } else {
+            returnData = dynamoDaysMap
           }
           
         } else {
@@ -184,7 +157,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             UpdateExpression: "SET #DA.#DI = :dm"
           }
           const updatedRes = await dynamoDb.update(updateMap).promise()
-          returnData = updatedRes.Attributes?.days
+          returnData =  new Map(Object.entries(updatedRes.Attributes?.days))
         }
       }
 
@@ -194,13 +167,12 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
         TableName: process.env.UserDays?? 'noTable'
       }
       await dynamoDb.put(newDbEntry).promise()
+      returnData = parsedICAL
     }
+
     console.time('sorted')
-    // const sortedDays = sortDays(returnData)
-    // const sorted = sortFlips(sortedDays)
     const sortedArray = sort(returnData)
     console.timeEnd('sorted')
-
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/plain" },
