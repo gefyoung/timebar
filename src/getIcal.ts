@@ -20,14 +20,13 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   const userTZ = 'America/Denver'
 
   function sort(daysMap: Map<string, Map<string, FlipEvent> | FlipEvent[]>) {
-    // console.log(daysMap, 'daysMap')
-    // need to have a condition if map or if record???
+    
     const arr = [...daysMap].map(([dayKey, dayValue]) => ({ dayKey, dayValue }))
-    // console.log('arr', Object.entries(daysMap))
+
     return arr.sort((dayA, dayB) => {
         if (!Array.isArray(dayA.dayValue)) {
             // dayA.dayText = Object.values(dayA.dayValue).map((flipEvent) => {
-            //   if (flipEvent.start === dayA.dayKey) {
+            //   if (flipEvent.start === 0) {
             //     return flipEvent.text
             //   }
             // })
@@ -61,7 +60,26 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             return 0
         }
     })
-}
+  }
+
+  type Sorted = {
+      dayKey: string
+      dayValue: FlipEvent[]
+      dayText?: string
+    }[]
+
+  function flip0Day(sorted: Sorted
+  ) {
+    sorted.forEach((dayObj) => {
+      if (!dayObj.dayValue[0].start) {
+        dayObj.dayText = dayObj.dayValue[0].text
+        dayObj.dayValue.splice(0, 1)
+      }
+    })
+    console.log(sorted[0])
+    return sorted
+  }
+
 
   function utcToLocal(utcDate: ical.DateWithTimeZone) {
     const start = new Date(utcDate.toLocaleString("en-US", { timeZone: userTZ }))
@@ -171,7 +189,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     }
 
     console.time('sorted')
-    const sortedArray = sort(returnData)
+    const sortedArray = flip0Day(sort(returnData))
     console.timeEnd('sorted')
     return {
       statusCode: 200,

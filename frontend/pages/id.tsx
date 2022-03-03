@@ -11,29 +11,25 @@ interface FlipEvent {
   className: string
   text?: string
 }
-type Day = {
+interface Day {
   dayKey: string
   dayValue: FlipEvent[]
   dayText?: string
 }
 
 export default function Id({ data }: { data: Day[] }) {
-  // console.log(data)
+  console.log(data[0])
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
-      // duration: 0,
-      // className: "",
       text: "",
       start: 0
     },
     dayKey: 0,
+    dayText: ""
   })
-  // const [editState, setEditState] = useState('day')
 
   const dayTextRef = useRef<HTMLTextAreaElement>(null)
-  const startRef = useRef<HTMLInputElement>(null)
-  const endRef = useRef<HTMLInputElement>(null)
   const summaryRef = useRef<HTMLInputElement>(null)
   const flipTextRef = useRef<HTMLTextAreaElement>(null)
 
@@ -42,29 +38,39 @@ export default function Id({ data }: { data: Day[] }) {
   const submitFlipEdit = async () => {
     // const duration = Number(endRef.current?.value) - Number(startRef.current?.value)
     const flip = {
-        dayKey: selectedEventState.dayKey,
-        // duration: duration,
-        start: selectedEventState.flipEvent.start,
-        summary: summaryRef.current?.value,
-        text: flipTextRef.current?.value
-      }
+      dayKey: selectedEventState.dayKey,
+      // duration: duration,
+      start: selectedEventState.flipEvent.start,
+      summary: summaryRef.current?.value,
+      text: flipTextRef.current?.value,
+      dayText: dayTextRef.current?.value
+    }
 
     await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
   }
 
-  const selectFlip = (flipEvent: FlipEvent,  dayKey: number) => {
+  const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     setSelectedEventState({
       flipEvent: {
-        // className: flipEvent.className,
         summary: flipEvent.summary,
-        // duration: flipEvent.duration,
-        text: flipEvent.text ?? '',
+        text: flipEvent.text ?? "",
         start: flipEvent.start
       },
-      dayKey: Number(dayKey)
-      // arrayPos: arrayPos,
+      dayKey: Number(dayKey),
+      dayText: ""
     })
-    // setEditState('flip')
+  }
+
+  const selectDay = (day: Day) => {
+    setSelectedEventState({
+      flipEvent: {
+        summary: "",
+        text: selectedEventState.flipEvent.text ?? "",
+        start: 0
+      },
+      dayKey: Number(day.dayKey),
+      dayText: day.dayText ?? ""
+    })
   }
 
   // const addDayNotes = (e: number) => {
@@ -75,71 +81,85 @@ export default function Id({ data }: { data: Day[] }) {
   //   setEditState('day')
   // }
 
-  const FlipComponent = ({ flipEvent, dayKey }: { flipEvent: FlipEvent, dayKey: string}) => (
-    <div 
-      key={flipEvent.start} 
-      className={flipEvent.className} 
+  const FlipComponent = ({ flipEvent, dayKey }: { flipEvent: FlipEvent, dayKey: string }) => (
+    <div
+      key={flipEvent.start}
+      className={flipEvent.className}
       onClick={() => selectFlip(flipEvent, Number(dayKey))}>
     </div>
   )
 
-  const TimeBar = ({ dayValue, dayKey }: { dayValue: FlipEvent[], dayKey: string}) => {
+  const TimeBar = ({ day }: { day: Day }) => {
 
-    return <div key={dayKey} className="flex overflow-hidden max-w-g">
-      {
-      dayValue.map((flipEvent: FlipEvent) => {
-        return <FlipComponent key={flipEvent.start} dayKey={dayKey} flipEvent={flipEvent} />
-        {/* {Number(dayKey) === Number(flipEvent.start) && <div>hello</div>} */}
-      }
-      )}
+    return (
+      <div className="mb-10" key={day.dayKey}>
+
+        <div onClick={() => selectDay(day)} >
+          {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' '}
+          {new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
+        </div>
+
+        <div className="flex flex-row">
+          {day.dayValue.map((flipEvent: FlipEvent) =>
+            <FlipComponent key={flipEvent.start} dayKey={day.dayKey} flipEvent={flipEvent} />
+          )}
+        </div>
+
+        <div>
+          {selectedEventState.dayKey === parseInt(day.dayKey)
+            && <FlipEditor />
+          }
+        </div>
       </div>
+    )
   }
 
   const FlipEditor = () => {
-    return (<div className='bg-gray-100'>
-      <div><input type="text" ref={summaryRef} defaultValue={selectedEventState.flipEvent.summary}></input></div>
-      {/* <div>
-        Start time: <input ref={startRef} type="text" defaultValue={selectedEventState.flipEvent.start}></input>
-        End time: <input ref={endRef} type="text" defaultValue={selectedEventState.flipEvent.start + selectedEventState.flipEvent.duration}></input>
-      </div> */}
-      <div><textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea></div>
-      <button onClick={() => submitFlipEdit()} className="outline">submit</button>
-    </div>)
-  }
-  
-  return (
-    <div className="flex justify-center mt-10">
-      <div className="flex flex-col w-90ch">
-      {
-        data.map((day) =>
-          
-          <div className="mb-10" key={day.dayKey}>
-            <div >
-              {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' '}
-              {new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
-            </div>
-            <TimeBar key={day.dayKey} dayKey={day.dayKey} dayValue={day.dayValue} />
-
+    return (
+      <div className='bg-gray-100'>
+        { selectedEventState.flipEvent.summary !== "" 
+          ? <div>
+            <input type="text" ref={summaryRef} defaultValue={selectedEventState.flipEvent.summary}></input>
             <div>
-              {selectedEventState.dayKey === parseInt(day.dayKey) && <FlipEditor />}
-            </div>
-          </div>)
-      }
+          <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea>
+        </div>
+          </div> :         <div>
+          <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea>
+        </div>
+          }
+        
+
+
+        <button onClick={() => submitFlipEdit()} className="outline">submit</button>
       </div>
+    )
+  }
+
+
+  return (
+    <div className="flex flex-row">
+      <div className="flex flex-1"></div>
+      <div className="mt-10 w-85ch">
+        <div className="">
+          {
+            data.map((day) =>
+              <TimeBar key={day.dayKey} day={day} />
+            )
+          }
+        </div>
+      </div>
+      <div className="flex flex-1"></div>
     </div>
   )
 }
 
-function getClassName(flip: FlipEvent) {
+function returnWidth(flip: FlipEvent) {
   const flipDuration = Number(flip.duration)
-  console.log(flipDuration)
   const minutes = flipDuration / 60000
   const part180 = (minutes / 16) * 10
   const rounded5 = (Math.round(part180 / 5) * 5) / 10
   const width = rounded5 === 0 ? rounded5 + 0.5 : rounded5
-
-  const color = returnColor(flip.summary)
-  return "w-" + width + "ch h-8 " + color
+  return width
 }
 
 function returnColor(summary: string) {
@@ -161,13 +181,6 @@ function returnColor(summary: string) {
   }
 }
 
-interface FlipInterface {
-  start: number
-  duration: number
-  summary: string
-  className?: string
-}
-
 export async function getStaticProps() {
   try {
     const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
@@ -175,11 +188,17 @@ export async function getStaticProps() {
     const data: Day[] = JSON.parse(response)
 
     data.forEach((dayObj: Day) => {
+      let i = 0
       dayObj.dayValue.forEach((flipObj) => {
-        flipObj.className = getClassName(flipObj)
+        if (Number(flipObj.start) === 0) { dayObj.dayText = flipObj.text; console.log("hi", flipObj.text) }
+        const color = returnColor(flipObj.summary)
+        const width = returnWidth(flipObj)
+        flipObj.className = "w-" + width + "ch h-8 " + color
+        i = i + width
       })
+      // console.log(i)
     })
-    
+
     return { props: { data: data }, revalidate: 1 }
   } catch (err) {
     return { props: { data: null }, revalidate: 1 }

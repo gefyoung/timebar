@@ -1,5 +1,6 @@
 export default function Blank() {
   return (<>
+      <div className="w-1/12"></div>
     <div className="w-1 h-8 bg-purple-600"></div>
     <div className="w-2 bg-red-600"></div>
     <div className="w-3 bg-yellow-600"></div>
