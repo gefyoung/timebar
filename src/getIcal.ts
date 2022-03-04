@@ -31,6 +31,9 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             //   }
             // })
             dayA.dayValue = Object.values(dayA.dayValue).sort((flipA, flipB) => {
+                // if (!flipA.summary || !flipB.summary) {
+                //   dayA.dayText = flipA.text || flipB.text
+                // }
                 if (Number(flipA.start) < Number(flipB.start)) {
                     return -1
                 } else if (Number(flipB.start) < Number(flipA.start)) {
@@ -189,12 +192,15 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     }
 
     console.time('sorted')
-    const sortedArray = flip0Day(sort(returnData))
+    console.log(Object.fromEntries(returnData))
+    const sortedArray = sort(returnData)
+    const zeroFlipConverted = flip0Day(sortedArray)
+    // console.log(zeroFlipConverted)
     console.timeEnd('sorted')
     return {
       statusCode: 200,
       headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(sortedArray),
+      body: JSON.stringify(zeroFlipConverted),
     }
   } catch (err) {
     console.log(err)

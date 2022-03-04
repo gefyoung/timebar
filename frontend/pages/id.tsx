@@ -18,7 +18,6 @@ interface Day {
 }
 
 export default function Id({ data }: { data: Day[] }) {
-  console.log(data[0])
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
@@ -35,17 +34,28 @@ export default function Id({ data }: { data: Day[] }) {
 
   // const userTZ = 'America/Denver'
 
-  const submitFlipEdit = async () => {
-    // const duration = Number(endRef.current?.value) - Number(startRef.current?.value)
+  const submitFlipText = async () => {
     const flip = {
       dayKey: selectedEventState.dayKey,
-      // duration: duration,
       start: selectedEventState.flipEvent.start,
-      summary: summaryRef.current?.value,
       text: flipTextRef.current?.value,
+    }
+    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  }
+  const submitDayText = async () => {
+    const flip = {
+      dayKey: selectedEventState.dayKey,
+      start: selectedEventState.flipEvent.start,
       dayText: dayTextRef.current?.value
     }
-
+    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  }
+  const submitSummary = async () => {
+    const flip = {
+      dayKey: selectedEventState.dayKey,
+      start: selectedEventState.flipEvent.start,
+      summary: summaryRef.current?.value
+    }
     await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
   }
 
@@ -62,6 +72,7 @@ export default function Id({ data }: { data: Day[] }) {
   }
 
   const selectDay = (day: Day) => {
+    console.log(day)
     setSelectedEventState({
       flipEvent: {
         summary: "",
@@ -122,15 +133,13 @@ export default function Id({ data }: { data: Day[] }) {
             <input type="text" ref={summaryRef} defaultValue={selectedEventState.flipEvent.summary}></input>
             <div>
           <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea>
-        </div>
+        </div><button onClick={() => submitFlipText()} className="outline">submit</button>
           </div> :         <div>
           <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea>
+          <button onClick={() => submitDayText()} className="outline">submit</button>
         </div>
           }
         
-
-
-        <button onClick={() => submitFlipEdit()} className="outline">submit</button>
       </div>
     )
   }
@@ -166,13 +175,13 @@ function returnColor(summary: string) {
   switch (summary) {
     case "Jerkin": return "bg-red-600"
     case "Learning": return "bg-yellow-600"
-    case "Eating": return "bg-orange-600"
+    case "Type 1 leisure": return "bg-orange-600"
     case "Sleeping": return "bg-purple-600"
     case "Weed": return "bg-amber-600"
     case "Socializing": return "bg-lime-600"
     case "Beer": return "bg-teal-600"
     case "Working out": return "bg-blue-600"
-    case "Insta/tv/youtub": return "bg-pink-600"
+    case "Type 2 leisure": return "bg-pink-600"
     case "Shop/Chores": return "bg-rose-600"
     case "Skiing": return "bg-cyan-600"
     case "Norski": return "bg-black"
