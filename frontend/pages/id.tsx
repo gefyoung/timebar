@@ -2,8 +2,9 @@ import ical from 'node-ical'
 import { useRef, useState } from 'react'
 import { API } from 'aws-amplify'
 import axios from 'axios'
+import TextArea from '../components/textArea'
 
-interface FlipEvent {
+export interface FlipEvent {
   dayBegins?: number
   start: number
   duration: number
@@ -34,30 +35,30 @@ export default function Id({ data }: { data: Day[] }) {
 
   // const userTZ = 'America/Denver'
 
-  const submitFlipText = async () => {
-    const flip = {
-      dayKey: selectedEventState.dayKey,
-      start: selectedEventState.flipEvent.start,
-      text: flipTextRef.current?.value,
-    }
-    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  }
-  const submitDayText = async () => {
-    const flip = {
-      dayKey: selectedEventState.dayKey,
-      start: selectedEventState.flipEvent.start,
-      dayText: dayTextRef.current?.value
-    }
-    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  }
-  const submitSummary = async () => {
-    const flip = {
-      dayKey: selectedEventState.dayKey,
-      start: selectedEventState.flipEvent.start,
-      summary: summaryRef.current?.value
-    }
-    await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  }
+  // const submitFlipText = async () => {
+  //   const flip = {
+  //     dayKey: selectedEventState.dayKey,
+  //     start: selectedEventState.flipEvent.start,
+  //     text: flipTextRef.current?.value,
+  //   }
+  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  // }
+  // const submitDayText = async () => {
+  //   const flip = {
+  //     dayKey: selectedEventState.dayKey,
+  //     start: selectedEventState.flipEvent.start,
+  //     dayText: dayTextRef.current?.value
+  //   }
+  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  // }
+  // const submitSummary = async () => {
+  //   const flip = {
+  //     dayKey: selectedEventState.dayKey,
+  //     start: selectedEventState.flipEvent.start,
+  //     summary: summaryRef.current?.value
+  //   }
+  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  // }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     console.log(flipEvent, 'selectedFlip')
@@ -133,11 +134,14 @@ export default function Id({ data }: { data: Day[] }) {
           ? <div>
             <input type="text" ref={summaryRef} defaultValue={selectedEventState.flipEvent.summary}></input>
             <div>
-              <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea>
-            </div><button onClick={() => submitFlipText()} className="outline">submit</button>
-          </div> : <div>
-            <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea>
-            <button onClick={() => submitDayText()} className="outline">submit</button>
+              {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
+              <TextArea flipState={selectedEventState}/>
+            </div>
+            {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
+          </div> : <div className="mt-6">
+            {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
+            <TextArea flipState={selectedEventState}/>
+            {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
 
@@ -147,10 +151,8 @@ export default function Id({ data }: { data: Day[] }) {
 
 
   return (
-    <div className="">
-      <div className="flex flex-1"></div>
-      <div className="">
-        <div className="">
+      <div className="flex justify-center">
+        <div className="w-85ch">
           {
             data.map((day) =>
               <TimeBar key={day.dayKey} day={day} />
@@ -158,8 +160,6 @@ export default function Id({ data }: { data: Day[] }) {
           }
         </div>
       </div>
-      <div className="flex flex-1"></div>
-    </div>
   )
 }
 
@@ -191,7 +191,6 @@ function returnAdvancedWidth(flipArray: FlipEvent[]) {
   let totalDuration = 0
   let width = 0
   flipArray.forEach(flip => totalDuration = totalDuration + returnWidth(flip).width)
-  console.log(totalDuration, 'dDUUT')
   
   return flipArray.map((flipObj) => {
     width = returnWidth(flipObj).width

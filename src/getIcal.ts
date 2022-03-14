@@ -66,12 +66,12 @@ function parseICAL(icalMap: IcalMap): JsonMap {
     if (!acc.get(dayBegins)) {
       acc.set(dayBegins, {})
     }
-
+    
     if (!acc.get(dayBegins)?.[start]) {
-      acc.get(dayBegins)[start] = {}
+      acc.get(dayBegins)![start] = {}
     }
 
-    acc.get(dayBegins)[start] = {
+    acc.get(dayBegins)![start] = {
       duration: duration,
       summary: cur.summary,
       start: Number(start)
@@ -95,7 +95,6 @@ function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
     }
 
     const dayArray = Array.from(Object.entries(dayValue)).map(([flipKey, flipValue]) => {
-      /* I can't pop out 0value here, returns undefined in array */
       if (Number(flipKey) === 0) {
         returnObj.dayText = flipValue.text
       }
@@ -104,11 +103,16 @@ function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
         start: Number(flipKey)
       }
     })
+    /* if the flip Obj doesnt have duration, ie, dayText, get rid of it */
+    const no0dayArray = dayArray.filter((flipObj) => {
+      return flipObj.duration
+    })
 
     returnObj.dayKey = dayKey
-    returnObj.dayValue = dayArray
+    returnObj.dayValue = no0dayArray
     return returnObj
   })
+
 
   //   console.log(arr, 'arrarrarrarrarrarr')
   //   const sortWithReduce = (arr: Sorted) => {
@@ -251,19 +255,20 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     console.time('sorted')
     const sortedArray = sort(returnData)
     // console.log(sortedArray, 'sortedArray')
+    const shit = JSON.stringify(sortedArray)
 
     console.timeEnd('sorted')
     return {
       statusCode: 200,
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(sortedArray),
+      // headers: { "Content-Type": "text/plain" },
+      body: shit,
     }
   } catch (err) {
     console.log(err)
     return {
       statusCode: 500,
-      headers: { "Content-Type": "text/plain" },
-      error: err
+      // headers: { "Content-Type": "text/plain" },
+      // body: err
     }
   }
 }

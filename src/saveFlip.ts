@@ -15,6 +15,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     const flipEvent: EditFlipEvent = JSON.parse(event.body ?? '')
 
     console.log('flipEvent', flipEvent)
+    console.log('fDayText', flipEvent.dayText)
 
     if (flipEvent.dayText) {
       const params = {
@@ -29,15 +30,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         TableName: process.env.UserDays?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI = :ft"
       }
+      console.log('params', params)
       const updated = await dynamoDb.update(params).promise()
-      console.log(updated, 'u[dated')
+      // console.log(updated, 'u[dated')
       return {
         statusCode: 200,
         body: JSON.stringify({ flipEvent: flipEvent })
       }
 
 
-    } else if (flipEvent.text) {
+    } else {
       const params = {
         ExpressionAttributeNames: { 
           "#DA": "days", 
@@ -51,35 +53,38 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         TableName: process.env.UserDays?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
       }
+      console.log('params', params)
       const updated = await dynamoDb.update(params).promise()
-      console.log(updated, 'u[dated')
+      // console.log(updated, 'u[dated')
       return {
         statusCode: 200,
         body: JSON.stringify({ flipEvent: flipEvent })
       }
 
 
-    } else {
-      const params = {
-        ExpressionAttributeNames: { 
-          "#DA": "days", 
-          "#DI": "" + flipEvent.dayKey, 
-          "#FI": "" + flipEvent.start,
-          "#FS": "summary"
-         },
-        ExpressionAttributeValues: { ":fs": flipEvent.summary },
-        Key: { user: 'gty' },
-        ReturnValues: "ALL_NEW",
-        TableName: process.env.UserDays?? 'noTable',
-        UpdateExpression: "SET #DA.#DI.#FI.#FS = :fs"
-      }
-      const updated = await dynamoDb.update(params).promise()
-      console.log(updated, 'u[dated')
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ flipEvent: flipEvent })
-      }
-    }
+    } 
+    // else {
+    //   const params = {
+    //     ExpressionAttributeNames: { 
+    //       "#DA": "days", 
+    //       "#DI": "" + flipEvent.dayKey, 
+    //       "#FI": "" + flipEvent.start,
+    //       "#FS": "summary"
+    //      },
+    //     ExpressionAttributeValues: { ":fs": flipEvent.summary },
+    //     Key: { user: 'gty' },
+    //     ReturnValues: "ALL_NEW",
+    //     TableName: process.env.UserDays?? 'noTable',
+    //     UpdateExpression: "SET #DA.#DI.#FI.#FS = :fs"
+    //   }
+    //   console.log('params', params)
+    //   const updated = await dynamoDb.update(params).promise()
+    //   // console.log(updated, 'u[dated')
+    //   return {
+    //     statusCode: 200,
+    //     body: JSON.stringify({ flipEvent: flipEvent })
+    //   }
+    // }
 
     
   } catch (err) {
