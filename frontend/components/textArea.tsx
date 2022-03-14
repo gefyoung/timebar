@@ -32,6 +32,7 @@ export default function TextArea({ flipState }: {flipState: FlipState}) {
   const isDay = flipState.flipEvent.summary === ""
 
   const [textState, setTextState] = useState(isDay ? flipState.dayText : flipState.flipEvent.text)
+  console.log(textState, 'textState', isDay)
 
   const flip = isDay ? {
     dayKey: flipState.dayKey,

@@ -17,29 +17,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     console.log('flipEvent', flipEvent)
     console.log('fDayText', flipEvent.dayText)
 
-    if (flipEvent.dayText) {
-      const params = {
-        ExpressionAttributeNames: { 
-          "#DA": "days", 
-          "#DI": "" + flipEvent.dayKey, 
-          "#FI": "" + flipEvent.start
-         },
-        ExpressionAttributeValues: { ":ft": { text: flipEvent.dayText } },
-        Key: { user: 'gty' },
-        ReturnValues: "ALL_NEW",
-        TableName: process.env.UserDays?? 'noTable',
-        UpdateExpression: "SET #DA.#DI.#FI = :ft"
-      }
-      console.log('params', params)
-      const updated = await dynamoDb.update(params).promise()
-      // console.log(updated, 'u[dated')
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ flipEvent: flipEvent })
-      }
+    if (flipEvent.summary) {
 
-
-    } else {
       const params = {
         ExpressionAttributeNames: { 
           "#DA": "days", 
@@ -52,6 +31,27 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         ReturnValues: "ALL_NEW",
         TableName: process.env.UserDays?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
+      }
+      console.log('params', params)
+      const updated = await dynamoDb.update(params).promise()
+      // console.log(updated, 'u[dated')
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ flipEvent: flipEvent })
+      }
+
+    } else {
+      const params = {
+        ExpressionAttributeNames: { 
+          "#DA": "days", 
+          "#DI": "" + flipEvent.dayKey, 
+          "#FI": "" + flipEvent.start
+         },
+        ExpressionAttributeValues: { ":ft": { text: flipEvent.dayText } },
+        Key: { user: 'gty' },
+        ReturnValues: "ALL_NEW",
+        TableName: process.env.UserDays?? 'noTable',
+        UpdateExpression: "SET #DA.#DI.#FI = :ft"
       }
       console.log('params', params)
       const updated = await dynamoDb.update(params).promise()

@@ -113,37 +113,6 @@ function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
     return returnObj
   })
 
-
-  //   console.log(arr, 'arrarrarrarrarrarr')
-  //   const sortWithReduce = (arr: Sorted) => {
-  //     return arr.reduce((acc, val) => {
-  //        let ind = 0;
-  //        while(ind < arr.length && val < arr[ind]){
-  //           ind++;
-  //        }
-  //        acc.splice(ind, 0, val);
-  //        return acc;
-  //     }, [{}]);
-  //  }
-  //  console.log(sortWithReduce(arr), ':)')
-  // let max = 0
-  // arr.reduce((acc, cur, i) => {
-  //   if (i + 1 === arr.length) return acc.concat(max)
-  //   const dayKey = Number(cur.dayKey)
-  //   max = dayKey > max ? dayKey : max
-  //   const dayObj = {
-  //     dayValue: cur.dayValue,
-  //     dayKey: cur.dayKey
-  //   }
-  //   const dayObj1 = {
-  //     dayValue: arr[i + 1].dayValue,
-  //     dayKey: arr[i + 1].dayKey
-  //   }
-  //   console.log(acc, 'acc')
-  //   acc.unshift(dayKey < Number(arr[i + 1].dayKey) ? dayObj : dayObj1)
-  //   return acc
-  // }, [{}])
-
   return arr.sort((dayA, dayB) => {
     dayA.dayValue = Object.values(dayA.dayValue).sort((flipA, flipB) => {
       if (Number(flipA.start) < Number(flipB.start)) {
