@@ -142,7 +142,6 @@ function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
       return 0
     }
   })
-
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async () => {

@@ -29,36 +29,15 @@ export default function Id({ data }: { data: Day[] }) {
     dayText: ""
   })
 
-  const dayTextRef = useRef<HTMLTextAreaElement>(null)
-  const summaryRef = useRef<HTMLInputElement>(null)
-  const flipTextRef = useRef<HTMLTextAreaElement>(null)
+  const [dataState, setDataState] = useState(data)
+  console.log({...dataState})
 
-  // const userTZ = 'America/Denver'
+  const changeText = () => {
+    setDataState({
+      ...dataState,
 
-  // const submitFlipText = async () => {
-  //   const flip = {
-  //     dayKey: selectedEventState.dayKey,
-  //     start: selectedEventState.flipEvent.start,
-  //     text: flipTextRef.current?.value,
-  //   }
-  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  // }
-  // const submitDayText = async () => {
-  //   const flip = {
-  //     dayKey: selectedEventState.dayKey,
-  //     start: selectedEventState.flipEvent.start,
-  //     dayText: dayTextRef.current?.value
-  //   }
-  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  // }
-  // const submitSummary = async () => {
-  //   const flip = {
-  //     dayKey: selectedEventState.dayKey,
-  //     start: selectedEventState.flipEvent.start,
-  //     summary: summaryRef.current?.value
-  //   }
-  //   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
-  // }
+    })
+  }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     console.log(flipEvent, 'selectedFlip')
@@ -86,20 +65,16 @@ export default function Id({ data }: { data: Day[] }) {
     })
   }
 
-  // const addDayNotes = (e: number) => {
-  //   setSelectedEventState({ 
-  //     ...selectedEventState,
-  //     dayBegins: e, 
-  //   })
-  //   setEditState('day')
-  // }
-
   const FlipComponent = ({ flipEvent, dayKey }: { flipEvent: FlipEvent, dayKey: string }) => (
+    <>
     <div
       key={flipEvent.start}
       className={flipEvent.className}
       onClick={() => selectFlip(flipEvent, Number(dayKey))}>
+    {flipEvent.text && <img className="h-4 mt-4" src="/files.svg" alt="notes icon" />}
     </div>
+    
+    </>
   )
 
   const TimeBar = ({ day }: { day: Day }) => {
@@ -107,9 +82,10 @@ export default function Id({ data }: { data: Day[] }) {
     return (
       <div className="max-w-4xl mb-10" key={day.dayKey}>
 
-        <div onClick={() => selectDay(day)} >
-          {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' '}
-          {new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
+        <div className="flex flex-row" onClick={() => selectDay(day)} >
+          {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' ' +
+          new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
+          {day.dayText && <img className="h-4 mt-2 ml-1" src="/files.svg" alt="notes icon" />}
         </div>
 
         <div className="grid grid-cols-96">
@@ -132,7 +108,7 @@ export default function Id({ data }: { data: Day[] }) {
       <div className='bg-gray-100'>
         {selectedEventState.flipEvent.summary !== ""
           ? <div>
-            <input type="text" ref={summaryRef} defaultValue={selectedEventState.flipEvent.summary}></input>
+            <div>{selectedEventState.flipEvent.summary}</div>
             <div>
               {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
               <TextArea flipState={selectedEventState}/>
@@ -144,7 +120,6 @@ export default function Id({ data }: { data: Day[] }) {
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
-
       </div>
     )
   }
@@ -154,7 +129,7 @@ export default function Id({ data }: { data: Day[] }) {
       <div className="flex justify-center">
         <div className="w-85ch">
           {
-            data.map((day) =>
+            dataState.map((day) =>
               <TimeBar key={day.dayKey} day={day} />
             )
           }
@@ -237,6 +212,11 @@ function returnColor(summary: string) {
     default:
       "bg-white"
   }
+}
+
+function whatDay () {
+  const now = new Date()
+  console.log(now)
 }
 
 export async function getStaticProps() {

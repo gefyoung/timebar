@@ -3,8 +3,8 @@ import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2 } from 'aws-lambda'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface EditFlipEvent {
-  dayKey: string
-  start: string
+  dayKey: number
+  start: number
   summary?: string
   text?: string
   dayText?: string
@@ -13,11 +13,8 @@ interface EditFlipEvent {
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   try {
     const flipEvent: EditFlipEvent = JSON.parse(event.body ?? '')
-
-    console.log('flipEvent', flipEvent)
-    console.log('fDayText', flipEvent.dayText)
-
-    if (flipEvent.summary) {
+    console.log(flipEvent)
+    if (flipEvent.start !== 0) {
 
       const params = {
         ExpressionAttributeNames: { 
@@ -32,7 +29,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         TableName: process.env.UserDays?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
       }
-      console.log('params', params)
+      // console.log('params', params)
       const updated = await dynamoDb.update(params).promise()
       // console.log(updated, 'u[dated')
       return {
@@ -53,7 +50,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         TableName: process.env.UserDays?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI = :ft"
       }
-      console.log('params', params)
+      // console.log('params', params)
       const updated = await dynamoDb.update(params).promise()
       // console.log(updated, 'u[dated')
       return {
@@ -61,8 +58,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         body: JSON.stringify({ flipEvent: flipEvent })
       }
 
-
     } 
+    
     // else {
     //   const params = {
     //     ExpressionAttributeNames: { 
