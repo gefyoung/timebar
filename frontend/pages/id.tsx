@@ -1,5 +1,5 @@
 import ical from 'node-ical'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { API } from 'aws-amplify'
 import axios from 'axios'
 import TextArea from '../components/textArea'
@@ -19,6 +19,13 @@ interface Day {
 }
 
 export default function Id({ data }: { data: Day[] }) {
+
+  if (!data) {
+    return (
+      <div className="p-5 m-20 outline">Data error</div>
+    )
+  }
+
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
@@ -30,7 +37,6 @@ export default function Id({ data }: { data: Day[] }) {
   })
 
   const [dataState, setDataState] = useState(data)
-  console.log({...dataState})
 
   const changeText = () => {
     setDataState({
@@ -123,7 +129,6 @@ export default function Id({ data }: { data: Day[] }) {
       </div>
     )
   }
-
 
   return (
       <div className="flex justify-center">
@@ -224,10 +229,12 @@ export async function getStaticProps() {
     const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
-
+    console.log(data)
     data.forEach((dayObj: Day) => {
       dayObj.dayValue = returnAdvancedWidth(dayObj.dayValue)
     })
+
+
 
     return { props: { data: data }, revalidate: 1 }
   } catch (err) {

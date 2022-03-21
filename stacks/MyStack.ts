@@ -7,8 +7,9 @@ export default class MyStack extends sst.Stack {
     const UserDays = new sst.Table(this, "UserDays", {
       fields: {
         user: sst.TableFieldType.STRING,
+        // month: sst.TableFieldType.STRING
       },
-      primaryIndex: { partitionKey: "user" },
+      primaryIndex: { partitionKey: "user", /*sortKey: "month"*/ }
     })
 
     const api = new sst.Api(this, "Api", {

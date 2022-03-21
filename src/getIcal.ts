@@ -40,6 +40,7 @@ type Sorted = {
 
 
 
+
 function utcToLocal(utcDate: ical.DateWithTimeZone) {
   const start = new Date(utcDate.toLocaleString("en-US", { timeZone: 'America/Denver' }))
   return {
@@ -66,7 +67,7 @@ function parseICAL(icalMap: IcalMap): JsonMap {
     if (!acc.get(dayBegins)) {
       acc.set(dayBegins, {})
     }
-    
+
     if (!acc.get(dayBegins)?.[start]) {
       acc.get(dayBegins)![start] = {}
     }
@@ -165,6 +166,35 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
     if (userExists.Item) {
       const dynamoDaysMap: Map<string, Record<string, FlipEvent>> = new Map(Object.entries(userExists.Item.days))
+
+      /* if backend dates arent updated to todays date */
+      const getToday = new Date(new Date().toLocaleString("en-US", { timeZone: 'America/Denver' }))
+      const today = Date.parse(getToday.toDateString())
+      let daysAdded = 0
+      while (daysAdded < (86400000 * 30)) {
+        const thatDay = Number(today) - daysAdded
+        console.log(thatDay, 'thatDay')
+        daysAdded = daysAdded + 86400000
+        console.log(daysAdded, 'daysAdded')
+        if (dynamoDaysMap.has("" + thatDay)
+          || dynamoDaysMap.has(JSON.stringify(thatDay + 3600000))
+          || dynamoDaysMap.has(JSON.stringify(thatDay - 3600000))) {
+          // do nothing, if i return, i return the whole handler
+        } else {
+          const updateMap = {
+            ExpressionAttributeNames: { "#DA": "days", "#DI": "" + thatDay },
+            ExpressionAttributeValues: { ":fa": {} },
+            Key: { user: 'gty' },
+            ReturnValues: "ALL_NEW",
+            TableName: process.env.UserDays ?? 'noTable',
+            UpdateExpression: "SET #DA.#DI = :fa"
+          }
+          const updatedRes = await dynamoDb.update(updateMap).promise()
+          console.log(updatedRes, 'updatedRes')
+        }
+
+      }
+
 
       for (const [dayKeyPI, dayValuePI] of parsedICAL) {
 
