@@ -24,10 +24,11 @@ interface Flip {
 
 const saveText = async (flip: Flip) => {
   await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+
 }
 
 
-export default function TextArea({ flipState }: {flipState: FlipState}) {
+export default function TextArea({ flipState, changeText }: {flipState: FlipState, changeText: (e: string) => void}) {
 
   const isDay = flipState.flipEvent.summary === ""
 
@@ -49,7 +50,7 @@ export default function TextArea({ flipState }: {flipState: FlipState}) {
     <>
       <textarea
         defaultValue={isDay ? flipState.dayText : flipState.flipEvent.text}
-        onChange={(e) => setTextState(e.target.value)}
+        onChange={(e) => changeText(e.target.value)}
         className="
         form-control
         block

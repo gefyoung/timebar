@@ -38,11 +38,19 @@ export default function Id({ data }: { data: Day[] }) {
 
   const [dataState, setDataState] = useState(data)
 
-  const changeText = () => {
-    setDataState({
-      ...dataState,
-
-    })
+  const changeText = (e: string) => {
+    /* day only */
+    const editedArray = dataState
+    dataState.forEach((dataDay, i) => {
+      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+        const newDay = {
+          ...dataDay,
+          dayText: e
+        }
+        editedArray.splice(i, 1, newDay)
+        setDataState(editedArray)
+      }
+    })    
   }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
@@ -117,12 +125,12 @@ export default function Id({ data }: { data: Day[] }) {
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
               {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
-              <TextArea flipState={selectedEventState}/>
+              <TextArea changeText={changeText} flipState={selectedEventState}/>
             </div>
             {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
           </div> : <div className="mt-6">
             {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
-            <TextArea flipState={selectedEventState}/>
+            <TextArea changeText={changeText} flipState={selectedEventState}/>
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
@@ -131,7 +139,7 @@ export default function Id({ data }: { data: Day[] }) {
   }
 
   return (
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10">
         <div className="w-85ch">
           {
             dataState.map((day) =>
