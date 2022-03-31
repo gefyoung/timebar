@@ -1,7 +1,5 @@
-import ical from 'node-ical'
-import { useEffect, useRef, useState } from 'react'
-import { API } from 'aws-amplify'
-import axios from 'axios'
+
+import { useState } from 'react'
 import TextArea from '../components/textArea'
 
 export interface FlipEvent {
@@ -20,12 +18,6 @@ interface Day {
 
 export default function Id({ data }: { data: Day[] }) {
 
-  if (!data) {
-    return (
-      <div className="p-5 m-20 outline">Data error</div>
-    )
-  }
-
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
@@ -37,6 +29,14 @@ export default function Id({ data }: { data: Day[] }) {
   })
 
   const [dataState, setDataState] = useState(data)
+
+
+  if (!data) {
+    return (
+      <div className="p-5 m-20 outline">Data error</div>
+    )
+  }
+
 
   const changeText = (e: string) => {
     /* day only */
@@ -160,7 +160,7 @@ function returnWidth(flip: FlipEvent) {
 
   const rounded = Math.round(part48) ? Math.round(part48) : 1
   let down = 0
-  let up = 0
+  const up = 0
   if (part48 > rounded) {
     down = part48 - rounded
   }
@@ -184,7 +184,7 @@ function returnAdvancedWidth(flipArray: FlipEvent[]) {
     width = returnWidth(flipObj).width
 
     if (totalDuration > 96) {
-      let overAmount = totalDuration - 96
+      const overAmount = totalDuration - 96
       console.log(totalDuration, 'total', overAmount, 'over')
         const flipPercentage = (flipObj.duration / 86400000) * 100
         if (flipPercentage > 20) {
@@ -225,11 +225,6 @@ function returnColor(summary: string) {
     default:
       "bg-white"
   }
-}
-
-function whatDay () {
-  const now = new Date()
-  console.log(now)
 }
 
 export async function getStaticProps() {

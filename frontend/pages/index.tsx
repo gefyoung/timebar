@@ -2,7 +2,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import HorizontalGraph from '../components/horizontalGraph'
 
 const Home: NextPage = () => {
   return (
@@ -19,7 +18,6 @@ const Home: NextPage = () => {
         </h1>
 
         <div>
-        <HorizontalGraph />
         </div>
       </main>
 

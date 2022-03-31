@@ -1,7 +1,6 @@
 import { DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyHandlerV2 } from "aws-lambda"
-import ical, { VEvent } from 'node-ical'
-import { FilterPattern } from 'aws-cdk-lib/aws-logs'
+import ical from 'node-ical'
 
 const dynamoDb = new DynamoDB.DocumentClient()
 
@@ -32,11 +31,11 @@ interface IcalResponse {
 type IcalMap = Map<string, IcalResponse>
 type JsonMap = Map<string, Record<string, FlipEvent>>
 
-type Sorted = {
-  dayKey: string
-  dayValue: FlipEvent[]
-  dayText?: string
-}[]
+// type Sorted = {
+//   dayKey: string
+//   dayValue: FlipEvent[]
+//   dayText?: string
+// }[]
 
 
 
@@ -53,7 +52,7 @@ function parseICAL(icalMap: IcalMap): JsonMap {
 
   const icalArray = Array.from(Object.values(icalMap))
 
-  return icalArray.reduce((acc: JsonMap, cur: IcalResponse, i) => {
+  return icalArray.reduce((acc: JsonMap, cur: IcalResponse) => {
 
     const PTS = cur.duration.match(/PT(.+)S/)
     if (!PTS) { throw Error }
@@ -173,9 +172,9 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       let daysAdded = 0
       while (daysAdded < (86400000 * 30)) {
         const thatDay = Number(today) - daysAdded
-        console.log(thatDay, 'thatDay')
+        // console.log(thatDay, 'thatDay')
         daysAdded = daysAdded + 86400000
-        console.log(daysAdded, 'daysAdded')
+        // console.log(daysAdded, 'daysAdded')
         if (dynamoDaysMap.has("" + thatDay)
           || dynamoDaysMap.has(JSON.stringify(thatDay + 3600000))
           || dynamoDaysMap.has(JSON.stringify(thatDay - 3600000))) {
@@ -189,8 +188,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
             TableName: process.env.UserDays ?? 'noTable',
             UpdateExpression: "SET #DA.#DI = :fa"
           }
-          const updatedRes = await dynamoDb.update(updateMap).promise()
-          console.log(updatedRes, 'updatedRes')
+          await dynamoDb.update(updateMap).promise()
         }
 
       }
@@ -216,7 +214,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
                 UpdateExpression: "SET #DA.#DI.#FI = :fe"
               }
               const updatedRes = await dynamoDb.update(updateMap).promise()
-              const updatedRecord: Record<string, Record<string, FlipEvent>> = updatedRes.Attributes?.days
               returnData = new Map(Object.entries(updatedRes.Attributes?.days))
               //this did fail, added new map entries
             } else {
