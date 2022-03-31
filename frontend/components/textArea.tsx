@@ -23,7 +23,7 @@ interface Flip {
 
 
 const saveText = async (flip: Flip) => {
-  await axios.post('https://npyxqhl803.execute-api.us-east-1.amazonaws.com/saveFlip', flip)
+  await axios.post(process.env.API_URL + '/saveFlip', flip)
 
 }
 

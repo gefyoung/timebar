@@ -35,6 +35,7 @@ export default class MyStack extends sst.Stack {
         // Pass the table details to our app
         REGION: scope.region,
         TABLE_NAME: UserDays.tableName,
+        API_URL: api.url
       },
     })
 

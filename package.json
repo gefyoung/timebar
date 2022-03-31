@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "test": "sst test",
-    "start": "sst start",
+    "start": "AWS_PROFILE=timebar sst start",
     "build": "sst build",
-    "deploy": "sst deploy",
+    "deploy": "AWS_PROFILE=timebar sst deploy",
     "remove": "sst remove"
   },
   "eslintConfig": {

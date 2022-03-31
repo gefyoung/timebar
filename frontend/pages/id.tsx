@@ -30,13 +30,13 @@ export default function Id({ data }: { data: Day[] }) {
 
   const [dataState, setDataState] = useState(data)
 
-
+  
   if (!data) {
     return (
       <div className="p-5 m-20 outline">Data error</div>
     )
   }
-
+  
 
   const changeText = (e: string) => {
     /* day only */
@@ -229,7 +229,7 @@ function returnColor(summary: string) {
 
 export async function getStaticProps() {
   try {
-    const res = await fetch("https://npyxqhl803.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
+    const res = await fetch(process.env.API_URL + "/getIcal", { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
     console.log(data)
