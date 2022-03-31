@@ -37,9 +37,6 @@ type JsonMap = Map<string, Record<string, FlipEvent>>
 //   dayText?: string
 // }[]
 
-
-
-
 function utcToLocal(utcDate: ical.DateWithTimeZone) {
   const start = new Date(utcDate.toLocaleString("en-US", { timeZone: 'America/Denver' }))
   return {
@@ -198,7 +195,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
         if (dynamoDaysMap.has(dayKeyPI)) {
           const dayRecord = dynamoDaysMap.get(dayKeyPI)
-          if (!dayRecord) { return }
+          if (!dayRecord) { return { statusCode: 500, err: "JS failure"} }
 
           const dynamoDay = new Map(Object.entries(dayRecord))
 
