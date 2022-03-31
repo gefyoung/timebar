@@ -1,7 +1,5 @@
-import { API } from 'aws-amplify'
 import axios from 'axios'
-import { FlipEvent } from '../pages/id'
-import { Autosave, useAutosave } from 'react-autosave'
+import { Autosave } from 'react-autosave'
 import { useState } from 'react'
 
 interface FlipState {
@@ -32,7 +30,7 @@ export default function TextArea({ flipState, changeText }: {flipState: FlipStat
 
   const isDay = flipState.flipEvent.summary === ""
 
-  const [textState, setTextState] = useState(isDay ? flipState.dayText : flipState.flipEvent.text)
+  const [textState] = useState(isDay ? flipState.dayText : flipState.flipEvent.text)
 
   const flip = isDay ? {
     dayKey: flipState.dayKey,

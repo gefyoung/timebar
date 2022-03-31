@@ -1,6 +1,7 @@
 
 import { useState } from 'react'
 import TextArea from '../components/textArea'
+import Image from 'next/image'
 
 export interface FlipEvent {
   dayBegins?: number
@@ -85,7 +86,7 @@ export default function Id({ data }: { data: Day[] }) {
       key={flipEvent.start}
       className={flipEvent.className}
       onClick={() => selectFlip(flipEvent, Number(dayKey))}>
-    {flipEvent.text && <img className="h-4 mt-4" src="/files.svg" alt="notes icon" />}
+    {flipEvent.text && <Image className="h-4 mt-4" src="/files.svg" alt="notes icon" />}
     </div>
     
     </>
@@ -99,7 +100,7 @@ export default function Id({ data }: { data: Day[] }) {
         <div className="flex flex-row" onClick={() => selectDay(day)} >
           {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' ' +
           new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
-          {day.dayText && <img className="h-4 mt-2 ml-1" src="/files.svg" alt="notes icon" />}
+          {day.dayText && <Image className="h-4 mt-2 ml-1" src="/files.svg" alt="notes icon" />}
         </div>
 
         <div className="grid grid-cols-96">
