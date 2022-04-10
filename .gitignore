@@ -38,7 +38,7 @@ yarn-error.log*
 
 
 
-/node_modules
+node_modules
 
 # testing
 /coverage
