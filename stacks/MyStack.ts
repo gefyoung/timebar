@@ -32,7 +32,6 @@ export default class MyStack extends sst.Stack {
     const site = new sst.NextjsSite(this, "Site", {
       path: "frontend",
       environment: {
-        // Pass the table details to our app
         REGION: scope.region,
         TABLE_NAME: UserDays.tableName,
         API_URL: api.url

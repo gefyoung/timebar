@@ -248,7 +248,7 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
     const sortedArray = sort(returnData)
     // console.log(sortedArray, 'sortedArray')
     const shit = JSON.stringify(sortedArray)
-
+    
     console.timeEnd('sorted')
     return {
       statusCode: 200,

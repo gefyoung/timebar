@@ -31,31 +31,53 @@ export default function Id({ data }: { data: Day[] }) {
 
   const [dataState, setDataState] = useState(data)
 
-  
+
   if (!data) {
     return (
       <div className="p-5 m-20 outline">Data error</div>
     )
   }
-  
 
-  const changeText = (e: string) => {
-    /* day only */
+
+  const changeText = (e: string, isDay: boolean) => {
     const editedArray = dataState
     dataState.forEach((dataDay, i) => {
       if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
-        const newDay = {
-          ...dataDay,
-          dayText: e
+        if (!isDay) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
+
+          dataDay.dayValue.forEach((flip, x) => {
+            if (selectedEventState.flipEvent.start === flip.start) {
+              const newFlip = {
+                ...flip,
+                text: e
+              }
+              flipArray.splice(x, 1, newFlip)
+            }
+          })
+
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
+          }
+          editedArray.splice(i, 1, newDay)
+
+        
+        } else {
+          const newDay = {
+            ...dataDay,
+            dayText: e
+          }
+          editedArray.splice(i, 1, newDay)
+          
         }
-        editedArray.splice(i, 1, newDay)
-        setDataState(editedArray)
       }
-    })    
+    })
+    setDataState(editedArray)
   }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
-    console.log(flipEvent, 'selectedFlip')
+    console.log('selectflipstate-', selectedEventState)
     setSelectedEventState({
       flipEvent: {
         summary: flipEvent.summary,
@@ -63,12 +85,12 @@ export default function Id({ data }: { data: Day[] }) {
         start: flipEvent.start
       },
       dayKey: Number(dayKey),
-      dayText: ""
+      dayText: selectedEventState.dayText
     })
   }
 
   const selectDay = (day: Day) => {
-    console.log(day)
+    console.log('dayclickstate-', selectedEventState)
     setSelectedEventState({
       flipEvent: {
         summary: "",
@@ -82,13 +104,15 @@ export default function Id({ data }: { data: Day[] }) {
 
   const FlipComponent = ({ flipEvent, dayKey }: { flipEvent: FlipEvent, dayKey: string }) => (
     <>
-    <div
-      key={flipEvent.start}
-      className={flipEvent.className}
-      onClick={() => selectFlip(flipEvent, Number(dayKey))}>
-    {flipEvent.text && <Image className="h-4 mt-4" src="/files.svg" alt="notes icon" />}
-    </div>
-    
+      <div
+        key={flipEvent.start}
+        className={flipEvent.className}
+        onClick={() => selectFlip(flipEvent, Number(dayKey))}>
+        {flipEvent.text && 
+        <div className="h-4 mt-4"><Image width={16} height={16}  src="/files.svg" alt="notes icon" />
+        </div>}
+      </div>
+
     </>
   )
 
@@ -99,8 +123,10 @@ export default function Id({ data }: { data: Day[] }) {
 
         <div className="flex flex-row" onClick={() => selectDay(day)} >
           {new Date(parseInt(day.dayKey)).toLocaleDateString() + ' ' +
-          new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
-          {day.dayText && <Image className="h-4 mt-2 ml-1" src="/files.svg" alt="notes icon" />}
+            new Date(parseInt(day.dayKey)).toLocaleString('en-us', { weekday: 'long' })}
+          {day.dayText && <div className="h-4 mt-2 ml-1">
+            <Image width={16} height={16} src="/files.svg" alt="notes icon" />
+            </div>}
         </div>
 
         <div className="grid grid-cols-96">
@@ -126,12 +152,12 @@ export default function Id({ data }: { data: Day[] }) {
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
               {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
-              <TextArea changeText={changeText} flipState={selectedEventState}/>
+              <TextArea changeText={changeText} flipState={selectedEventState} />
             </div>
             {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
           </div> : <div className="mt-6">
             {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
-            <TextArea changeText={changeText} flipState={selectedEventState}/>
+            <TextArea changeText={changeText} flipState={selectedEventState} />
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
@@ -140,15 +166,15 @@ export default function Id({ data }: { data: Day[] }) {
   }
 
   return (
-      <div className="flex justify-center mt-10">
-        <div className="w-85ch">
-          {
-            dataState.map((day) =>
-              <TimeBar key={day.dayKey} day={day} />
-            )
-          }
-        </div>
+    <div className="flex justify-center mt-10">
+      <div className="w-85ch">
+        {
+          dataState.map((day) =>
+            <TimeBar key={day.dayKey} day={day} />
+          )
+        }
       </div>
+    </div>
   )
 }
 
@@ -180,31 +206,29 @@ function returnAdvancedWidth(flipArray: FlipEvent[]) {
   let totalDuration = 0
   let width = 0
   flipArray.forEach(flip => totalDuration = totalDuration + returnWidth(flip).width)
-  
+
   return flipArray.map((flipObj) => {
     width = returnWidth(flipObj).width
 
     if (totalDuration > 96) {
       const overAmount = totalDuration - 96
-      console.log(totalDuration, 'total', overAmount, 'over')
-        const flipPercentage = (flipObj.duration / 86400000) * 100
-        if (flipPercentage > 20) {
-          width = returnWidth(flipObj).width - overAmount
-        } else {
-          // console.log('over with no percentage over 30')
-        }
+
+      const flipPercentage = (flipObj.duration / 86400000) * 100
+      if (flipPercentage > 20) {
+        width = returnWidth(flipObj).width - overAmount
+      }
     }
 
     if (totalDuration < 96) {
       // let underAmount = 96 - totalDuration
-        width = returnWidth(flipObj).width + 1
-        totalDuration = totalDuration + 1
-      }
+      width = returnWidth(flipObj).width + 1
+      totalDuration = totalDuration + 1
+    }
 
     const color = returnColor(flipObj.summary)
 
     flipObj.className = "col-span-" + width + " h-8 " + color
-    
+
     return flipObj
   })
 }
@@ -230,10 +254,9 @@ function returnColor(summary: string) {
 
 export async function getStaticProps() {
   try {
-    const res = await fetch(process.env.API_URL + "/getIcal", { method: "GET" })
+    const res = await fetch("https://pam5cy5wck.execute-api.us-east-1.amazonaws.com/getIcal", { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
-    console.log(data)
     data.forEach((dayObj: Day) => {
       dayObj.dayValue = returnAdvancedWidth(dayObj.dayValue)
     })
