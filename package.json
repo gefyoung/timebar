@@ -24,6 +24,7 @@
     "@serverless-stack/cli": "0.61.0",
     "@serverless-stack/resources": "0.61.0",
     "aws-cdk-lib": "2.7.0",
+    "aws-sdk": "^2.1111.0",
     "ical": "^0.8.0",
     "node-ical": "^0.14.1"
   }
