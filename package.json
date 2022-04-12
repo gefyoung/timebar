@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "test": "sst test",
-    "start": "AWS_PROFILE=timebar sst start",
+    "start": "sst start",
     "build": "sst build",
-    "deploy": "AWS_PROFILE=timebar sst deploy",
+    "deploy": "sst deploy",
     "remove": "sst remove"
   },
   "eslintConfig": {
@@ -21,7 +21,6 @@
     "@types/node": "<15.0.0"
   },
   "dependencies": {
-    "@aws-sdk/credential-provider-node": "^3.67.0",
     "@serverless-stack/cli": "0.61.0",
     "@serverless-stack/resources": "0.61.0",
     "@sls-next/lambda-at-edge": "^3.7.0",
