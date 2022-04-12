@@ -30,7 +30,7 @@ export default class MyStack extends sst.Stack {
     api.attachPermissions([UserDays])
 
     const site = new sst.NextjsSite(this, "Site", {
-      path: "frontend",
+      path: "frontend/",
       environment: {
         REGION: scope.region,
         TABLE_NAME: UserDays.tableName,
