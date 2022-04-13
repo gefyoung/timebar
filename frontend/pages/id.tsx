@@ -38,7 +38,6 @@ export default function Id({ data }: { data: Day[] }) {
     )
   }
 
-
   const changeText = (e: string, isDay: boolean) => {
     const editedArray = dataState
     dataState.forEach((dataDay, i) => {
