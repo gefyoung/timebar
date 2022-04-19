@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Autosave } from 'react-autosave'
+// import { Autosave } from 'react-autosave'
 import { useState } from 'react'
 
 interface FlipState {
@@ -20,9 +20,9 @@ interface Flip {
 }
 
 
-const saveText = async (flip: Flip) => {
-  await axios.post(process.env.API_URL + '/saveFlip', flip)
-}
+// const saveText = async (flip: Flip) => {
+//   await axios.post(process.env.API_URL + '/saveFlip', flip)
+// }
 
 
 export default function TextArea({ flipState, changeText }: {flipState: FlipState, changeText: (e: string, isDay: boolean) => void}) {
@@ -67,7 +67,7 @@ export default function TextArea({ flipState, changeText }: {flipState: FlipStat
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
       "
       ></textarea>
-      <Autosave data={flip} onSave={() => saveText(flip)} />
+      {/* <Autosave data={flip} onSave={() => saveText(flip)} /> */}
     </>
   )
 }
