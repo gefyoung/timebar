@@ -253,8 +253,8 @@ function returnColor(summary: string) {
 
 export async function getStaticProps() {
   try {
-    const apiUrl = process.env.API_URL ?? "https://os45ecguvi.execute-api.us-east-1.amazonaws.com"
-    const res = await fetch(apiUrl, { method: "GET" })
+    const apiUrl = process.env.API_URL
+    const res = await fetch(apiUrl?? "", { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
     data.forEach((dayObj: Day) => {
