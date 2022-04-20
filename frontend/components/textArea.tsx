@@ -31,15 +31,15 @@ export default function TextArea({ flipState, changeText }: {flipState: FlipStat
 
   const [textState] = useState(isDay ? flipState.dayText : flipState.flipEvent.text)
 
-  const flip = isDay ? {
-    dayKey: flipState.dayKey,
-    start: flipState.flipEvent.start,
-    dayText: textState
-  } : {
-    dayKey: flipState.dayKey,
-    start: flipState.flipEvent.start,
-    text: textState
-  }
+  // const flip = isDay ? {
+  //   dayKey: flipState.dayKey,
+  //   start: flipState.flipEvent.start,
+  //   dayText: textState
+  // } : {
+  //   dayKey: flipState.dayKey,
+  //   start: flipState.flipEvent.start,
+  //   text: textState
+  // }
 
   // useAutosave({ data: flip, onSave: saveText })
 
