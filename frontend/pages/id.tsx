@@ -17,7 +17,7 @@ interface Day {
   dayText?: string
 }
 
-export default function Id({ data }: { data: Day[] }) {
+export default function Id({ data, env }: { data: Day[], env: {API_URL: string} }) {
 
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
@@ -151,12 +151,12 @@ export default function Id({ data }: { data: Day[] }) {
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
               {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
-              <TextArea changeText={changeText} flipState={selectedEventState} />
+              <TextArea API_URL={env.API_URL} changeText={changeText} flipState={selectedEventState} />
             </div>
             {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
           </div> : <div className="mt-6">
             {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
-            <TextArea changeText={changeText} flipState={selectedEventState} />
+            <TextArea API_URL={env.API_URL} changeText={changeText} flipState={selectedEventState} />
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
@@ -252,9 +252,11 @@ function returnColor(summary: string) {
 }
 
 export async function getStaticProps() {
+  console.log(process.env)
   try {
-    const apiUrl = process.env.API_URL
-    const res = await fetch(apiUrl?? "", { method: "GET" })
+    const env = { API_URL: process.env.API_URL }
+    const apiUrl = process.env.API_URL + '/getIcal'
+    const res = await fetch(apiUrl, { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
     data.forEach((dayObj: Day) => {
@@ -263,7 +265,7 @@ export async function getStaticProps() {
 
 
 
-    return { props: { data: data }, revalidate: 1 }
+    return { props: { data: data, env: env }, revalidate: 1 }
   } catch (err) {
     return { props: { data: null }, revalidate: 1 }
   }

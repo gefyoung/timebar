@@ -142,7 +142,7 @@ function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async () => {
-
+  console.log('hello')
   const fakeEvent = 'https://newapi.timeflip.io/api/ics/ab7a3206-de2f-8cae-838b-45bd387aacff'
 
   const getDays = {
