@@ -252,7 +252,6 @@ function returnColor(summary: string) {
 }
 
 export async function getStaticProps() {
-  console.log(process.env)
   try {
     const env = { API_URL: process.env.API_URL }
     const apiUrl = process.env.API_URL + '/getIcal'
