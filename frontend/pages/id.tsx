@@ -18,7 +18,7 @@ interface Day {
 }
 
 export default function Id({ data, env }: { data: Day[], env: {API_URL: string} }) {
-
+  console.log(env.API_URL)
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
