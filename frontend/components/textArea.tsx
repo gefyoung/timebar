@@ -19,12 +19,14 @@ interface Flip {
   dayText?: string
 }
 
-const saveText = async (flip: Flip, API_URL: string) => {
-  await axios.post(API_URL + '/saveFlip', flip)
-}
 
 
-export default function TextArea({ flipState, API_URL, changeText }: {flipState: FlipState, API_URL:string, changeText: (e: string, isDay: boolean) => void}) {
+
+export default function TextArea({ flipState, changeText }: {flipState: FlipState, changeText: (e: string, isDay: boolean) => void}) {
+
+  const saveText = async (flip: Flip) => {
+    await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveFlip', flip)
+  }
 
   const isDay = flipState.flipEvent.summary === ""
 
@@ -66,7 +68,7 @@ export default function TextArea({ flipState, API_URL, changeText }: {flipState:
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
       "
       ></textarea>
-      <Autosave data={flip} onSave={() => saveText(flip, API_URL)} />
+      <Autosave data={flip} onSave={() => saveText(flip)} />
     </>
   )
 }

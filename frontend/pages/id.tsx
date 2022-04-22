@@ -17,8 +17,8 @@ interface Day {
   dayText?: string
 }
 
-export default function Id({ data, env }: { data: Day[], env: {API_URL: string} }) {
-  console.log(env.API_URL)
+export default function Id({ data }: { data: Day[] }) {
+  console.log(process.env.NEXT_PUBLIC_API_URL)
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
@@ -151,12 +151,12 @@ export default function Id({ data, env }: { data: Day[], env: {API_URL: string} 
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
               {/* <textarea defaultValue={selectedEventState.flipEvent.text} ref={flipTextRef}></textarea> */}
-              <TextArea API_URL={env.API_URL} changeText={changeText} flipState={selectedEventState} />
+              <TextArea changeText={changeText} flipState={selectedEventState} />
             </div>
             {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
           </div> : <div className="mt-6">
             {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
-            <TextArea API_URL={env.API_URL} changeText={changeText} flipState={selectedEventState} />
+            <TextArea changeText={changeText} flipState={selectedEventState} />
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
@@ -253,8 +253,7 @@ function returnColor(summary: string) {
 
 export async function getStaticProps() {
   try {
-    const env = { API_URL: process.env.API_URL }
-    const apiUrl = process.env.API_URL + '/getIcal'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/getIcal'
     const res = await fetch(apiUrl, { method: "GET" })
     const response = await res.text()
     const data: Day[] = JSON.parse(response)
@@ -264,7 +263,7 @@ export async function getStaticProps() {
 
 
 
-    return { props: { data: data, env: env }, revalidate: 1 }
+    return { props: { data: data }, revalidate: 1 }
   } catch (err) {
     return { props: { data: null }, revalidate: 1 }
   }
