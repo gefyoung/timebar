@@ -19,16 +19,10 @@ interface Flip {
   dayText?: string
 }
 
-export default function TextArea({ flipState, changeText }: {flipState: FlipState, changeText: (e: string, isDay: boolean) => void}) {
+export default function DayText({ flipState, changeText }: {flipState: FlipState, changeText: (e: string, isDay: boolean) => void}) {
 
-  const [savedState, setSavedState] = useState(false)
+  const [savedState, setSavedState] = useState("")
 
-
-  const saveText = async (flip: Flip) => {
-    const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveFlip', flip)
-    console.log('res', res)
-    setSavedState(true)
-  }
   const isDay = flipState.flipEvent.summary === ""
   const text = isDay ? flipState.dayText : flipState.flipEvent.text
 
@@ -37,6 +31,20 @@ export default function TextArea({ flipState, changeText }: {flipState: FlipStat
     dayKey: flipState.dayKey,
     start: flipState.flipEvent.start,
     dayText: text
+  }
+
+
+  const saveText = async (flip: Flip) => {
+    
+    try {
+      console.log('apiURL', process.env.NEXT_PUBLIC_API_URL)
+      const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveDayText', flip)
+      console.log('res', res)
+      setSavedState("saved")
+    } catch {
+      setSavedState("failed")
+    }
+
   }
 
   // useAutosave({ data: flip, onSave: saveText })
@@ -65,8 +73,9 @@ export default function TextArea({ flipState, changeText }: {flipState: FlipStat
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
       "
       ></textarea>
-      < button onClick={() => saveText(flip)} ></button>
-      { savedState ? "✔️" : "❌" }
+      < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => saveText(flip)} >save</button>
+      { savedState === "saved" && "✔️" }
+      { savedState === "failed" && "❌" }
     </>
   )
 }

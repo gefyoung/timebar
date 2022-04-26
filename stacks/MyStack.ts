@@ -24,6 +24,7 @@ export default class MyStack extends sst.Stack {
           // timeout: 20,
           function: "src/getIcal.handler"
         },
+        "POST /saveDayText": "src/saveDayText.handler",
         "POST /saveFlip": "src/saveFlip.handler"
       },
     })

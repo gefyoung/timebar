@@ -1,7 +1,9 @@
 
 import { useState } from 'react'
 import TextArea from '../components/textArea'
+import DayText from '../components/dayText'
 import Image from 'next/image'
+import axios from 'axios'
 
 export interface FlipEvent {
   dayBegins?: number
@@ -156,7 +158,8 @@ export default function Id({ data }: { data: Day[] }) {
             {/* <button onClick={() => submitFlipText()} className="outline">submit</button> */}
           </div> : <div className="mt-6">
             {/* <textarea defaultValue={selectedEventState.dayText} ref={dayTextRef}></textarea> */}
-            <TextArea changeText={changeText} flipState={selectedEventState} />
+            <DayText changeText={changeText} flipState={selectedEventState} />
+            {/* <TextArea changeText={changeText} flipState={selectedEventState} /> */}
             {/* <button onClick={() => submitDayText()} className="outline">submit</button> */}
           </div>
         }
@@ -253,14 +256,12 @@ function returnColor(summary: string) {
 
 export async function getStaticProps() {
   try {
-    const res = await fetch('https://os45ecguvi.execute-api.us-east-1.amazonaws.com' + '/getIcal', { method: "GET" })
-    const response = await res.text()
-    const data: Day[] = JSON.parse(response)
+    const res = await axios.get('https://os45ecguvi.execute-api.us-east-1.amazonaws.com/getIcal')
+    console.log(res)
+    const data: Day[] = res.data
     data.forEach((dayObj: Day) => {
       dayObj.dayValue = returnAdvancedWidth(dayObj.dayValue)
     })
-
-
 
     return { props: { data: data }, revalidate: 1 }
   } catch (err) {
