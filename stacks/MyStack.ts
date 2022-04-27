@@ -7,15 +7,38 @@ export default class MyStack extends sst.Stack {
     const UserDays = new sst.Table(this, "UserDays", {
       fields: {
         user: sst.TableFieldType.STRING,
-        // month: sst.TableFieldType.STRING
       },
       primaryIndex: { partitionKey: "user", /*sortKey: "month"*/ }
+    })
+    const UserMonths = new sst.Table(this, 'UserMonths', {
+      fields: {
+        user: sst.TableFieldType.STRING,
+        month: sst.TableFieldType.STRING
+      },
+      primaryIndex: { partitionKey: "user", sortKey: "month" }
+    })
+
+    const auth = new sst.Auth(this, "Auth", {
+      cognito: {
+        userPool: {
+          signInAliases: { email: true },
+          passwordPolicy: {             
+            minLength: 7,
+            requireSymbols: false,
+            requireUppercase: false
+          }
+        },
+      },
+      // google: {
+      //   clientId: process.env.GOOGLE_AUTH_ID || ''
+      // }
     })
 
     const api = new sst.Api(this, "Api", {
       defaultFunctionProps: {
         environment: {
-          UserDays: UserDays.tableName
+          UserDays: UserDays.tableName,
+          UserMonths: UserMonths.tableName
         },
         timeout: 20
       },
@@ -24,27 +47,32 @@ export default class MyStack extends sst.Stack {
           // timeout: 20,
           function: "src/getIcal.handler"
         },
+        "GET /getUserMonth": "src/getUserMonth.handler",
         "POST /saveDayText": "src/saveDayText.handler",
         "POST /saveFlip": "src/saveFlip.handler"
       },
     })
-    api.attachPermissions([UserDays])
+    api.attachPermissions([UserDays, UserMonths])
 
     const site = new sst.NextjsSite(this, "Site", {
       path: "frontend",
       environment: {
-        REGION: scope.region,
-        TABLE_NAME: UserDays.tableName,
-        NEXT_PUBLIC_API_URL: api.url
+        NEXT_PUBLIC_REGION: scope.region,
+        NEXT_PUBLIC_API_URL: api.url,
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: auth.cognitoUserPool?.userPoolId ?? 'noPool',
+        NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.cognitoUserPoolClient?.userPoolClientId ?? 'noAppClient',
+        NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId,
+        NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
       },
     })
-
-    site.attachPermissions([UserDays])
+    // console.log(auth.cognitoIdentityPoolId)
+    site.attachPermissions([UserDays, UserMonths])
 
     // Show the endpoint in the output
     this.addOutputs({
       URL: site.url,
       "ApiEndpoint": api.url,
+      "Cognito": auth.cognitoIdentityPoolId
     })
   }
 }

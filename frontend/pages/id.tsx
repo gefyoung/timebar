@@ -20,7 +20,7 @@ interface Day {
 }
 
 export default function Id({ data }: { data: Day[] }) {
-  console.log(process.env.NEXT_PUBLIC_API_URL)
+
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
       summary: "",
@@ -257,7 +257,6 @@ function returnColor(summary: string) {
 export async function getStaticProps() {
   try {
     const res = await axios.get('https://os45ecguvi.execute-api.us-east-1.amazonaws.com/getIcal')
-    console.log(res)
     const data: Day[] = res.data
     data.forEach((dayObj: Day) => {
       dayObj.dayValue = returnAdvancedWidth(dayObj.dayValue)
