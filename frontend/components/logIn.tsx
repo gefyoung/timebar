@@ -1,7 +1,6 @@
 import React, { useRef, useState,  } from "react";
 import { Auth } from '@aws-amplify/auth'
 import CustomSpinner from "./customSpinner"
-import '../configureAmplify'
 import { useRouter } from 'next/router'
 // import Google from "./google";
 

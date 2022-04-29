@@ -4,12 +4,12 @@ export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props)
 
-    const UserDays = new sst.Table(this, "UserDays", {
-      fields: {
-        user: sst.TableFieldType.STRING,
-      },
-      primaryIndex: { partitionKey: "user", /*sortKey: "month"*/ }
-    })
+    // const UserDays = new sst.Table(this, "UserDays", {
+    //   fields: {
+    //     user: sst.TableFieldType.STRING,
+    //   },
+    //   primaryIndex: { partitionKey: "user", /*sortKey: "month"*/ }
+    // })
     const UserMonths = new sst.Table(this, 'UserMonths', {
       fields: {
         user: sst.TableFieldType.STRING,
@@ -17,6 +17,7 @@ export default class MyStack extends sst.Stack {
       },
       primaryIndex: { partitionKey: "user", sortKey: "month" }
     })
+
 
     const auth = new sst.Auth(this, "Auth", {
       cognito: {
@@ -27,8 +28,8 @@ export default class MyStack extends sst.Stack {
             requireSymbols: false,
             requireUppercase: false
           }
-        },
-      },
+        }
+      }
       // google: {
       //   clientId: process.env.GOOGLE_AUTH_ID || ''
       // }
@@ -37,22 +38,25 @@ export default class MyStack extends sst.Stack {
     const api = new sst.Api(this, "Api", {
       defaultFunctionProps: {
         environment: {
-          UserDays: UserDays.tableName,
+          // UserDays: UserDays.tableName,
           UserMonths: UserMonths.tableName
         },
         timeout: 20
       },
       routes: {
-        "GET /getIcal": {
-          // timeout: 20,
-          function: "src/getIcal.handler"
-        },
+        // "GET /getIcal": {
+        //   // timeout: 20,
+        //   function: "src/getIcal.handler"
+        // },
         "GET /getUserMonth": "src/getUserMonth.handler",
         "POST /saveDayText": "src/saveDayText.handler",
         "POST /saveFlip": "src/saveFlip.handler"
       },
     })
-    api.attachPermissions([UserDays, UserMonths])
+
+    api.attachPermissions([UserMonths])
+
+    auth.attachPermissionsForAuthUsers([api])
 
     const site = new sst.NextjsSite(this, "Site", {
       path: "frontend",
@@ -65,14 +69,14 @@ export default class MyStack extends sst.Stack {
         NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
       },
     })
-    // console.log(auth.cognitoIdentityPoolId)
-    site.attachPermissions([UserDays, UserMonths])
 
-    // Show the endpoint in the output
     this.addOutputs({
       URL: site.url,
-      "ApiEndpoint": api.url,
-      "Cognito": auth.cognitoIdentityPoolId
+      ApiEndpoint: api.url,
+      UserPoolId: auth.cognitoUserPool?.userPoolId??'',
+      IdentityPoolId: auth.cognitoCfnIdentityPool.ref,
+      UserPoolClientId: auth.cognitoUserPoolClient?.userPoolClientId??""
     })
   }
 }
+

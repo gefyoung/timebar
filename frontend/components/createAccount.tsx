@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Auth } from '@aws-amplify/auth'
 import { useRouter } from 'next/router'
 import CustomSpinner from './customSpinner'
-import '../configureAmplify'
 // import Google from './google'
 
 interface CreateAccountProps {
@@ -25,7 +24,7 @@ const CreateAccount = (props: CreateAccountProps) => {
     submitting: false
   })
 
-  const userAddHandler = async (e: any) => {
+  const userAddHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     try {
@@ -50,7 +49,7 @@ const CreateAccount = (props: CreateAccountProps) => {
     }
   }
 
-  const userVerifyHandler = async (e: any) => {
+  const userVerifyHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setInputState({...inputState, submitting: false})
     try {

@@ -78,44 +78,44 @@ export default function Days({ data }: { data : any}) {
     // setSelectedEventState({...selectedEventState, dayText: text})
   }
 
-  const changeText = (e: string, isDay: boolean) => {
+  // const changeText = (e: string, isDay: boolean) => {
     
-    const editedArray = dataState
-    dataState.forEach((dataDay, i) => {
-      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
-        if (!isDay) {
-          const flipArray: FlipEvent[] = dataDay.dayValue
+  //   const editedArray = dataState
+  //   dataState.forEach((dataDay, i) => {
+  //     if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+  //       if (!isDay) {
+  //         const flipArray: FlipEvent[] = dataDay.dayValue
 
-          dataDay.dayValue.forEach((flip, x) => {
-            if (selectedEventState.flipEvent.start === flip.start) {
-              const newFlip = {
-                ...flip,
-                text: e
-              }
-              flipArray.splice(x, 1, newFlip)
-            }
-          })
+  //         dataDay.dayValue.forEach((flip, x) => {
+  //           if (selectedEventState.flipEvent.start === flip.start) {
+  //             const newFlip = {
+  //               ...flip,
+  //               text: e
+  //             }
+  //             flipArray.splice(x, 1, newFlip)
+  //           }
+  //         })
 
-          const newDay = {
-            ...dataDay,
-            dayValue: flipArray
-          }
-          editedArray.splice(i, 1, newDay)
+  //         const newDay = {
+  //           ...dataDay,
+  //           dayValue: flipArray
+  //         }
+  //         editedArray.splice(i, 1, newDay)
 
         
-        } else {
-          const newDay = {
-            ...dataDay,
-            dayText: e
-          }
-          editedArray.splice(i, 1, newDay)
+  //       } else {
+  //         const newDay = {
+  //           ...dataDay,
+  //           dayText: e
+  //         }
+  //         editedArray.splice(i, 1, newDay)
           
-        }
-      }
-    })
-    console.log('e', e)
-    setDataState(editedArray)
-  }
+  //       }
+  //     }
+  //   })
+  //   console.log('e', e)
+  //   setDataState(editedArray)
+  // }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     console.log('selectflipstate-', selectedEventState)
@@ -192,7 +192,7 @@ export default function Days({ data }: { data : any}) {
           ? <div>
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
-              <TextArea changeText={changeText} flipState={selectedEventState} />
+              {/* <TextArea changeText={changeText} flipState={selectedEventState} /> */}
             </div>
           </div> : <div className="mt-6">
             <DayText changeDayText={changeDayText} flipState={selectedEventState} monthState={monthState}/>

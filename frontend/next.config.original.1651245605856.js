@@ -1,5 +1,7 @@
+const withPWA = require('next-pwa')
+
 module.exports = function(...args) {
-  let original = require('./next.config.original.1651245605856.js');
+  let original = require('./next.config.original.1650593042994.js');
   const finalConfig = {};
   const target = { target: 'serverless' };
   if (typeof original === 'function' && original.constructor.name === 'AsyncFunction') {
@@ -18,5 +20,5 @@ module.exports = function(...args) {
     Object.assign(finalConfig, original);
   }
   Object.assign(finalConfig, target);
-  return finalConfig;
+  return withPWA({...finalConfig, pwa: { dest: 'public' } });
 }

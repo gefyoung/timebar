@@ -12,3 +12,13 @@ export interface Day {
   dayText?: string
 }
 
+declare namespace NodeJS {
+  export interface ProcessEnv {
+    NEXT_PUBLIC_API_URL: string
+    NEXT_PUBLIC_COGNITO_USER_POOL_ID: string;
+    NEXT_PUBLIC_REGION: string;
+    NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: string
+    NEXT_PUBLIC_COGNITO_IDENTITY: string
+    NEXT_PUBLIC_APIGATEWAY_NAME: string
+  }
+}

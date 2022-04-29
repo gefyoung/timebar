@@ -9,6 +9,7 @@ import { Auth } from 'aws-amplify'
 import Days from '../components/days'
 import CustomSpinner from '../components/customSpinner'
 import LogIn from '../components/logIn'
+import '../configureAmplify'
 
 interface IndexProps {
   changePageState: Function,
