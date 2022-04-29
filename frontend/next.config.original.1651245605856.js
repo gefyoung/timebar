@@ -20,5 +20,6 @@ module.exports = function(...args) {
     Object.assign(finalConfig, original);
   }
   Object.assign(finalConfig, target);
-  return withPWA({...finalConfig, pwa: { dest: 'public' } });
+  Object.assign(finalConfig, { pwa: { dest: 'public' } });
+  return withPWA(finalConfig);
 }
