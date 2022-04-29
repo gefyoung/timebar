@@ -4,10 +4,11 @@ export interface FlipEvent {
   duration: number
   summary: string
   className: string
-  text?: string
+  text: string
 }
 export interface Day {
   dayKey: string
   dayValue: FlipEvent[]
   dayText?: string
 }
+

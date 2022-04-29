@@ -1,11 +1,16 @@
 import React, { useRef, useState,  } from "react";
 import { Auth } from '@aws-amplify/auth'
 import CustomSpinner from "./customSpinner"
-import '../../../configureAmplify'
+import '../configureAmplify'
 import { useRouter } from 'next/router'
 // import Google from "./google";
 
-const LogIn = () => {
+interface CreateAccountProps {
+  changePageState: (e: string) => void
+}
+
+
+const LogIn = (props: CreateAccountProps) => {
 
   const [hiddenPassState, setHiddenPassState] = useState(true)
 
@@ -27,15 +32,15 @@ const LogIn = () => {
         )
         setSubmitting(false)
       }
-
+      props.changePageState("")
       // setPageState(false)
-    } catch (err) {
-      // if (err.code === "UserNotFoundException") {
-      //   setErrState("emailErr")
-      // }
-      // if (err.code === "NotAuthorizedException") {
-      //   setErrState("passErr")
-      // }
+    } catch (err: any) {
+      if (err.code === "UserNotFoundException") {
+        setErrState("emailErr")
+      }
+      if (err.code === "NotAuthorizedException") {
+        setErrState("passErr")
+      }
       setSubmitting(false)
     }
   };

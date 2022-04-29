@@ -6,7 +6,7 @@ import '../configureAmplify'
 // import Google from './google'
 
 interface CreateAccountProps {
-  changeState: () => void
+  changePageState: (e: string) => void
 }
 
 const CreateAccount = (props: CreateAccountProps) => {
@@ -122,7 +122,7 @@ const CreateAccount = (props: CreateAccountProps) => {
       <div className="mt-10 ">
         Already have an account? <span 
           className="text-blue-500 cursor-pointer " 
-          onClick={() => props.changeState()}
+          onClick={() => props.changePageState('login')}
         >LOG IN</span>
       </div>
     </div>

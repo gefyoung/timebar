@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import TextArea from '../components/textArea'
-import DayText from '../components/dayText'
+import TextArea from './textArea'
+import DayText from './dayText'
 import Image from 'next/image'
 import axios from 'axios'
 import API from '@aws-amplify/api'
@@ -9,7 +9,9 @@ import returnAdvancedWidth from '../lib/returnWidth'
 import { FlipEvent, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
 
-export default function Days() {
+export default function Days({ data }: { data : any}) {
+
+  console.log(data)
 
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
@@ -22,14 +24,14 @@ export default function Days() {
   })
 
   const [monthState, setMonthState] = useState({
-    month: 0,
-    year: 0
+    month: '',
+    year: 0,
+    monthYear: ''
   })
 
   const [dataState, setDataState] = useState([{
     dayKey: '',
     dayValue: [{
-      dayBegins: 0,
       start: 0,
       duration: 0,
       summary: '',
@@ -50,8 +52,9 @@ export default function Days() {
         const month = data.month.match(/(.*?)_/)
         const year = data.month.match(/_(.*)/)
         setMonthState({
-          month: Number(month[1]),
-          year: year[1]
+          month: month[1],
+          year: year[1],
+          monthYear: data.month
         })
       } catch (err) {
         console.log('err', err)
@@ -59,48 +62,60 @@ export default function Days() {
     })()
   }, [])
 
-  if (!dataState) {
-    return (
-      <div className="p-5 m-20 outline">Data error</div>
-    )
+
+  const changeDayText = (text: string) => {
+    const editedArray = dataState
+    dataState.forEach((dataDay, i) => {
+      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+          const newDay = {
+            ...dataDay,
+            dayText: text
+          }
+          editedArray.splice(i, 1, newDay)
+      }
+    })
+    setDataState(editedArray)
+    // setSelectedEventState({...selectedEventState, dayText: text})
   }
 
-  // const changeText = (e: string, isDay: boolean) => {
-  //   const editedArray = dataState
-  //   dataState.forEach((dataDay, i) => {
-  //     if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
-  //       if (!isDay) {
-  //         const flipArray: FlipEvent[] = dataDay.dayValue
+  const changeText = (e: string, isDay: boolean) => {
+    
+    const editedArray = dataState
+    dataState.forEach((dataDay, i) => {
+      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+        if (!isDay) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
 
-  //         dataDay.dayValue.forEach((flip, x) => {
-  //           if (selectedEventState.flipEvent.start === flip.start) {
-  //             const newFlip = {
-  //               ...flip,
-  //               text: e
-  //             }
-  //             flipArray.splice(x, 1, newFlip)
-  //           }
-  //         })
+          dataDay.dayValue.forEach((flip, x) => {
+            if (selectedEventState.flipEvent.start === flip.start) {
+              const newFlip = {
+                ...flip,
+                text: e
+              }
+              flipArray.splice(x, 1, newFlip)
+            }
+          })
 
-  //         const newDay = {
-  //           ...dataDay,
-  //           dayValue: flipArray
-  //         }
-  //         editedArray.splice(i, 1, newDay)
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
+          }
+          editedArray.splice(i, 1, newDay)
 
         
-  //       } else {
-  //         const newDay = {
-  //           ...dataDay,
-  //           dayText: e
-  //         }
-  //         editedArray.splice(i, 1, newDay)
+        } else {
+          const newDay = {
+            ...dataDay,
+            dayText: e
+          }
+          editedArray.splice(i, 1, newDay)
           
-  //       }
-  //     }
-  //   })
-  //   setDataState(editedArray)
-  // }
+        }
+      }
+    })
+    console.log('e', e)
+    setDataState(editedArray)
+  }
 
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     console.log('selectflipstate-', selectedEventState)
@@ -145,7 +160,6 @@ export default function Days() {
   const TimeBar = ({ day }: { day: Day }) => {
     const dayInteger = new Date(monthState.month + " " + day.dayKey + " " + monthState.year)
 
-    console.log("dayToInt", dayInteger)
     return (
       <div className="max-w-4xl mb-10" key={day.dayKey}>
 
@@ -178,10 +192,10 @@ export default function Days() {
           ? <div>
             <div>{selectedEventState.flipEvent.summary}</div>
             <div>
-              {/* <TextArea changeText={changeText} flipState={selectedEventState} /> */}
+              <TextArea changeText={changeText} flipState={selectedEventState} />
             </div>
           </div> : <div className="mt-6">
-            {/* <DayText changeText={changeText} flipState={selectedEventState} /> */}
+            <DayText changeDayText={changeDayText} flipState={selectedEventState} monthState={monthState}/>
           </div>
         }
       </div>
@@ -193,7 +207,7 @@ export default function Days() {
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
-      <div className="mb-10 text-xl">{monthToString(monthState.month)}  {monthState.year}</div>
+      <div className="mb-10 text-xl">{monthToString(Number(monthState.month))}  {monthState.year}</div>
         {
           dataState.map((day) =>
             <TimeBar key={day.dayKey} day={day} />

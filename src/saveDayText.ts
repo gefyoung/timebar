@@ -7,12 +7,14 @@ interface EditFlipEvent {
   start: number
   summary?: string
   text?: string
-  dayText?: string
+  dayText?: string,
+  monthYear?: string
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   try {
     const flipEvent: EditFlipEvent = JSON.parse(event.body ?? '')
+    console.log("FE", flipEvent)
 
       const params = {
         ExpressionAttributeNames: { 
@@ -21,14 +23,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
           "#FI": "" + flipEvent.start
          },
         ExpressionAttributeValues: { ":ft": { text: flipEvent.dayText } },
-        Key: { user: 'gty' },
+        Key: { user: 'gty', month: flipEvent.monthYear },
         ReturnValues: "ALL_NEW",
-        TableName: process.env.UserDays?? 'noTable',
+        TableName: process.env.UserMonths?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI = :ft"
       }
 
       const updated = await dynamoDb.update(params).promise()
-      console.log(updated, 'u[dated')
       return {
         statusCode: 200,
         body: JSON.stringify({ flipEvent: flipEvent })

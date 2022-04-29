@@ -1,5 +1,4 @@
 export function monthToString (month: number) {
-  console.log('month wtf', month)
   switch (month) {
     case 1: return 'January'
     case 2: return 'February'
