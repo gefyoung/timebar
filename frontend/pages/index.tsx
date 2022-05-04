@@ -81,7 +81,7 @@ const Home: NextPage = () => {
       { state.page === 'days' && <Days data={state.data} />}
       { state.page === 'login' && <LogIn changePageState={changePageState}/>}
 
-      <footer className={styles.footer}>
+      {/* <footer className={styles.footer}>
         <a
           href="https://vercel.com"
           target="_blank"
@@ -92,7 +92,7 @@ const Home: NextPage = () => {
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
-      </footer>
+      </footer> */}
     </div>
   )
 }

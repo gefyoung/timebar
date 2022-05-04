@@ -4,14 +4,12 @@ import DayText from './dayText'
 import Image from 'next/image'
 import axios from 'axios'
 import API from '@aws-amplify/api'
-import '../configureAmplify'
+
 import returnAdvancedWidth from '../lib/returnWidth'
 import { FlipEvent, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
 
 export default function Days({ data }: { data : any}) {
-
-  console.log(data)
 
   const [selectedEventState, setSelectedEventState] = useState({
     flipEvent: {
@@ -20,13 +18,15 @@ export default function Days({ data }: { data : any}) {
       start: 0
     },
     dayKey: 0,
-    dayText: ""
+    dayText: "",
+    addEvent: false
   })
 
   const [monthState, setMonthState] = useState({
     month: '',
     year: 0,
-    monthYear: ''
+    monthYear: '',
+    events: null
   })
 
   const [dataState, setDataState] = useState([{
@@ -54,7 +54,8 @@ export default function Days({ data }: { data : any}) {
         setMonthState({
           month: month[1],
           year: year[1],
-          monthYear: data.month
+          monthYear: data.month,
+          events: null
         })
       } catch (err) {
         console.log('err', err)
@@ -117,29 +118,36 @@ export default function Days({ data }: { data : any}) {
   //   setDataState(editedArray)
   // }
 
+  const addEvent = () => {
+    setSelectedEventState({...selectedEventState, addEvent: true})
+  }
+
   const selectFlip = (flipEvent: FlipEvent, dayKey: number) => {
     console.log('selectflipstate-', selectedEventState)
     setSelectedEventState({
+      ...selectedEventState,
       flipEvent: {
         summary: flipEvent.summary,
         text: flipEvent.text ?? "",
         start: flipEvent.start
       },
       dayKey: Number(dayKey),
-      dayText: selectedEventState.dayText
+      
     })
   }
 
   const selectDay = (day: Day) => {
     console.log('dayclickstate-', selectedEventState)
     setSelectedEventState({
+      ...selectedEventState,
       flipEvent: {
         summary: "",
         text: selectedEventState.flipEvent.text ?? "",
         start: 0
       },
       dayKey: Number(day.dayKey),
-      dayText: day.dayText ?? ""
+      dayText: day.dayText ?? "",
+      addEvent: true
     })
   }
 
@@ -165,9 +173,20 @@ export default function Days({ data }: { data : any}) {
 
         <div className="flex flex-row" onClick={() => selectDay(day)} >
           { dayInteger.toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey }
+          
           {day.dayText && <div className="h-4 mt-2 ml-1">
             <Image width={16} height={16} src="/files.svg" alt="notes icon" />
             </div>}
+            {selectedEventState.dayKey === parseInt(day.dayKey) && < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => setSelectedEventState({...selectedEventState, addEvent: true})} >add event</button>}
+        </div>
+        <div>
+          {selectedEventState.addEvent && selectedEventState.dayKey === parseInt(day.dayKey) && <div>
+            < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >add event</button>
+          < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >add event</button>
+          < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >add event</button>
+          < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >add event</button>
+          < button className="px-1 m-1 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >add event</button>
+          </div>}
         </div>
 
         <div className="grid grid-cols-96">
@@ -207,7 +226,8 @@ export default function Days({ data }: { data : any}) {
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
-      <div className="mb-10 text-xl">{monthToString(Number(monthState.month))}  {monthState.year}</div>
+      <div className="mb-2 text-xl">{monthToString(Number(monthState.month))}  {monthState.year}</div>
+      < button className="px-1 m-1 mb-10 mr-2 outline-black outline outline-1" onClick={() => addEvent()} >events</button>
         {
           dataState.map((day) =>
             <TimeBar key={day.dayKey} day={day} />
