@@ -13,6 +13,8 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
   const monthsKey = month + "_" + year
   const day = "" + date.getDate()
 
+  // const prevMonthYear = // i need to import the previous Event Names
+
   try {
     const getDays = {
       Key: { user: 'gty', month: monthsKey },
@@ -23,11 +25,13 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
     const dynamoData = await dynamoDb.get(getDays).promise()
 
+
+
     /* if user does not exist */
     if (Object.keys(dynamoData).length === 0) {
 
       const newUser = {
-        Item: { user: 'gty', month: monthsKey, days: { [day]: {} } },
+        Item: { user: 'gty', month: monthsKey, days: { [day]: {} }, events: [] },
         TableName: process.env.UserMonths ?? 'noTable'
       }
       await dynamoDb.put(newUser).promise()
@@ -41,17 +45,14 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
         }]
       }
 
-      /* if user exists */
+    
+    /* if user exists */
     } else {
 
       let map: Map<string, Record<string, FlipEvent>> = new Map(Object.entries(dynamoData.Item?.days))
 
       /* if user doesn't have today */
       if (!map.has(day)) {
-        const newDay = {
-          Item: { user: 'gty', month: monthsKey, days: { [day]: {} } },
-          TableName: process.env.UserMonths ?? 'noTable'
-        }
         const updateMap = {
           ExpressionAttributeNames: { "#DA": "days", "#DI": day },
           ExpressionAttributeValues: { ":fa": {} },
@@ -64,10 +65,27 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
         map = new Map(Object.entries(updatedRes.Attributes?.days))
       }
 
+      /* if user doesn't have any eventNames saved */
+      const eventArray = dynamoData.Item?.events
+      if (!eventArray) {
+        const updateArray = {
+          ExpressionAttributeNames: { "#EV": "events" },
+          ExpressionAttributeValues: { ":ev": [] },
+          Key: { user: 'gty', month: monthsKey },
+          ReturnValues: "ALL_NEW",
+          TableName: process.env.UserMonths ?? 'noTable',
+          UpdateExpression: "SET #EV = :ev"
+        }
+        const updatedArray = await dynamoDb.update(updateArray).promise()
+        console.log('updatedArray', updatedArray)
+      }
+     
+
       returnData = {
         user: 'gty',
         month: monthsKey,
-        days: sort(map)
+        days: sort(map),
+        events: eventArray
       }
     }
 

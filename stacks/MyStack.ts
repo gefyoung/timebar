@@ -50,7 +50,8 @@ export default class MyStack extends sst.Stack {
         // },
         "GET /getUserMonth": "src/getUserMonth.handler",
         "POST /saveDayText": "src/saveDayText.handler",
-        "POST /saveFlip": "src/saveFlip.handler"
+        "POST /saveFlip": "src/saveFlip.handler",
+        "POST /submitEventName": "src/submitEventName.handler",
       },
     })
 
