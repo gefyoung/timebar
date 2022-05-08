@@ -49,9 +49,11 @@ export default class MyStack extends sst.Stack {
         //   function: "src/getIcal.handler"
         // },
         "GET /getUserMonth": "src/getUserMonth.handler",
-        "POST /saveDayText": "src/saveDayText.handler",
+        "POST /saveText": "src/saveText.handler",
         "POST /saveFlip": "src/saveFlip.handler",
         "POST /submitEventName": "src/submitEventName.handler",
+        "POST /submitEvent": "src/submitEvent.handler",
+        "POST /deleteEvent": "src/deleteEvent.handler",
       },
     })
 

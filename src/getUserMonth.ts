@@ -25,8 +25,6 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
 
     const dynamoData = await dynamoDb.get(getDays).promise()
 
-
-
     /* if user does not exist */
     if (Object.keys(dynamoData).length === 0) {
 

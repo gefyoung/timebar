@@ -5,35 +5,37 @@ const dynamoDb = new DynamoDB.DocumentClient()
 interface EditFlipEvent {
   dayKey: number
   start: number
-  summary?: string
   text?: string
-  dayText?: string,
   monthYear?: string
+  eventName?: string
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   try {
-    const flipEvent: EditFlipEvent = JSON.parse(event.body ?? '')
-    console.log("FE", flipEvent)
+    const textData: EditFlipEvent = JSON.parse(event.body ?? '')
+    console.log("FE", textData)
 
       const params = {
         ExpressionAttributeNames: { 
           "#DA": "days", 
-          "#DI": "" + flipEvent.dayKey, 
-          "#FI": "" + flipEvent.start
+          "#DI": "" + textData.dayKey, 
+          "#FI": "" + textData.start,
+          "#TX": "text"
          },
-        ExpressionAttributeValues: { ":ft": { text: flipEvent.dayText } },
-        Key: { user: 'gty', month: flipEvent.monthYear },
+        ExpressionAttributeValues: { ":ft": textData.text },
+        Key: { user: 'gty', month: textData.monthYear },
         ReturnValues: "ALL_NEW",
         TableName: process.env.UserMonths?? 'noTable',
-        UpdateExpression: "SET #DA.#DI.#FI = :ft"
+        UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
       }
 
       const updated = await dynamoDb.update(params).promise()
       return {
         statusCode: 200,
-        body: JSON.stringify({ flipEvent: flipEvent })
+        body: JSON.stringify({ flipEvent: textData })
       }
+
+      
     
   } catch (err) {
     console.log(err)

@@ -8,30 +8,31 @@ interface EventNameEvent {
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
-  
+
   try {
-    console.log(event.body)
+
     const { eventName, monthYear }: EventNameEvent = JSON.parse(event.body ?? '')
-    console.log(eventName, monthYear)
-      const params = {
-        ExpressionAttributeNames: { "#EV": "events" },
-        ExpressionAttributeValues: { ":arr": [ eventName ] },
-        Key: { user: 'gty', month: monthYear },
-        ReturnValues: "ALL_NEW",
-        TableName: process.env.UserMonths?? 'noTable',
-        UpdateExpression: "SET #EV = list_append(#EV, :arr)"
-      }
 
-      const updated = await dynamoDb.update(params).promise()
-      console.log('updated', updated)
+    const params = {
+      ExpressionAttributeNames: { "#EV": "events" },
+      ExpressionAttributeValues: { ":arr": [eventName] },
+      Key: { user: 'gty', month: monthYear },
+      ReturnValues: "ALL_NEW",
+      TableName: process.env.UserMonths ?? 'noTable',
+      UpdateExpression: "SET #EV = list_append(#EV, :arr)"
+    }
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ eventName: eventName })
-      }
+    await dynamoDb.update(params).promise()
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ eventName: eventName })
+    }
+
+
     
   } catch (err) {
-    
+
     console.log(err)
     return {
       statusCode: 500

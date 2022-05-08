@@ -19,35 +19,32 @@ interface Flip {
   dayText?: string
 }
 
-export default function DayText({ flipState, changeDayText, monthState }: {
+export default function TextArea({ flipState, changeText, monthState, eventName }: {
   flipState: FlipState
-  changeDayText: (e: string) => void
+  changeText: (e: string) => void
   monthState: { month: string, year: number, monthYear: string }
+  eventName: string
 }) {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   const [savedState, setSavedState] = useState("")
 
-  const saveText = async (text: string | undefined) => {
-    /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
-    and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
-    if (text) {
-      const flip = {
-        dayKey: flipState.dayKey,
-        start: flipState.flipEvent.start,
-        text: textAreaRef.current?.value,
-        monthYear: monthState.monthYear
-      }
-      console.log('savetext', text)
-      try {
-        const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveText', flip)
-        console.log('res', res)
-
-        setSavedState("saved")
-      } catch {
-        setSavedState("failed")
-      }
+  const saveText = async () => {
+    const flip = {
+      dayKey: flipState.dayKey,
+      start: flipState.flipEvent.start,
+      text: textAreaRef.current?.value,
+      monthYear: monthState.monthYear,
+      eventName: eventName
+    }
+    console.log('savetext', textAreaRef.current?.value)
+    try {
+      const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveText', flip)
+      console.log('res', res)
+      setSavedState("saved")
+    } catch {
+      setSavedState("failed")
     }
 
   }
@@ -55,9 +52,9 @@ export default function DayText({ flipState, changeDayText, monthState }: {
   return (
     <>
       <textarea
-        defaultValue={flipState.dayText}
+        defaultValue={flipState.flipEvent.text}
         ref={textAreaRef}
-        onChange={(e) => changeDayText(e.target.value)}
+        // onChange={(e) => changeText(e.target.value)}
         className="
         form-control
         block
@@ -77,9 +74,9 @@ export default function DayText({ flipState, changeDayText, monthState }: {
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
       "
       ></textarea>
-      < button 
+      <button 
         className="px-1 m-1 mr-2 outline-black outline outline-1" 
-        onClick={() => saveText(textAreaRef.current?.value)} 
+        onClick={() => saveText()}
       >save</button>
       { savedState === "saved" && "✔️" }
       { savedState === "failed" && "❌" }

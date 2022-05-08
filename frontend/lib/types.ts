@@ -2,9 +2,10 @@ export interface FlipEvent {
   dayBegins?: number
   start: number
   duration: number
-  summary: string
+  eventName: string
   className: string
-  text: string
+  text: string,
+  eventKey: number
 }
 export interface Day {
   dayKey: string
