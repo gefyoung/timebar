@@ -25,6 +25,11 @@ function returnWidth(flip: FlipEvent) {
   return numObj
 }
 
+export function returnOneClassName(event: any) {
+
+  return "col-span-" + (event.duration + 1) + " h-8 " + eventKeyToColor(event.eventKey)
+}
+
 export default function returnClassName(flipArray: FlipEvent[]) {
   let totalDuration = 0
   let width = 0

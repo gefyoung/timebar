@@ -54,7 +54,7 @@ export default function TextArea({ flipState, changeText, monthState, eventName 
       <textarea
         defaultValue={flipState.flipEvent.text}
         ref={textAreaRef}
-        // onChange={(e) => changeText(e.target.value)}
+        onChange={() => setSavedState("")}
         className="
         form-control
         block

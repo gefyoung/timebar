@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
+import { DragEvent, useEffect, useState } from 'react'
 import EventText from './eventText'
 import DayText from './dayText'
 import Image from 'next/image'
-import axios from 'axios'
 import API from '@aws-amplify/api'
 
-import returnClassName from '../lib/returnClassName'
+import returnClassName, { returnOneClassName } from '../lib/returnClassName'
 import { FlipEvent, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
 import EventBar from './days/eventBar'
@@ -24,7 +23,8 @@ export default function Days({ data }: { data: any }) {
       eventName: "",
       text: "",
       start: 0,
-      arrayIndex: 0
+      arrayIndex: 0,
+      duration: 0
     },
     dayKey: 0,
     dayText: "",
@@ -123,7 +123,7 @@ export default function Days({ data }: { data: any }) {
     console.log('selectflipstate-', selectedEventState)
     setSelectedEventState({
       ...selectedEventState,
-      flipEvent: {
+      flipEvent: { ...flipEvent,
         eventName: flipEvent.eventName,
         text: flipEvent.text ?? "",
         start: flipEvent.start,
@@ -205,7 +205,7 @@ export default function Days({ data }: { data: any }) {
     console.log('dayclickstate-', selectedEventState)
     setSelectedEventState({
       ...selectedEventState,
-      flipEvent: {
+      flipEvent: { ...selectedEventState.flipEvent,
         eventName: "",
         text: selectedEventState.flipEvent.text ?? "",
         start: 0,
@@ -216,21 +216,63 @@ export default function Days({ data }: { data: any }) {
     })
   }
 
+  const drag = (e: DragEvent) => {
+    console.log(e)
+    console.log('how many fires')
+    const editedArray = [...dataState]
+    editedArray.forEach((dataDay, i) => {
+      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+        const flipArray: FlipEvent[] = dataDay.dayValue
+
+        dataDay.dayValue.forEach((event, x) => {
+          if (selectedEventState.flipEvent.start === event.start) {
+            const newEvent = {
+              ...event,
+              duration: event.duration + 1,
+              className: returnOneClassName(event)
+            }
+            flipArray.splice(x, 1, newEvent)
+          }
+        })
+
+        const newDay = {
+          ...dataDay,
+          dayValue: flipArray
+        }
+        editedArray.splice(i, 1, newDay)
+
+      }
+    })
+    setDataState(editedArray)
+  }
+
   const EventComponent = ({ flipEvent, dayKey, i }: { flipEvent: FlipEvent, dayKey: string, i: number }) => (
     <>
       {selectedEventState.flipEvent.start === flipEvent.start 
-      && selectedEventState.dayKey === parseInt(dayKey) ?
-        <div
+      && selectedEventState.dayKey === parseInt(dayKey) 
+      
+      ?
+        <><div
           key={flipEvent.start}
           className={flipEvent.className + " border-black border-2"}
           onClick={() => selectEvent(flipEvent, Number(dayKey), i)}
+          // draggable={true}
         >
+          <div className="grid grid-cols-3" >
           {
             flipEvent.text &&
-            <div className="h-4 mt-4"><Image width={16} height={16} src="/files.svg" alt="notes icon" />
+            <div className="mt-2 "><Image width={16} height={16} src="/files.svg" alt="notes icon" />
             </div>
           }
+          <div></div>
+          <div onDrag={(e) => drag(e)} className="mt-1 cursor-ew-resize"> 
+            <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
+          </div>
+          </div>
         </div>
+        
+        </>
+
 
         : <div
           key={flipEvent.start}
@@ -239,10 +281,11 @@ export default function Days({ data }: { data: any }) {
         >
           {
             flipEvent.text &&
-            <div className="h-4 mt-4"><Image width={16} height={16} src="/files.svg" alt="notes icon" />
+            <div className="flex mt-3 ml-0.5"><Image width={16} height={16} src="/files.svg" alt="notes icon" />
             </div>
           }
         </div>
+        
       }
     </>
   )
@@ -296,7 +339,7 @@ export default function Days({ data }: { data: any }) {
                 {day.dayValue.map((flipEvent: FlipEvent, i: number) =>
                   <EventComponent i={i} key={flipEvent.start} dayKey={day.dayKey} flipEvent={flipEvent} />
                 )}
-                {selectedEventState.dayKey === parseInt(day.dayKey)
+                {selectedEventState.flipEvent.start !== 0 && selectedEventState.dayKey === parseInt(day.dayKey)
                   && <button
                    className="ml-2"
                    onClick={eventDeleted}

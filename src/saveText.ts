@@ -15,17 +15,41 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     const textData: EditFlipEvent = JSON.parse(event.body ?? '')
     console.log("FE", textData)
 
+    if (textData.start === 0) {
+      /* updating dayText overwrites 0 event properties cause text didn't prev exist on it */
       const params = {
-        ExpressionAttributeNames: { 
-          "#DA": "days", 
-          "#DI": "" + textData.dayKey, 
+        ExpressionAttributeNames: {
+          "#DA": "days",
+          "#DI": "" + textData.dayKey,
+          "#FI": "" + textData.start
+        },
+        ExpressionAttributeValues: { ":ft": { text: "" + textData.text } },
+        Key: { user: 'gty', month: textData.monthYear },
+        ReturnValues: "ALL_NEW",
+        TableName: process.env.UserMonths ?? 'noTable',
+        UpdateExpression: "SET #DA.#DI.#FI = :ft"
+      }
+      const updated = await dynamoDb.update(params).promise()
+      console.log(updated)
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ flipEvent: textData })
+      }
+
+
+    } else {
+      /* updating eventText */
+      const params = {
+        ExpressionAttributeNames: {
+          "#DA": "days",
+          "#DI": "" + textData.dayKey,
           "#FI": "" + textData.start,
           "#TX": "text"
-         },
+        },
         ExpressionAttributeValues: { ":ft": textData.text },
         Key: { user: 'gty', month: textData.monthYear },
         ReturnValues: "ALL_NEW",
-        TableName: process.env.UserMonths?? 'noTable',
+        TableName: process.env.UserMonths ?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
       }
 
@@ -34,9 +58,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         statusCode: 200,
         body: JSON.stringify({ flipEvent: textData })
       }
+    }
 
-      
-    
+
+
+
+
   } catch (err) {
     console.log(err)
     return {

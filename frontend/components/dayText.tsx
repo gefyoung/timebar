@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { API } from '@aws-amplify/api'
 import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
@@ -33,15 +33,15 @@ export default function DayText({ flipState, changeDayText, monthState }: {
     /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
     and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
     if (text) {
-      const flip = {
+      const params = { body: {
         dayKey: flipState.dayKey,
         start: flipState.flipEvent.start,
         text: textAreaRef.current?.value,
         monthYear: monthState.monthYear
-      }
+      }}
       console.log('savetext', text)
       try {
-        const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveText', flip)
+        const res = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveText', params)
         console.log('res', res)
 
         setSavedState("saved")
@@ -57,7 +57,10 @@ export default function DayText({ flipState, changeDayText, monthState }: {
       <textarea
         defaultValue={flipState.dayText}
         ref={textAreaRef}
-        onChange={(e) => changeDayText(e.target.value)}
+        onChange={(e) => {
+          changeDayText(e.target.value)
+          setSavedState("")
+        }}
         className="
         form-control
         block
