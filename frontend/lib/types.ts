@@ -5,7 +5,7 @@ export interface FlipEvent {
   eventName: string
   className: string
   text: string,
-  eventKey: number
+  eventNameKey: number
 }
 export interface Day {
   dayKey: string

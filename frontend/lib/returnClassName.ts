@@ -27,7 +27,7 @@ function returnWidth(flip: FlipEvent) {
 
 export function returnOneClassName(event: any) {
 
-  return "col-span-" + (event.duration + 1) + " h-8 " + eventKeyToColor(event.eventKey)
+  return "col-span-" + (event.duration + 1) + " h-8 " + eventKeyToColor(event.eventNameKey)
 }
 
 export default function returnClassName(flipArray: FlipEvent[]) {
@@ -57,7 +57,7 @@ export default function returnClassName(flipArray: FlipEvent[]) {
     //   totalDuration = totalDuration + 1
     // }
 
-    flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventKey)
+    flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventNameKey)
 
     return flipObj
   })

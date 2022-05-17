@@ -46,7 +46,7 @@ export default function Days({ data }: { data: any }) {
       eventName: '',
       className: '',
       text: '',
-      eventKey: 0
+      eventNameKey: 0
     }],
     dayText: ''
   }])

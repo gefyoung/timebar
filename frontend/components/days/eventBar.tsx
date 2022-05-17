@@ -8,20 +8,21 @@ interface DayValue {
   eventName: string
   className: string
   text: string
-}[]
+}
+type DayValueArr = DayValue[]
 
 const EventBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAdded }: {
   monthYear: string,
   events: string[],
   dayKey: number,
   eventNameAdded: (e: string) => void,
-  dayValue: DayValue,
+  dayValue: DayValueArr,
   eventAdded: (e: {
     eventName: string
     dayKey: number
     monthYear: string
     start: number
-    eventKey: number
+    eventNameKey: number
   }) => void,
 }) => {
 
@@ -47,35 +48,17 @@ const EventBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAd
     }
   }
 
-  const addEvent = async (event: string, dayValue: DayValue, i: number) => {
+  const addEvent = async (event: string, dayValue: DayValueArr, i: number) => {
     let params
-    /* other events exist */
-    if (dayValue.length > 0) {
 
-      const lastEvent = dayValue[dayValue.length -1]
-      const newStart = lastEvent.start + lastEvent.duration
       params = {
         body: {
           eventName: event,
           dayKey: dayKey,
           monthYear: monthYear,
-          start: newStart,
-          eventKey: i
+          eventNameKey: i
         }
       }
-
-    } else {
-      /* first event of the day */
-      params = {
-        body: {
-          eventName: event,
-          dayKey: dayKey,
-          monthYear: monthYear,
-          start: 1,
-          eventKey: i
-        }
-      }
-    }
     console.log('params', params)
     try {
       const submittedEvent = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEvent', params)
@@ -94,7 +77,7 @@ const EventBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAd
             <button
               key={i}
               className="px-1 m-1 mr-2 outline-black outline outline-1"
-              onClick={() => addEvent(event, i)}
+              onClick={() => addEvent(event, dayValue, i)}
             >{event}</button>
           </>)
       }{
