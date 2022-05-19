@@ -7,7 +7,8 @@ import API from '@aws-amplify/api'
 import returnClassName, { returnOneClassName } from '../lib/returnClassName'
 import { FlipEvent, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
-import EventBar from './days/eventBar'
+import EventNameBar from './days/eventNameBar'
+import EventsBar from './days/eventsBar'
 
 interface MonthType {
   month: string,
@@ -28,7 +29,6 @@ export default function Days({ data }: { data: any }) {
     },
     dayKey: 0,
     dayText: "",
-    // addEvent: false
   })
 
   const [monthState, setMonthState] = useState<MonthType>({
@@ -50,6 +50,11 @@ export default function Days({ data }: { data: any }) {
     }],
     dayText: ''
   }])
+
+  const [dragState, setDragState] = useState({
+    initialPosition: 1,
+    size: 1
+  })
 
 
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function Days({ data }: { data: any }) {
   }
 
 
-  const changeText = (e: string) => {
+  const changeEventText = (e: string) => {
     const editedArray = dataState
     dataState.forEach((dataDay, i) => {
       if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
@@ -169,13 +174,7 @@ export default function Days({ data }: { data: any }) {
       if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
 
         dataDay.dayValue.splice(selectedEventState.flipEvent.arrayIndex, 1)
-        // const newArray = dataDay.dayValue.concat([event])
 
-        // const newDay = {
-        //   ...dataDay,
-        //   dayValue: newArray
-        // }
-        // editedArray.splice(i, 1, newDay)
         const params = {
           body: {
             dayKey: selectedEventState.dayKey,
@@ -185,17 +184,7 @@ export default function Days({ data }: { data: any }) {
         }
         await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)
         setDataState(editedArray)
-        // trying to set selectedevent to previous event after delete
-        // setSelectedEventState(
-        //   {...selectedEventState,
-        //    flipEvent: {
-        //     eventName: editedArray[editedArray.length - 1].dayValue.eventName,
-        //     text: "",
-        //     start: 0,
-        //     arrayIndex: 0
-        //   }
-        //    })
-           
+      
         console.log('editedArray', editedArray)
       }
     })
@@ -216,79 +205,93 @@ export default function Days({ data }: { data: any }) {
     })
   }
 
-  const drag = (e: DragEvent) => {
-    console.log(e)
-    console.log('how many fires')
-    const editedArray = [...dataState]
-    editedArray.forEach((dataDay, i) => {
-      if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
-        const flipArray: FlipEvent[] = dataDay.dayValue
+  const dragStart = (e: DragEvent) => {
+    console.log('dragStart', e)
+    setDragState({...dragState, initialPosition: e.clientX })
+  }
+  const dragEnd = () => {
 
-        dataDay.dayValue.forEach((event, x) => {
-          if (selectedEventState.flipEvent.start === event.start) {
-            const newEvent = {
-              ...event,
-              duration: event.duration + 1,
-              className: returnOneClassName(event)
-            }
-            flipArray.splice(x, 1, newEvent)
-          }
-        })
-
-        const newDay = {
-          ...dataDay,
-          dayValue: flipArray
-        }
-        editedArray.splice(i, 1, newDay)
-
-      }
-    })
-    setDataState(editedArray)
   }
 
-  const EventComponent = ({ flipEvent, dayKey, i }: { flipEvent: FlipEvent, dayKey: string, i: number }) => (
-    <>
-      {selectedEventState.flipEvent.start === flipEvent.start 
-      && selectedEventState.dayKey === parseInt(dayKey) 
+  const drag = (e: DragEvent) => {
+    const editedArray = [...dataState]
+    const boxWidth = document.getElementById("selectedEventBox")?.offsetWidth?? 0
+    console.log('boxwidth', boxWidth, 'clientX', e.clientX, 'initial', dragState.initialPosition)
+    
+    // should not be drag initial position but latest position
+
+    if (e.clientX > dragState.initialPosition + boxWidth) {
+      /* if mouse moves right, add width */
+      editedArray.forEach((dataDay, i) => {
+        if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
+  
+          dataDay.dayValue.forEach((event, x) => {
+            if (selectedEventState.flipEvent.start === event.start) {
+              const newEvent = {
+                ...event,
+                duration: event.duration + 1,
+                className: returnOneClassName(event)
+              }
+              flipArray.splice(x, 1, newEvent)
+            }
+          })
+  
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
+          }
+          editedArray.splice(i, 1, newDay)
+  
+        }
+      })
       
-      ?
-        <><div
-          key={flipEvent.start}
-          className={flipEvent.className + " border-black border-2"}
-          onClick={() => selectEvent(flipEvent, Number(dayKey), i)}
-          // draggable={true}
-        >
-          <div className="grid grid-cols-3" >
-          {
-            flipEvent.text &&
-            <div className="mt-2 "><Image width={16} height={16} src="/files.svg" alt="notes icon" />
-            </div>
+      setDataState(editedArray)
+
+      /* thinking I can update state this way spreading everything to replace above code*/
+      // setDataState({
+      //   ...dataState, 
+      //   [selectedEventState.dayKey]: {
+      //     ...dataState[selectedEventState.dayKey],
+      //     dayValue: { 
+      //       ...dataState[selectedEventState.dayKey].dayValue, 
+      //     }
+      //   }
+      // })
+      
+    } else if (e.clientX < dragState.initialPosition + boxWidth) {
+      editedArray.forEach((dataDay, i) => {
+        if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
+  
+          dataDay.dayValue.forEach((event, x) => {
+            if (selectedEventState.flipEvent.start === event.start) {
+              const newEvent = {
+                ...event,
+                duration: event.duration - 1,
+                className: returnOneClassName(event)
+              }
+              flipArray.splice(x, 1, newEvent)
+            }
+          })
+  
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
           }
-          <div></div>
-          <div onDrag={(e) => drag(e)} className="mt-1 cursor-ew-resize"> 
-            <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
-          </div>
-          </div>
-        </div>
-        
-        </>
+          editedArray.splice(i, 1, newDay)
+  
+        }
+      })
+      setDataState(editedArray)
+    }
 
 
-        : <div
-          key={flipEvent.start}
-          className={flipEvent.className}
-          onClick={() => selectEvent(flipEvent, Number(dayKey), i)}
-        >
-          {
-            flipEvent.text &&
-            <div className="flex mt-3 ml-0.5"><Image width={16} height={16} src="/files.svg" alt="notes icon" />
-            </div>
-          }
-        </div>
-        
-      }
-    </>
-  )
+    
+
+  }
+
+
 
   const TextEditor = () => {
     return (
@@ -297,7 +300,7 @@ export default function Days({ data }: { data: any }) {
           ? <div>
             <div>{selectedEventState.flipEvent.eventName}</div>
             <div>
-              <EventText eventName={selectedEventState.flipEvent.eventName} changeText={changeText} flipState={selectedEventState} monthState={monthState} />
+              <EventText eventName={selectedEventState.flipEvent.eventName} changeEventText={changeEventText} flipState={selectedEventState} monthState={monthState} />
             </div>
           </div> : <div className="mt-6">
             <DayText changeDayText={changeDayText} flipState={selectedEventState} monthState={monthState} />
@@ -325,7 +328,7 @@ export default function Days({ data }: { data: any }) {
               </div>
               <div>
                 {selectedEventState.dayKey === parseInt(day.dayKey)
-                  && <EventBar
+                  && <EventNameBar
                     eventNameAdded={eventNameAdded}
                     eventAdded={eventAdded}
                     monthYear={monthState.monthYear}
@@ -335,16 +338,15 @@ export default function Days({ data }: { data: any }) {
                   />}
               </div>
 
-              <div className="grid grid-cols-96">
-                {day.dayValue.map((flipEvent: FlipEvent, i: number) =>
-                  <EventComponent i={i} key={flipEvent.start} dayKey={day.dayKey} flipEvent={flipEvent} />
-                )}
-                {selectedEventState.flipEvent.start !== 0 && selectedEventState.dayKey === parseInt(day.dayKey)
-                  && <button
-                   className="ml-2"
-                   onClick={eventDeleted}
-                  >delete</button>}
-              </div>
+                <EventsBar 
+                  eventDeleted={eventDeleted} 
+                  drag={drag} 
+                  day={day} 
+                  selectEvent={selectEvent} 
+                  selectedEvent={selectedEventState} 
+                  dragStart={dragStart}
+                />
+              
 
               <div>
                 {selectedEventState.dayKey === parseInt(day.dayKey)

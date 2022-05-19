@@ -19,9 +19,9 @@ interface Flip {
   dayText?: string
 }
 
-export default function TextArea({ flipState, changeText, monthState, eventName }: {
+export default function TextArea({ flipState, changeEventText, monthState, eventName }: {
   flipState: FlipState
-  changeText: (e: string) => void
+  changeEventText: (e: string) => void
   monthState: { month: string, year: number, monthYear: string }
   eventName: string
 }) {
@@ -54,7 +54,10 @@ export default function TextArea({ flipState, changeText, monthState, eventName 
       <textarea
         defaultValue={flipState.flipEvent.text}
         ref={textAreaRef}
-        onChange={() => setSavedState("")}
+        onChange={(e) => {
+          changeEventText(e.target.value)
+          setSavedState("")
+        }}
         className="
         form-control
         block

@@ -11,7 +11,7 @@ interface DayValue {
 }
 type DayValueArr = DayValue[]
 
-const EventBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAdded }: {
+const EventNameBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAdded }: {
   monthYear: string,
   events: string[],
   dayKey: number,
@@ -101,4 +101,4 @@ const EventBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAd
   )
 }
 
-export default EventBar
+export default EventNameBar
