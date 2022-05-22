@@ -37,8 +37,6 @@ export default function returnClassName(flipArray: FlipEvent[]) {
 
   return flipArray.map((flipObj) => {
     
-    console.log('flipObj', flipObj)
-    
     // width = returnWidth(flipObj).width
     width = flipObj.duration
 

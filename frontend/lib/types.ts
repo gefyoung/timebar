@@ -13,6 +13,13 @@ export interface Day {
   dayText?: string
 }
 
+export interface UserData {
+  user: string
+  month: string
+  days: Day[]
+  events: string[]
+}
+
 declare namespace NodeJS {
   export interface ProcessEnv {
     NEXT_PUBLIC_API_URL: string

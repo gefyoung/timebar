@@ -59,8 +59,15 @@ export default function Days({ data }: { data: any }) {
 
   useEffect(() => {
     (async () => {
+      const params = { body: {
+        timezoneOffset: new Date().getTimezoneOffset()
+      }}
       try {
-        const data = await API.get(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/getUserMonth', {})
+        const data = await API.post(
+          process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", 
+          '/getUserMonth',
+          params
+        )
         data.days.forEach((dayObj: Day) => {
           dayObj.dayValue = returnClassName(dayObj.dayValue)
         })
@@ -80,12 +87,14 @@ export default function Days({ data }: { data: any }) {
   }, [])
 
 
-  const changeDayText = (text: string) => {
+  const changeDayText = (text: string, dayKey: string) => {
     /* these change text functions are mutating state, if I have them set state, they do a state
     refresh every letter, which causes shit to deselct, or after save, still fucky*/
+
     const editedArray = dataState
     dataState.forEach((dataDay, i) => {
       if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+
         const newDay = {
           ...dataDay,
           dayText: text
@@ -93,7 +102,9 @@ export default function Days({ data }: { data: any }) {
         editedArray.splice(i, 1, newDay)
       }
     })
-    // setDataState(editedArray)
+
+    setDataState({...dataState})
+
   }
 
 
@@ -132,7 +143,8 @@ export default function Days({ data }: { data: any }) {
         eventName: flipEvent.eventName,
         text: flipEvent.text ?? "",
         start: flipEvent.start,
-        arrayIndex: i
+        arrayIndex: i,
+        duration: flipEvent.duration
       },
       dayKey: Number(dayKey),
 
@@ -205,22 +217,38 @@ export default function Days({ data }: { data: any }) {
     })
   }
 
-  const dragStart = (e: DragEvent) => {
+  const dragStart = (e: DragEvent, duration: number) => {
     console.log('dragStart', e)
     setDragState({...dragState, initialPosition: e.clientX })
+
   }
-  const dragEnd = () => {
+  const touchStart = (e: TouchEvent) => {
+    console.log('touchStart', e)
+    setDragState({...dragState, initialPosition: e.changedTouches[0].clientX })
+  }
+  const dragEnd = async (duration: number) => {
+    console.log('dragEnd')
+    
+    const params = {
+      body: {
+        dayKey: selectedEventState.dayKey,
+        monthYear: monthState.monthYear,
+        start: selectedEventState.flipEvent.start,
+        duration: duration,
+      }
+    }
+    await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
 
   }
 
   const drag = (e: DragEvent) => {
     const editedArray = [...dataState]
-    const boxWidth = document.getElementById("selectedEventBox")?.offsetWidth?? 0
-    console.log('boxwidth', boxWidth, 'clientX', e.clientX, 'initial', dragState.initialPosition)
-    
-    // should not be drag initial position but latest position
+    const oneGridWidth = (document.getElementById("grid96")?.offsetWidth?? 0) / 96
+    const currentWidth = selectedEventState.flipEvent.duration * oneGridWidth
+    const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    let duration = 0
 
-    if (e.clientX > dragState.initialPosition + boxWidth) {
+    if (e.clientX - 10 > currentWidth + boxLeftPosition) {
       /* if mouse moves right, add width */
       editedArray.forEach((dataDay, i) => {
         if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
@@ -228,6 +256,7 @@ export default function Days({ data }: { data: any }) {
   
           dataDay.dayValue.forEach((event, x) => {
             if (selectedEventState.flipEvent.start === event.start) {
+              duration = event.duration + 1
               const newEvent = {
                 ...event,
                 duration: event.duration + 1,
@@ -247,25 +276,23 @@ export default function Days({ data }: { data: any }) {
       })
       
       setDataState(editedArray)
-
-      /* thinking I can update state this way spreading everything to replace above code*/
-      // setDataState({
-      //   ...dataState, 
-      //   [selectedEventState.dayKey]: {
-      //     ...dataState[selectedEventState.dayKey],
-      //     dayValue: { 
-      //       ...dataState[selectedEventState.dayKey].dayValue, 
-      //     }
-      //   }
-      // })
+      setSelectedEventState({
+        ...selectedEventState, 
+        flipEvent: {
+          ...selectedEventState.flipEvent, 
+          duration: duration
+        }
+      })
       
-    } else if (e.clientX < dragState.initialPosition + boxWidth) {
+
+    } else if (e.clientX < currentWidth + boxLeftPosition) {
       editedArray.forEach((dataDay, i) => {
         if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
           const flipArray: FlipEvent[] = dataDay.dayValue
   
           dataDay.dayValue.forEach((event, x) => {
             if (selectedEventState.flipEvent.start === event.start) {
+              duration = event.duration - 1
               const newEvent = {
                 ...event,
                 duration: event.duration - 1,
@@ -284,12 +311,99 @@ export default function Days({ data }: { data: any }) {
         }
       })
       setDataState(editedArray)
+      setSelectedEventState({
+        ...selectedEventState, 
+        flipEvent: {
+          ...selectedEventState.flipEvent, 
+          duration: duration
+        }
+      })
     }
 
 
     
-
   }
+
+  const touchMove = (e: any) => {
+    const editedArray = [...dataState]
+    const oneGridWidth = (document.getElementById("grid96")?.offsetWidth?? 0) / 96
+    const currentWidth = selectedEventState.flipEvent.duration * oneGridWidth
+    const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    let duration = 0
+
+    if (e.changedTouches[0].clientX - 10 > currentWidth + boxLeftPosition) {
+      /* if mouse moves right, add width */
+      editedArray.forEach((dataDay, i) => {
+        if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
+  
+          dataDay.dayValue.forEach((event, x) => {
+            if (selectedEventState.flipEvent.start === event.start) {
+              duration = event.duration + 1
+              const newEvent = {
+                ...event,
+                duration: event.duration + 1,
+                className: returnOneClassName(event)
+              }
+              flipArray.splice(x, 1, newEvent)
+            }
+          })
+  
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
+          }
+          editedArray.splice(i, 1, newDay)
+  
+        }
+      })
+      
+      setDataState(editedArray)
+      setSelectedEventState({
+        ...selectedEventState, 
+        flipEvent: {
+          ...selectedEventState.flipEvent, 
+          duration: duration
+        }
+      })
+
+    } else if (e.changedTouches[0].clientX < currentWidth + boxLeftPosition) {
+      editedArray.forEach((dataDay, i) => {
+        if (selectedEventState.dayKey === Number(dataDay.dayKey)) {
+          const flipArray: FlipEvent[] = dataDay.dayValue
+  
+          dataDay.dayValue.forEach((event, x) => {
+            if (selectedEventState.flipEvent.start === event.start) {
+              duration = event.duration - 1
+              const newEvent = {
+                ...event,
+                duration: event.duration - 1,
+                className: returnOneClassName(event)
+              }
+              flipArray.splice(x, 1, newEvent)
+            }
+          })
+  
+          const newDay = {
+            ...dataDay,
+            dayValue: flipArray
+          }
+          editedArray.splice(i, 1, newDay)
+  
+        }
+      })
+      setDataState(editedArray)
+      setSelectedEventState({
+        ...selectedEventState, 
+        flipEvent: {
+          ...selectedEventState.flipEvent, 
+          duration: duration
+        }
+      })
+    }
+  }
+
+
 
 
 
@@ -345,6 +459,8 @@ export default function Days({ data }: { data: any }) {
                   selectEvent={selectEvent} 
                   selectedEvent={selectedEventState} 
                   dragStart={dragStart}
+                  dragEnd={dragEnd}
+                  touchMove={touchMove}
                 />
               
 

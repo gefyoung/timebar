@@ -54,7 +54,11 @@ const Home: NextPage = () => {
       try {
         const user = await Auth.currentCredentials()
         if (user.authenticated) { 
-          const data = await API.get(process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', {})
+          const params = { body: {
+            timezoneOffset: new Date().getTimezoneOffset()
+          }}
+          const data = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params)
+          
           setState({ page: 'days', auth: true, loading: false, data: data })
         } else {
           setState({...state, auth: false, loading: false })

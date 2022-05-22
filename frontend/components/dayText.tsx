@@ -21,7 +21,7 @@ interface Flip {
 
 export default function DayText({ flipState, changeDayText, monthState }: {
   flipState: FlipState
-  changeDayText: (e: string) => void
+  changeDayText: (dayText: string, dayKey: string ) => void
   monthState: { month: string, year: number, monthYear: string }
 }) {
 
@@ -58,7 +58,7 @@ export default function DayText({ flipState, changeDayText, monthState }: {
         defaultValue={flipState.dayText}
         ref={textAreaRef}
         onChange={(e) => {
-          changeDayText(e.target.value)
+          changeDayText(e.target.value, "" + flipState.dayKey)
           setSavedState("")
         }}
         className="
