@@ -10,10 +10,19 @@ import Days from '../components/days'
 import CustomSpinner from '../components/customSpinner'
 import LogIn from '../components/logIn'
 import '../configureAmplify'
+import { Day, Event } from '../lib/types'
+import returnClassName from '../lib/returnClassName'
 
 interface IndexProps {
   changePageState: Function,
   loading: boolean
+}
+
+export interface UserMonthData {
+  user?: string
+  month: string
+  days: Day[],
+  events: string[]
 }
 
 const Index = (props: IndexProps) => {
@@ -40,14 +49,22 @@ const Home: NextPage = () => {
     page: '',
     auth: false,
     loading: true,
-    data: null
+    data: {
+      month: "",
+      days: [{
+        dayKey: "",
+        // dayText: "",
+        dayValue: []
+      }],
+      events: [""]
+    }
   })
 
   const changePageState = (e: string) => {
     setState({...state, page: e})
   }
 
-
+  
 
   useEffect(() => {
     (async () => {
@@ -57,8 +74,10 @@ const Home: NextPage = () => {
           const params = { body: {
             timezoneOffset: new Date().getTimezoneOffset()
           }}
-          const data = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params)
-          
+          const data: UserMonthData = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params)
+          data.days.forEach((dayObj: Day) => {
+            dayObj.dayValue = returnClassName(dayObj.dayValue)
+          })
           setState({ page: 'days', auth: true, loading: false, data: data })
         } else {
           setState({...state, auth: false, loading: false })

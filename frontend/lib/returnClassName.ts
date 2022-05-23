@@ -1,7 +1,7 @@
 
-import { FlipEvent } from "./types"
+import { Event } from "./types"
 
-function returnWidth(flip: FlipEvent) {
+function returnWidth(flip: Event) {
   if (!flip.duration) { return { width: 0, down: 0, up: 0 } }
   // let width = 0
   const flipDuration = Number(flip.duration)
@@ -30,7 +30,7 @@ export function returnOneClassName(event: any) {
   return "col-span-" + (event.duration + 1) + " h-8 " + eventKeyToColor(event.eventNameKey)
 }
 
-export default function returnClassName(flipArray: FlipEvent[]) {
+export default function returnClassName(flipArray: Event[]) {
   let totalDuration = 0
   let width = 0
   flipArray.forEach(flip => totalDuration = totalDuration + returnWidth(flip).width)

@@ -1,15 +1,10 @@
 import { useRef, useState } from 'react'
 import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
+import { Event } from '../../lib/types'
 
-interface DayValue {
-  start: number
-  duration: number
-  eventName: string
-  className: string
-  text: string
-}
-type DayValueArr = DayValue[]
+
+type DayValueArr = Event[]
 
 const EventNameBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAdded }: {
   monthYear: string,

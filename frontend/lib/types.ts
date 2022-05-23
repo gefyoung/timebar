@@ -1,15 +1,15 @@
-export interface FlipEvent {
-  dayBegins?: number
+export interface Event {
   start: number
   duration: number
   eventName: string
   className: string
-  text: string,
-  eventNameKey: number
+  text?: string
+  eventNameKey?: number
+  dayKey: string
 }
 export interface Day {
   dayKey: string
-  dayValue: FlipEvent[]
+  dayValue: Event[]
   dayText?: string
 }
 

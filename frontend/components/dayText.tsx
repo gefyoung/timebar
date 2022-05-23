@@ -3,42 +3,42 @@ import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
 interface FlipState {
-  flipEvent: {
-    eventName: string,
-    text: string,
-    start: number
-  },
-  dayKey: number,
-  dayText: string
+
+  eventName: string
+  text: string
+  start: number
+  dayKey: string
+  duration: number
 }
 
-interface Flip {
-  dayKey: number
+interface SelectedEvent {
+  dayKey: string
   start: number
   text?: string
   dayText?: string
 }
 
-export default function DayText({ flipState, changeDayText, monthState }: {
-  flipState: FlipState
-  changeDayText: (dayText: string, dayKey: string ) => void
+export default function DayText({ selectedEvent, dispatch, monthState }: {
+  selectedEvent: SelectedEvent
+  dispatch: ({ dayText, type, dayKey }: { dayText: string, type: string, dayKey: string }) => void
   monthState: { month: string, year: number, monthYear: string }
 }) {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   const [savedState, setSavedState] = useState("")
-
   const saveText = async (text: string | undefined) => {
     /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
     and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
     if (text) {
-      const params = { body: {
-        dayKey: flipState.dayKey,
-        start: flipState.flipEvent.start,
-        text: textAreaRef.current?.value,
-        monthYear: monthState.monthYear
-      }}
+      const params = {
+        body: {
+          dayKey: selectedEvent.dayKey,
+          start: selectedEvent.start,
+          text: textAreaRef.current?.value,
+          monthYear: monthState.monthYear
+        }
+      }
       console.log('savetext', text)
       try {
         const res = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveText', params)
@@ -55,10 +55,10 @@ export default function DayText({ flipState, changeDayText, monthState }: {
   return (
     <>
       <textarea
-        defaultValue={flipState.dayText}
+        defaultValue={selectedEvent.text}
         ref={textAreaRef}
         onChange={(e) => {
-          changeDayText(e.target.value, "" + flipState.dayKey)
+          dispatch({ type: "changeDayText", dayText: e.target.value, dayKey: selectedEvent.dayKey })
           setSavedState("")
         }}
         className="
@@ -71,7 +71,7 @@ export default function DayText({ flipState, changeDayText, monthState }: {
         text-base
         font-normal
         text-gray-700
-        bg-white bg-clip-padding
+        e.target.valuebg-white bg-clip-padding
         border border-solid border-gray-300
         rounded
         transition
@@ -80,12 +80,12 @@ export default function DayText({ flipState, changeDayText, monthState }: {
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
       "
       ></textarea>
-      < button 
-        className="px-1 m-1 mr-2 outline-black outline outline-1" 
-        onClick={() => saveText(textAreaRef.current?.value)} 
+      < button
+        className="px-1 m-1 mr-2 outline-black outline outline-1"
+        onClick={() => saveText(textAreaRef.current?.value)}
       >save</button>
-      { savedState === "saved" && "✔️" }
-      { savedState === "failed" && "❌" }
+      {savedState === "saved" && "✔️"}
+      {savedState === "failed" && "❌"}
     </>
   )
 }

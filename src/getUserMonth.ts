@@ -5,13 +5,23 @@ import { FlipEvent } from '../lib/types'
 import sort from '../lib/sort'
 const dynamoDb = new DynamoDB.DocumentClient()
 
+interface TimezoneOffset {
+  timezoneOffset: number
+}
 
-export const handler: APIGatewayProxyHandlerV2 = async () => {
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+
+  const { timezoneOffset }: TimezoneOffset = JSON.parse(event.body ?? '')
+
   const date = new Date()
-  const month = date.getMonth() + 1
-  const year = date.getFullYear()
+  const offsetDate = new Date(date.getTime() - timezoneOffset)
+  const month = offsetDate.getMonth() + 1
+  const year = offsetDate.getFullYear()
   const monthsKey = month + "_" + year
-  const day = "" + date.getDate()
+  const day = "" + offsetDate.getDate()
+
+  console.log('day', day)
+  console.log('date', date, 'offsetDate', offsetDate)
 
   // const prevMonthYear = // i need to import the previous Event Names
 

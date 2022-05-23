@@ -44,13 +44,9 @@ export default class MyStack extends sst.Stack {
         timeout: 20
       },
       routes: {
-        // "GET /getIcal": {
-        //   // timeout: 20,
-        //   function: "src/getIcal.handler"
-        // },
-        "GET /getUserMonth": "src/getUserMonth.handler",
+        "POST /getUserMonth": "src/getUserMonth.handler",
         "POST /saveText": "src/saveText.handler",
-        "POST /saveFlip": "src/saveFlip.handler",
+        "POST /saveDuration": "src/saveDuration.handler",
         "POST /submitEventName": "src/submitEventName.handler",
         "POST /submitEvent": "src/submitEvent.handler",
         "POST /deleteEvent": "src/deleteEvent.handler",
