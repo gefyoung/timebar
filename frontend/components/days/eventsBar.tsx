@@ -2,29 +2,41 @@
 import { Day, Event } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent } from "react"
-
+import { API } from '@aws-amplify/api'
+import { State } from '../../lib/daysReducer'
 
 const EventsBar = ({ 
+  state,
   day, 
   selectedEvent, 
   dispatch,
-  drag, 
-  eventDeleted, 
-  dragStart, 
-  dragEnd,
   touchMove
  }:
   {
     day: Day,
     selectedEvent: Event,
-    dispatch: ({type, event, dayKey, arrayIndex}: 
-      {type: string, event: Event, dayKey: string, arrayIndex: number}) => void
-    drag: (e: DragEvent) => void
-    eventDeleted: (e: any) => void
-    dragStart: (e: DragEvent, duration: number) => void
-    dragEnd: (e: number) => void
+    dispatch: ({type, event, dayKey, arrayIndex, dragEvent}: 
+      {type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent }) => void
     touchMove: (e: any) => void
+    state: State
   }) => {
+
+
+  
+  const dragEnd = async (duration: number) => {
+
+    const params = {
+      body: {
+        dayKey: state.selectedEvent.dayKey,
+        monthYear: state.monthYear,
+        start: state.selectedEvent.start,
+        duration: duration,
+      }
+    }
+    await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
+
+  }
+
 
   return (
     <div id="grid96" className="grid grid-cols-96">
@@ -46,11 +58,10 @@ const EventsBar = ({
                 }
                 
                 <div 
-                  onDrag={(e) => drag(e)} 
-                  onDragStart={(e) => dragStart(e, mapDataEvent.duration)}
+                  onDrag={(e) => dispatch({ type: "drag", dragEvent: e })} 
                   onDragEnd={() => dragEnd(mapDataEvent.duration)}
                   // onTouchStart={(e) => touchMove(e)}
-                  onTouchMove={(e) => touchMove(e)} 
+                  onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
                   // onTouchEnd={() => dragEnd(flipEvent.duration)}
 
                   className="absolute mt-1 -right-3 cursor-ew-resize"
@@ -86,7 +97,7 @@ const EventsBar = ({
       {selectedEvent.start !== 0 && selectedEvent.dayKey === day.dayKey
         && <button
           className="ml-2"
-          onClick={eventDeleted}
+          onClick={() => dispatch({ type: "eventDeleted" }) }
         >delete</button>}
     </div>
 

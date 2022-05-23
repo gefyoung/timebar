@@ -6,19 +6,20 @@ import { Event } from '../../lib/types'
 
 type DayValueArr = Event[]
 
-const EventNameBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eventAdded }: {
+interface EventAdded {
+  eventName: string
+  dayKey: number
+  monthYear: string
+  start: number
+  eventNameKey: number
+}
+
+const EventNameBar = ({ monthYear, events, dayKey, dayValue, dispatch }: {
   monthYear: string,
   events: string[],
   dayKey: number,
-  eventNameAdded: (e: string) => void,
+  dispatch: (e: any) => void,
   dayValue: DayValueArr,
-  eventAdded: (e: {
-    eventName: string
-    dayKey: number
-    monthYear: string
-    start: number
-    eventNameKey: number
-  }) => void,
 }) => {
 
   const [addingEvent, setAddingEvent] = useState(false)
@@ -35,7 +36,7 @@ const EventNameBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eve
       }
       try {
         await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEventName', params)
-        eventNameAdded(eventInputRef.current.value)
+        dispatch(eventInputRef.current.value)
         eventInputRef.current.value = 'new event'
       } catch (err) {
         console.log(err)
@@ -58,7 +59,10 @@ const EventNameBar = ({ monthYear, events, dayKey, dayValue, eventNameAdded, eve
     try {
       const submittedEvent = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEvent', params)
       submittedEvent.className = "col-span-" + 6 + " h-8 " + eventKeyToColor(i)
-      eventAdded(submittedEvent)
+      dispatch({
+        type: "eventAdded", 
+        submittedEvent: submittedEvent
+      })
     } catch (err) {
       console.log(err)
     }

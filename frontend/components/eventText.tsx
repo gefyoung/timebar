@@ -19,9 +19,17 @@ interface Flip {
   dayText?: string
 }
 
-export default function TextArea({ flipState, changeEventText, monthState, eventName }: {
-  flipState: FlipState
-  changeEventText: (e: string) => void
+interface SelectedEvent {
+  dayKey: string
+  start: number
+  text?: string
+  dayText?: string
+}
+
+
+export default function TextArea({ selectedEvent, dispatch, monthState, eventName }: {
+  selectedEvent: SelectedEvent
+  dispatch: (e: any ) => void
   monthState: { month: string, year: number, monthYear: string }
   eventName: string
 }) {
@@ -32,8 +40,8 @@ export default function TextArea({ flipState, changeEventText, monthState, event
 
   const saveText = async () => {
     const flip = {
-      dayKey: flipState.dayKey,
-      start: flipState.flipEvent.start,
+      dayKey: selectedEvent.dayKey,
+      start: selectedEvent.start,
       text: textAreaRef.current?.value,
       monthYear: monthState.monthYear,
       eventName: eventName
@@ -52,10 +60,12 @@ export default function TextArea({ flipState, changeEventText, monthState, event
   return (
     <>
       <textarea
-        defaultValue={flipState.flipEvent.text}
+        defaultValue={selectedEvent.text}
         ref={textAreaRef}
         onChange={(e) => {
-          changeEventText(e.target.value)
+          dispatch({ type: "changeEventText", 
+                text: e.target.value
+        })
           setSavedState("")
         }}
         className="

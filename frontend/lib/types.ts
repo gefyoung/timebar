@@ -6,6 +6,7 @@ export interface Event {
   text?: string
   eventNameKey?: number
   dayKey: string
+  arrayIndex: number
 }
 export interface Day {
   dayKey: string
