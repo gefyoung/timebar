@@ -55,10 +55,11 @@ export default function Days({ data }: { data: UserMonthData }) {
 
   const [state, dispatch] = useReducer<Reducer<any, any>>(reducer, initialState)
 
-  const month= data.month.match(/(.*?)_/)
+  const month = data.month.match(/(.*?)_/)
   const year = data.month.match(/_(.*)/)
-  const month1 = month[1]
-  const year1 = year[1]
+
+  const month1 = month![1]
+  const year1 = year![1]
 
 
   const TextEditor = () => {
@@ -69,22 +70,21 @@ export default function Days({ data }: { data: UserMonthData }) {
             <div>{state.selectedEvent.eventName}</div>
             <div>
               <EventText 
-                eventName={state.selectedEvent.eventName} 
                 dispatch={dispatch} 
                 selectedEvent={state.selectedEvent} 
-                monthState={state.monthState} />
+                monthYear={state.monthYear} />
             </div>
           </div> : <div className="mt-6">
             <DayText 
               dispatch={dispatch} 
               selectedEvent={state.selectedEvent} 
-              monthState={state.monthState} />
+              monthState={state.monthYear} />
           </div>
         }
       </div>
     )
   }
-  console.log('month', month, 'year', year)
+
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
@@ -115,15 +115,14 @@ export default function Days({ data }: { data: UserMonthData }) {
                     monthYear={state.monthYear}
                     events={state.events}
                     dayKey={Number(day.dayKey)}
-                    dayValue={day.dayValue}
                   />}
               </div>
 
               <EventsBar
                 dispatch={dispatch}
                 day={day}
+                monthYear={state.monthYear}
                 selectedEvent={state.selectedEvent}
-                state={state}
               />
 
 

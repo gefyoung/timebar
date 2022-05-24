@@ -14,12 +14,11 @@ interface EventAdded {
   eventNameKey: number
 }
 
-const EventNameBar = ({ monthYear, events, dayKey, dayValue, dispatch }: {
+const EventNameBar = ({ monthYear, events, dayKey, dispatch }: {
   monthYear: string,
   events: string[],
   dayKey: number,
-  dispatch: (e: any) => void,
-  dayValue: DayValueArr,
+  dispatch: (e: any) => void
 }) => {
 
   const [addingEvent, setAddingEvent] = useState(false)
@@ -44,7 +43,7 @@ const EventNameBar = ({ monthYear, events, dayKey, dayValue, dispatch }: {
     }
   }
 
-  const addEvent = async (event: string, dayValue: DayValueArr, i: number) => {
+  const addEvent = async (event: string, i: number) => {
     let params
 
       params = {
@@ -55,13 +54,17 @@ const EventNameBar = ({ monthYear, events, dayKey, dayValue, dispatch }: {
           eventNameKey: i
         }
       }
-    console.log('params', params)
+
     try {
-      const submittedEvent = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEvent', params)
+      const submittedEvent = await API.post(
+        process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",
+        '/submitEvent',
+        params
+      )
       submittedEvent.className = "col-span-" + 6 + " h-8 " + eventKeyToColor(i)
       dispatch({
         type: "eventAdded", 
-        submittedEvent: submittedEvent
+        event: submittedEvent
       })
     } catch (err) {
       console.log(err)
@@ -76,7 +79,7 @@ const EventNameBar = ({ monthYear, events, dayKey, dayValue, dispatch }: {
             <button
               key={i}
               className="px-1 m-1 mr-2 outline-black outline outline-1"
-              onClick={() => addEvent(event, dayValue, i)}
+              onClick={() => addEvent(event, i)}
             >{event}</button>
           </>)
       }{

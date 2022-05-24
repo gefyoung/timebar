@@ -68,7 +68,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       monthYear: monthYear,
       dayKey: dayKey,
       start: newStart,
-      eventNameKey: eventNameKey
+      eventNameKey: eventNameKey,
+      duration: 6
     }
 
     return {

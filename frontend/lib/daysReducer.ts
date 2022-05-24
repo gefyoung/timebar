@@ -17,6 +17,7 @@ interface ReducerEvent {
   arrayIndex?: number
   eventName?: string
   dragEvent?: DragEvent
+  distanceToFront?: number
 }
 
 export interface State {
@@ -44,8 +45,19 @@ export interface State {
     className?: string
     text?: string
     eventNameKey?: number
-    arrayIndex?: number
+    arrayIndex: number
   }
+}
+
+interface DayValueDay {
+    start: number;
+    duration: number;
+    eventName: string;
+    className: string;
+    text?: string | undefined;
+    eventNameKey?: number | undefined;
+    dayKey: string;
+    arrayIndex: number;
 }
 
 
@@ -53,16 +65,16 @@ export interface State {
 const reducer = (state: State, event: ReducerEvent): State => {
   
   if (event.type === "selectEvent") {
-
+    
     return { ...state,
       selectedEvent: {
         eventName: event.event?.eventName?? "",
         text: event.event?.text ?? "",
         start: event.event?.start?? 0,
-        // arrayIndex: event.arrayIndex,
+        arrayIndex: event.arrayIndex?? 0,
         duration: event.event?.duration?? 0,
         dayKey: event.dayKey?? "0"
-    }
+      }
     }
 
 
@@ -76,16 +88,16 @@ const reducer = (state: State, event: ReducerEvent): State => {
         start: 0,
         dayKey: event.dayKey?? "0",
         text: event.text
-        // arrayIndex: 0
       }
     }
 
-    //this is acting as it did before, deselecting
+
+    // this mutates
   } else if (event.type === "changeDayText" ) {
-    const editedArray = [...state.data]
-    console.log('cjsnhifdng')
+    const editedArray = state.data
     state.data.forEach((day, i) => {
       if (state.selectedEvent.dayKey === day.dayKey) {
+        console.log('hello', event.text)
         const newDay = {
           ...day,
           dayText: event.text
@@ -93,10 +105,9 @@ const reducer = (state: State, event: ReducerEvent): State => {
         editedArray.splice(i, 1, newDay)
       }
   })
-    return(state)
 
 
-
+// this mutates
   } else if (event.type === "changeEventText") {
 
     const editedArray = state.data
@@ -137,50 +148,47 @@ const reducer = (state: State, event: ReducerEvent): State => {
   } else if (event.type === "eventAdded") {
 
       const editedArray = [...state.data]
-  
       state.data.forEach((dataDay, i) => {
   
-        if (state.selectedEvent.dayKey === dataDay.dayKey) {
+        if (state.selectedEvent.dayKey === "" + dataDay.dayKey) {
+
           if (event.event) {
             const newArray = dataDay.dayValue.concat([event.event])
-  
+
             const newDay = {
               ...dataDay,
               dayValue: newArray
             }
             editedArray.splice(i, 1, newDay)
-
             
           }
 
         }
-        return { ...state, data: editedArray }
+        
+        
       })
+
+      return { ...state, data: editedArray }
 
 
 
   } else if (event.type ==="eventDeleted") {
 
       const editedArray = [...state.data]
+
+      let params = { body: {} }
   
       editedArray.forEach(async (dataDay, i) => {
   
         if (state.selectedEvent.dayKey === dataDay.dayKey) {
   
           dataDay.dayValue.splice(state.selectedEvent.arrayIndex, 1)
-  
-          const params = {
-            body: {
-              dayKey: state.selectedEvent.dayKey,
-              monthYear: state.monthYear,
-              start: state.selectedEvent.start
-            }
-          }
-          await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)
-          return {...state, data: editedArray}
 
         }
       })
+
+
+      return {...state, data: editedArray}
       
     
   } else if (event.type === "drag") {
@@ -189,6 +197,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
       const currentWidth = state.selectedEvent.duration * oneGridWidth
       const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
       let duration = 0
+      console.log('oneGrid', oneGridWidth, 'currentWidth', currentWidth,'boxLeftPosition', boxLeftPosition)
 
     if (event.dragEvent) {
       if (event.dragEvent.clientX - 10 > currentWidth + boxLeftPosition) {
@@ -265,6 +274,29 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
   
+    } else if (event.type === "moved" ) {
+      if (event.dragEvent && event.distanceToFront) {
+        const movingFront = event.dragEvent.clientX - event.distanceToFront
+
+        state.data.forEach((day, i) => {
+          if (state.selectedEvent.dayKey === day.dayKey) {
+            const greaterThanArray: Event[] = []
+
+            {[...day.dayValue].forEach((event) => {
+              const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
+              if (currPosition > movingFront) {
+                greaterThanArray.push(event)
+              }
+            })}
+            console.log('greaterThanArray', greaterThanArray)
+            greaterThanArray.sort((a, b) => a.start - b.start)
+            console.log(greaterThanArray[0])
+            
+            
+          }
+        })
+
+      }
     }
 
   return state
@@ -281,81 +313,81 @@ export default reducer
 
 
 
-const touchMove = (e: any) => {
-  const editedArray = [...dataState]
-  const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
-  const currentWidth = state.selectedEvent.duration * oneGridWidth
-  const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-  let duration = 0
+// const touchMove = (e: any) => {
+//   const editedArray = [...dataState]
+//   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
+//   const currentWidth = state.selectedEvent.duration * oneGridWidth
+//   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+//   let duration = 0
 
-  if (e.changedTouches[0].clientX - 10 > currentWidth + boxLeftPosition) {
-    /* if mouse moves right, add width */
-    editedArray.forEach((dataDay, i) => {
-      if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
-        const flipArray: Event[] = dataDay.dayValue
+//   if (e.changedTouches[0].clientX - 10 > currentWidth + boxLeftPosition) {
+//     /* if mouse moves right, add width */
+//     editedArray.forEach((dataDay, i) => {
+//       if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
+//         const flipArray: Event[] = dataDay.dayValue
 
-        dataDay.dayValue.forEach((event, x) => {
-          if (state.selectedEvent.start === event.start) {
-            duration = event.duration + 1
-            const newEvent = {
-              ...event,
-              duration: event.duration + 1,
-              className: returnOneClassName(event)
-            }
-            flipArray.splice(x, 1, newEvent)
-          }
-        })
+//         dataDay.dayValue.forEach((event, x) => {
+//           if (state.selectedEvent.start === event.start) {
+//             duration = event.duration + 1
+//             const newEvent = {
+//               ...event,
+//               duration: event.duration + 1,
+//               className: returnOneClassName(event)
+//             }
+//             flipArray.splice(x, 1, newEvent)
+//           }
+//         })
 
-        const newDay = {
-          ...dataDay,
-          dayValue: flipArray
-        }
-        editedArray.splice(i, 1, newDay)
+//         const newDay = {
+//           ...dataDay,
+//           dayValue: flipArray
+//         }
+//         editedArray.splice(i, 1, newDay)
 
-      }
-    })
+//       }
+//     })
 
-    setDataState(editedArray)
-    setSelectedEventState({
-      ...state.selectedEvent,
-      flipEvent: {
-        ...state.selectedEvent,
-        duration: duration
-      }
-    })
+//     setDataState(editedArray)
+//     setSelectedEventState({
+//       ...state.selectedEvent,
+//       flipEvent: {
+//         ...state.selectedEvent,
+//         duration: duration
+//       }
+//     })
 
-  } else if (e.changedTouches[0].clientX < currentWidth + boxLeftPosition) {
-    editedArray.forEach((dataDay, i) => {
-      if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
-        const flipArray: Event[] = dataDay.dayValue
+//   } else if (e.changedTouches[0].clientX < currentWidth + boxLeftPosition) {
+//     editedArray.forEach((dataDay, i) => {
+//       if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
+//         const flipArray: Event[] = dataDay.dayValue
 
-        dataDay.dayValue.forEach((event, x) => {
-          if (state.selectedEvent.start === event.start) {
-            duration = event.duration - 1
-            const newEvent = {
-              ...event,
-              duration: event.duration - 1,
-              className: returnOneClassName(event)
-            }
-            flipArray.splice(x, 1, newEvent)
-          }
-        })
+//         dataDay.dayValue.forEach((event, x) => {
+//           if (state.selectedEvent.start === event.start) {
+//             duration = event.duration - 1
+//             const newEvent = {
+//               ...event,
+//               duration: event.duration - 1,
+//               className: returnOneClassName(event)
+//             }
+//             flipArray.splice(x, 1, newEvent)
+//           }
+//         })
 
-        const newDay = {
-          ...dataDay,
-          dayValue: flipArray
-        }
-        editedArray.splice(i, 1, newDay)
+//         const newDay = {
+//           ...dataDay,
+//           dayValue: flipArray
+//         }
+//         editedArray.splice(i, 1, newDay)
 
-      }
-    })
-    setDataState(editedArray)
-    setSelectedEventState({
-      ...state.selectedEvent,
-      flipEvent: {
-        ...state.selectedEvent,
-        duration: duration
-      }
-    })
-  }
-}
+//       }
+//     })
+//     setDataState(editedArray)
+//     setSelectedEventState({
+//       ...state.selectedEvent,
+//       flipEvent: {
+//         ...state.selectedEvent,
+//         duration: duration
+//       }
+//     })
+//   }
+// }

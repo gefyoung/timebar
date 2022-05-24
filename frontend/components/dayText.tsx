@@ -20,7 +20,7 @@ interface SelectedEvent {
 
 export default function DayText({ selectedEvent, dispatch, monthState }: {
   selectedEvent: SelectedEvent
-  dispatch: ({ dayText, type, dayKey }: { dayText: string, type: string, dayKey: string }) => void
+  dispatch: ({ text, type, dayKey }: { text: string, type: string, dayKey: string }) => void
   monthState: { month: string, year: number, monthYear: string }
 }) {
 
@@ -58,7 +58,7 @@ export default function DayText({ selectedEvent, dispatch, monthState }: {
         defaultValue={selectedEvent.text}
         ref={textAreaRef}
         onChange={(e) => {
-          dispatch({ type: "changeDayText", dayText: e.target.value, dayKey: selectedEvent.dayKey })
+          dispatch({ type: "changeDayText", text: e.target.value, dayKey: selectedEvent.dayKey })
           setSavedState("")
         }}
         className="

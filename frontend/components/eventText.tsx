@@ -24,14 +24,14 @@ interface SelectedEvent {
   start: number
   text?: string
   dayText?: string
+  eventName?: string
 }
 
 
-export default function TextArea({ selectedEvent, dispatch, monthState, eventName }: {
+export default function TextArea({ selectedEvent, dispatch, monthYear }: {
   selectedEvent: SelectedEvent
   dispatch: (e: any ) => void
-  monthState: { month: string, year: number, monthYear: string }
-  eventName: string
+  monthYear: string
 }) {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -43,8 +43,8 @@ export default function TextArea({ selectedEvent, dispatch, monthState, eventNam
       dayKey: selectedEvent.dayKey,
       start: selectedEvent.start,
       text: textAreaRef.current?.value,
-      monthYear: monthState.monthYear,
-      eventName: eventName
+      monthYear: monthYear,
+      eventName: selectedEvent.eventName
     }
     console.log('savetext', textAreaRef.current?.value)
     try {

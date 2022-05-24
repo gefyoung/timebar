@@ -1,40 +1,67 @@
 
+import { useState } from 'react'
 import { Day, Event } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
 import { State } from '../../lib/daysReducer'
 
+
 const EventsBar = ({ 
-  state,
+  monthYear,
   day, 
   selectedEvent, 
   dispatch,
-  touchMove
  }:
   {
+    monthYear: string,
     day: Day,
     selectedEvent: Event,
-    dispatch: ({type, event, dayKey, arrayIndex, dragEvent}: 
-      {type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent }) => void
-    touchMove: (e: any) => void
-    state: State
+    dispatch: ({type, event, dayKey, arrayIndex, dragEvent, distanceToFront}: 
+      {type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent,
+        distanceToFront?: number
+       }) => void
   }) => {
 
+  const [move, setMove] = useState(0)
 
   
   const dragEnd = async (duration: number) => {
 
     const params = {
       body: {
-        dayKey: state.selectedEvent.dayKey,
-        monthYear: state.monthYear,
-        start: state.selectedEvent.start,
+        dayKey: selectedEvent.dayKey,
+        monthYear: monthYear,
+        start: selectedEvent.start,
         duration: duration,
       }
     }
     await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
 
+  }
+
+  const deleteEvent = async () => {
+    const params = {
+      body: {
+        dayKey: selectedEvent.dayKey,
+        monthYear: monthYear,
+        start: selectedEvent.start
+      }
+    }
+
+    dispatch({ type: "eventDeleted" })
+
+    try {
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)
+    } catch (err) {
+      throw err
+    }
+  }
+
+  const moveStart = (e: DragEvent) => {
+    const selectedLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    const distanceToFront = e.clientX - selectedLeftPosition
+    setMove(distanceToFront)
   }
 
 
@@ -49,6 +76,9 @@ const EventsBar = ({
               key={mapDataEvent.start}
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
+              onDragStart={(e) => moveStart(e)}
+              onDragEnd={(e) => dispatch({ type: "moved", dragEvent: e, distanceToFront: move })}
+              draggable={true}
             >
                 {
                   mapDataEvent.text &&
@@ -61,7 +91,7 @@ const EventsBar = ({
                   onDrag={(e) => dispatch({ type: "drag", dragEvent: e })} 
                   onDragEnd={() => dragEnd(mapDataEvent.duration)}
                   // onTouchStart={(e) => touchMove(e)}
-                  onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
+                  // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
                   // onTouchEnd={() => dragEnd(flipEvent.duration)}
 
                   className="absolute mt-1 -right-3 cursor-ew-resize"
@@ -75,14 +105,18 @@ const EventsBar = ({
 
 
             : <div
+              id={"" + mapDataEvent.start}
               key={mapDataEvent.start}
               className={mapDataEvent.className}
-              onClick={() => dispatch({
+              onClick={() => {
+                console.log(mapDataEvent)
+                dispatch({
                 type: "selectEvent",
                 event: mapDataEvent, 
                 dayKey: day.dayKey, 
                 arrayIndex: i
-              })}
+                
+              })}}
             >
               {
                 mapDataEvent.text &&
@@ -97,7 +131,7 @@ const EventsBar = ({
       {selectedEvent.start !== 0 && selectedEvent.dayKey === day.dayKey
         && <button
           className="ml-2"
-          onClick={() => dispatch({ type: "eventDeleted" }) }
+          onClick={() => deleteEvent() }
         >delete</button>}
     </div>
 
