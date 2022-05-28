@@ -1,5 +1,6 @@
 import { DynamoDB } from 'aws-sdk'
-import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { APIGatewayProxyEventV2WithRequestContext } from 'aws-lambda'
+import { IAMAuthorizer } from './types'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface EventNameEvent {
@@ -18,14 +19,17 @@ interface EventObj {
   text?: string
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
+export const handler = async (event: 
+  APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
 
   try {
     const { eventName, monthYear, dayKey, eventNameKey }: EventNameEvent = JSON.parse(event.body ?? '')
 
+    const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
+
 
     const getDays = {
-      Key: { user: 'gty', month: monthYear },
+      Key: { user: identityId, month: monthYear },
       TableName: process.env.UserMonths ?? 'noTable',
       ProjectExpression: "days"
     }
@@ -52,11 +56,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       newStart = lastEvent.duration + Number(max)
     }
 
+    
+
 
     const updateMap = {
       ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": "" + newStart },
       ExpressionAttributeValues: { ":en": { duration: 6, eventName: eventName, eventNameKey: eventNameKey } },
-      Key: { user: 'gty', month: monthYear },
+      Key: { user: identityId, month: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #DA.#DK.#ST = :en"

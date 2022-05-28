@@ -1,6 +1,8 @@
 import { DynamoDB } from 'aws-sdk'
-import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { APIGatewayProxyEventV2WithRequestContext, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { IAMAuthorizer } from './types'
 const dynamoDb = new DynamoDB.DocumentClient()
+
 
 interface EditFlipEvent {
   dayKey: number
@@ -10,10 +12,11 @@ interface EditFlipEvent {
   eventName?: string
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
+export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
   try {
     const textData: EditFlipEvent = JSON.parse(event.body ?? '')
     console.log("FE", textData)
+    const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
 
     if (textData.start === 0) {
       /* updating dayText overwrites 0 event properties cause text didn't prev exist on it */
@@ -24,7 +27,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
           "#FI": "" + textData.start
         },
         ExpressionAttributeValues: { ":ft": { text: "" + textData.text } },
-        Key: { user: 'gty', month: textData.monthYear },
+        Key: { user: identityId, month: textData.monthYear },
         ReturnValues: "ALL_NEW",
         TableName: process.env.UserMonths ?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI = :ft"
@@ -47,7 +50,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
           "#TX": "text"
         },
         ExpressionAttributeValues: { ":ft": textData.text },
-        Key: { user: 'gty', month: textData.monthYear },
+        Key: { user: identityId, month: textData.monthYear },
         ReturnValues: "ALL_NEW",
         TableName: process.env.UserMonths ?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"

@@ -31,7 +31,7 @@ const LogIn = (props: CreateAccountProps) => {
         )
         setSubmitting(false)
       }
-      props.changePageState("")
+      location.reload()
       // setPageState(false)
     } catch (err: any) {
       if (err.code === "UserNotFoundException") {

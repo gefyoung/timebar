@@ -40,22 +40,9 @@ export default function returnClassName(flipArray: Event[]) {
     // width = returnWidth(flipObj).width
     width = flipObj.duration
 
-    // if (totalDuration > 96) {
-    //   const overAmount = totalDuration - 96
-
-    //   const flipPercentage = (flipObj.duration / 86400000) * 100
-    //   if (flipPercentage > 20) {
-    //     width = returnWidth(flipObj).width - overAmount
-    //   }
-    // }
-
-    // if (totalDuration < 96) {
-    //   // let underAmount = 96 - totalDuration
-    //   width = returnWidth(flipObj).width + 1
-    //   totalDuration = totalDuration + 1
-    // }
-
-    flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventNameKey)
+    if (typeof flipObj.eventNameKey === 'number') {
+      flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventNameKey)
+    }
 
     return flipObj
   })

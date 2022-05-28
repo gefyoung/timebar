@@ -26,8 +26,8 @@ const EventsBar = ({
   const [move, setMove] = useState(0)
 
   
-  const dragEnd = async (duration: number) => {
-
+  const dragEnd = async (e: DragEvent, duration: number) => {
+      e.stopPropagation()
     const params = {
       body: {
         dayKey: selectedEvent.dayKey,
@@ -89,7 +89,7 @@ const EventsBar = ({
                 
                 <div 
                   onDrag={(e) => dispatch({ type: "drag", dragEvent: e })} 
-                  onDragEnd={() => dragEnd(mapDataEvent.duration)}
+                  onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
                   // onTouchStart={(e) => touchMove(e)}
                   // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
                   // onTouchEnd={() => dragEnd(flipEvent.duration)}

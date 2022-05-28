@@ -1,15 +1,18 @@
 import { DynamoDB } from 'aws-sdk'
-import { APIGatewayProxyHandlerV2 } from "aws-lambda"
-import ical from 'node-ical'
+import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2WithRequestContext } from "aws-lambda"
 import { FlipEvent } from '../lib/types'
 import sort from '../lib/sort'
+import { IAMAuthorizer } from './types'
+
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface TimezoneOffset {
   timezoneOffset: number
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
+
+  const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
 
   const { timezoneOffset }: TimezoneOffset = JSON.parse(event.body ?? '')
 
@@ -27,7 +30,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   try {
     const getDays = {
-      Key: { user: 'gty', month: monthsKey },
+      Key: { user: identityId, month: monthsKey },
       TableName: process.env.UserMonths ?? 'noTable'
     }
 
@@ -39,13 +42,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     if (Object.keys(dynamoData).length === 0) {
 
       const newUser = {
-        Item: { user: 'gty', month: monthsKey, days: { [day]: {} }, events: [] },
+        Item: { user: identityId, month: monthsKey, days: { [day]: {} }, events: [] },
         TableName: process.env.UserMonths ?? 'noTable'
       }
       await dynamoDb.put(newUser).promise()
 
       returnData = {
-        user: 'gty',
+        user: identityId,
         month: monthsKey,
         days: [{
           dayKey: day,
@@ -64,7 +67,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         const updateMap = {
           ExpressionAttributeNames: { "#DA": "days", "#DI": day },
           ExpressionAttributeValues: { ":fa": {} },
-          Key: { user: 'gty', month: monthsKey },
+          Key: { user: identityId, month: monthsKey },
           ReturnValues: "ALL_NEW",
           TableName: process.env.UserMonths ?? 'noTable',
           UpdateExpression: "SET #DA.#DI = :fa"
@@ -79,7 +82,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         const updateArray = {
           ExpressionAttributeNames: { "#EV": "events" },
           ExpressionAttributeValues: { ":ev": [] },
-          Key: { user: 'gty', month: monthsKey },
+          Key: { user: identityId, month: monthsKey },
           ReturnValues: "ALL_NEW",
           TableName: process.env.UserMonths ?? 'noTable',
           UpdateExpression: "SET #EV = :ev"
@@ -90,7 +93,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
      
 
       returnData = {
-        user: 'gty',
+        user: identityId,
         month: monthsKey,
         days: sort(map),
         events: eventArray

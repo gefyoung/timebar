@@ -1,5 +1,6 @@
 import { DynamoDB } from 'aws-sdk'
-import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { APIGatewayProxyEventV2WithRequestContext, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { IAMAuthorizer } from './types'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface EventNameEvent {
@@ -7,8 +8,8 @@ interface EventNameEvent {
   monthYear: string
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
-
+export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
+  const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
   try {
 
     const { eventName, monthYear }: EventNameEvent = JSON.parse(event.body ?? '')
@@ -16,7 +17,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     const params = {
       ExpressionAttributeNames: { "#EV": "events" },
       ExpressionAttributeValues: { ":arr": [eventName] },
-      Key: { user: 'gty', month: monthYear },
+      Key: { user: identityId, month: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #EV = list_append(#EV, :arr)"

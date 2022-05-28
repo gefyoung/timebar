@@ -55,7 +55,8 @@ const CreateAccount = (props: CreateAccountProps) => {
     try {
       await Auth.confirmSignUp(loginState.email, loginState.code)
       setInputState({...inputState, confirmation: "accepted", submitting: false})
-      const authSignInRes = await Auth.signIn(loginState.email, loginState.password)
+      await Auth.signIn(loginState.email, loginState.password)
+      location.reload()
     } catch (err) {
       console.log(err)
       setInputState({...inputState, confirmation: "denied", submitting: false})

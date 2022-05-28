@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { API } from '@aws-amplify/api'
 import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
@@ -39,16 +39,16 @@ export default function TextArea({ selectedEvent, dispatch, monthYear }: {
   const [savedState, setSavedState] = useState("")
 
   const saveText = async () => {
-    const flip = {
+    const flip = { body: {
       dayKey: selectedEvent.dayKey,
       start: selectedEvent.start,
       text: textAreaRef.current?.value,
       monthYear: monthYear,
       eventName: selectedEvent.eventName
-    }
-    console.log('savetext', textAreaRef.current?.value)
+    }}
+
     try {
-      const res = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/saveText', flip)
+      const res = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveText', flip)
       console.log('res', res)
       setSavedState("saved")
     } catch {

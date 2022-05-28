@@ -1,3 +1,4 @@
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as sst from "@serverless-stack/resources"
 
 export default class MyStack extends sst.Stack {
@@ -23,7 +24,7 @@ export default class MyStack extends sst.Stack {
       cognito: {
         userPool: {
           signInAliases: { email: true },
-          passwordPolicy: {             
+          passwordPolicy: {
             minLength: 7,
             requireSymbols: false,
             requireUppercase: false
@@ -43,6 +44,7 @@ export default class MyStack extends sst.Stack {
         },
         timeout: 20
       },
+      defaultAuthorizationType: sst.ApiAuthorizationType.AWS_IAM,
       routes: {
         "POST /getUserMonth": "src/getUserMonth.handler",
         "POST /saveText": "src/saveText.handler",
@@ -56,6 +58,15 @@ export default class MyStack extends sst.Stack {
     api.attachPermissions([UserMonths])
 
     auth.attachPermissionsForAuthUsers([api])
+    auth.attachPermissionsForUnauthUsers([
+      new iam.PolicyStatement({
+        actions: ["execute-api:Invoke"],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          `arn:aws:execute-api:${scope.region}:${scope.account}:${api.httpApi.apiId}/getUserMonth`
+        ]
+      })
+    ])
 
     const site = new sst.NextjsSite(this, "Site", {
       path: "frontend",
@@ -67,14 +78,20 @@ export default class MyStack extends sst.Stack {
         NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId,
         NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
       },
+      // customDomain: {
+      //   domainName: "timebar.me",
+      //   domainAlias: "www.timebar.me",
+      // }
+      customDomain: scope.stage === "prod" ? "timebar.me" : undefined
     })
+
 
     this.addOutputs({
       URL: site.url,
       ApiEndpoint: api.url,
-      UserPoolId: auth.cognitoUserPool?.userPoolId??'',
+      UserPoolId: auth.cognitoUserPool?.userPoolId ?? '',
       IdentityPoolId: auth.cognitoCfnIdentityPool.ref,
-      UserPoolClientId: auth.cognitoUserPoolClient?.userPoolClientId??""
+      UserPoolClientId: auth.cognitoUserPoolClient?.userPoolClientId ?? ""
     })
   }
 }

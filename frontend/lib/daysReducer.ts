@@ -25,7 +25,7 @@ export interface State {
   events: string[]
   data: {
     dayKey: string
-    dayValue: {     
+    dayValue: {
       start: number
       duration: number
       eventName: string
@@ -35,7 +35,7 @@ export interface State {
       dayKey: string
       arrayIndex: number
     }[]
-    dayText?: string 
+    dayText?: string
   }[]
   selectedEvent: {
     start: number
@@ -50,30 +50,31 @@ export interface State {
 }
 
 interface DayValueDay {
-    start: number;
-    duration: number;
-    eventName: string;
-    className: string;
-    text?: string | undefined;
-    eventNameKey?: number | undefined;
-    dayKey: string;
-    arrayIndex: number;
+  start: number;
+  duration: number;
+  eventName: string;
+  className: string;
+  text?: string | undefined;
+  eventNameKey?: number | undefined;
+  dayKey: string;
+  arrayIndex: number;
 }
 
 
 
 const reducer = (state: State, event: ReducerEvent): State => {
-  
+
   if (event.type === "selectEvent") {
-    
-    return { ...state,
+
+    return {
+      ...state,
       selectedEvent: {
-        eventName: event.event?.eventName?? "",
+        eventName: event.event?.eventName ?? "",
         text: event.event?.text ?? "",
-        start: event.event?.start?? 0,
-        arrayIndex: event.arrayIndex?? 0,
-        duration: event.event?.duration?? 0,
-        dayKey: event.dayKey?? "0"
+        start: event.event?.start ?? 0,
+        arrayIndex: event.arrayIndex ?? 0,
+        duration: event.event?.duration ?? 0,
+        dayKey: event.dayKey ?? "0"
       }
     }
 
@@ -86,14 +87,14 @@ const reducer = (state: State, event: ReducerEvent): State => {
         ...state.selectedEvent,
         eventName: "",
         start: 0,
-        dayKey: event.dayKey?? "0",
+        dayKey: event.dayKey ?? "0",
         text: event.text
       }
     }
 
 
     // this mutates
-  } else if (event.type === "changeDayText" ) {
+  } else if (event.type === "changeDayText") {
     const editedArray = state.data
     state.data.forEach((day, i) => {
       if (state.selectedEvent.dayKey === day.dayKey) {
@@ -104,10 +105,10 @@ const reducer = (state: State, event: ReducerEvent): State => {
         }
         editedArray.splice(i, 1, newDay)
       }
-  })
+    })
 
 
-// this mutates
+    // this mutates
   } else if (event.type === "changeEventText") {
 
     const editedArray = state.data
@@ -139,7 +140,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
   } else if (event.type === "eventNameAdded") {
     return {
       ...state,
-      events: state.events.concat([event.event?.eventName?? ""])
+      events: state.events.concat([event.event?.eventName ?? ""])
     }
 
 
@@ -147,57 +148,57 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
   } else if (event.type === "eventAdded") {
 
-      const editedArray = [...state.data]
-      state.data.forEach((dataDay, i) => {
-  
-        if (state.selectedEvent.dayKey === "" + dataDay.dayKey) {
+    const editedArray = [...state.data]
+    state.data.forEach((dataDay, i) => {
 
-          if (event.event) {
-            const newArray = dataDay.dayValue.concat([event.event])
+      if (state.selectedEvent.dayKey === "" + dataDay.dayKey) {
 
-            const newDay = {
-              ...dataDay,
-              dayValue: newArray
-            }
-            editedArray.splice(i, 1, newDay)
-            
+        if (event.event) {
+          const newArray = dataDay.dayValue.concat([event.event])
+
+          const newDay = {
+            ...dataDay,
+            dayValue: newArray
           }
+          editedArray.splice(i, 1, newDay)
 
         }
-        
-        
-      })
 
-      return { ...state, data: editedArray }
+      }
 
 
+    })
 
-  } else if (event.type ==="eventDeleted") {
-
-      const editedArray = [...state.data]
-
-      let params = { body: {} }
-  
-      editedArray.forEach(async (dataDay, i) => {
-  
-        if (state.selectedEvent.dayKey === dataDay.dayKey) {
-  
-          dataDay.dayValue.splice(state.selectedEvent.arrayIndex, 1)
-
-        }
-      })
+    return { ...state, data: editedArray }
 
 
-      return {...state, data: editedArray}
-      
-    
+
+  } else if (event.type === "eventDeleted") {
+
+    const editedArray = [...state.data]
+
+    let params = { body: {} }
+
+    editedArray.forEach(async (dataDay, i) => {
+
+      if (state.selectedEvent.dayKey === dataDay.dayKey) {
+
+        dataDay.dayValue.splice(state.selectedEvent.arrayIndex, 1)
+
+      }
+    })
+
+
+    return { ...state, data: editedArray }
+
+
   } else if (event.type === "drag") {
-      const editedArray = [...state.data]
-      const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
-      const currentWidth = state.selectedEvent.duration * oneGridWidth
-      const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-      let duration = 0
-      console.log('oneGrid', oneGridWidth, 'currentWidth', currentWidth,'boxLeftPosition', boxLeftPosition)
+    const editedArray = [...state.data]
+    const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
+    const currentWidth = state.selectedEvent.duration * oneGridWidth
+    const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    let duration = 0
+    console.log('oneGrid', oneGridWidth, 'currentWidth', currentWidth, 'boxLeftPosition', boxLeftPosition)
 
     if (event.dragEvent) {
       if (event.dragEvent.clientX - 10 > currentWidth + boxLeftPosition) {
@@ -205,7 +206,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
         editedArray.forEach((dataDay, i) => {
           if (state.selectedEvent.dayKey === dataDay.dayKey) {
             const flipArray: Event[] = dataDay.dayValue
-  
+
             dataDay.dayValue.forEach((event, x) => {
               if (state.selectedEvent.start === event.start) {
                 duration = event.duration + 1
@@ -217,16 +218,16 @@ const reducer = (state: State, event: ReducerEvent): State => {
                 flipArray.splice(x, 1, newEvent)
               }
             })
-  
+
             const newDay = {
               ...dataDay,
               dayValue: flipArray
             }
             editedArray.splice(i, 1, newDay)
-  
+
           }
         })
-        
+
         return {
           ...state,
           data: editedArray,
@@ -235,13 +236,13 @@ const reducer = (state: State, event: ReducerEvent): State => {
             duration: duration
           }
         }
-  
+
 
       } else if (event.dragEvent.clientX < currentWidth + boxLeftPosition) {
         editedArray.forEach((dataDay, i) => {
           if (state.selectedEvent.dayKey === dataDay.dayKey) {
             const flipArray: Event[] = dataDay.dayValue
-  
+
             dataDay.dayValue.forEach((event, x) => {
               if (state.selectedEvent.start === event.start) {
                 duration = event.duration - 1
@@ -253,13 +254,13 @@ const reducer = (state: State, event: ReducerEvent): State => {
                 flipArray.splice(x, 1, newEvent)
               }
             })
-  
+
             const newDay = {
               ...dataDay,
               dayValue: flipArray
             }
             editedArray.splice(i, 1, newDay)
-  
+
           }
         })
         return {
@@ -273,31 +274,72 @@ const reducer = (state: State, event: ReducerEvent): State => {
       }
     }
 
-  
-    } else if (event.type === "moved" ) {
-      if (event.dragEvent && event.distanceToFront) {
-        const movingFront = event.dragEvent.clientX - event.distanceToFront
 
-        state.data.forEach((day, i) => {
-          if (state.selectedEvent.dayKey === day.dayKey) {
-            const greaterThanArray: Event[] = []
-
-            {[...day.dayValue].forEach((event) => {
-              const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
-              if (currPosition > movingFront) {
-                greaterThanArray.push(event)
-              }
-            })}
-            console.log('greaterThanArray', greaterThanArray)
-            greaterThanArray.sort((a, b) => a.start - b.start)
-            console.log(greaterThanArray[0])
-            
-            
-          }
-        })
-
-      }
+  } else if (event.type === "moved") { // if event moved left
+    console.log("dragEvent", event.dragEvent)
+    const editedArray = [...state.data]
+    let start = 0
+    let selectedEvent: Event = {
+      eventName: "",
+      text: "",
+      start: 0,
+      className: "",
+      arrayIndex: 0,
+      duration: 0,
+      dayKey: "0"
     }
+    let x: number
+    let nearestEvent: Event
+    if (event.dragEvent && event.distanceToFront) {
+      const movingFront = event.dragEvent.clientX - event.distanceToFront
+
+      editedArray.forEach((day) => {
+        if (state.selectedEvent.dayKey === day.dayKey) {
+          const greaterThanArray: Event[] = []
+
+
+          day.dayValue.forEach((event, i) => {
+            const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
+            if (currPosition > movingFront) {
+              greaterThanArray.push({ ...event, arrayIndex: i })
+            }
+            if (state.selectedEvent.arrayIndex === i) {
+              selectedEvent = event
+            }
+          })
+
+          greaterThanArray.sort((a, b) => a.start - b.start)
+          nearestEvent = greaterThanArray[0]
+
+          const nearestStart = nearestEvent.start
+          x = nearestEvent.arrayIndex
+          start = nearestStart
+          nearestEvent.start = state.selectedEvent.start
+          selectedEvent.start = nearestStart
+
+          console.log('day.dayValue[x]', day.dayValue[x], 
+          'day.dayValue[selectedEvent.arrayIndex]', day.dayValue[state.selectedEvent.arrayIndex])
+          
+          day.dayValue[x] = selectedEvent
+          day.dayValue[state.selectedEvent.arrayIndex] = nearestEvent
+
+        }
+
+
+
+        // its the same value
+      })
+
+    }
+    console.log('selectedEvent', selectedEvent)
+    return {
+      ...state,
+      data: editedArray,
+      selectedEvent: selectedEvent
+      
+    }
+
+  }
 
   return state
 }

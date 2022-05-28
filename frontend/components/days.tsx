@@ -27,7 +27,7 @@ interface ReducerEvent {
   arrayIndex?: number
 }
 
-interface State {
+export interface State {
   monthYear: string
   events: string[]
   data: Day[]

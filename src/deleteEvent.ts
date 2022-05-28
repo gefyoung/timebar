@@ -1,5 +1,6 @@
 import { DynamoDB } from 'aws-sdk'
-import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2 } from 'aws-lambda'
+import { APIGatewayProxyHandlerV2, APIGatewayProxyEventV2WithRequestContext } from 'aws-lambda'
+import { IAMAuthorizer } from './types'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 interface EventNameEvent {
@@ -8,10 +9,12 @@ interface EventNameEvent {
   dayKey: string
 }[]
 
-export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
+export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
   
   try {
     const { monthYear, dayKey, start }: EventNameEvent = JSON.parse(event.body ?? '')
+
+    const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     
     console.log('delete event: ', monthYear, dayKey, start)
 
@@ -19,7 +22,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     
     const updateMap = {
       ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": "" + startWithNaN },
-      Key: { user: 'gty', month: monthYear },
+      Key: { user: identityId, month: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "REMOVE #DA.#DK.#ST"
