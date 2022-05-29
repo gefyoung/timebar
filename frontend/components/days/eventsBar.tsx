@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Day, Event } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent } from "react"
@@ -8,12 +8,14 @@ import { State } from '../../lib/daysReducer'
 
 
 const EventsBar = ({ 
+  state,
   monthYear,
   day, 
   selectedEvent, 
   dispatch,
  }:
   {
+    state: State
     monthYear: string,
     day: Day,
     selectedEvent: Event,
@@ -22,6 +24,8 @@ const EventsBar = ({
         distanceToFront?: number
        }) => void
   }) => {
+
+  const eventRef = useRef(null)
 
   const [move, setMove] = useState(0)
 
@@ -64,6 +68,47 @@ const EventsBar = ({
     setMove(distanceToFront)
   }
 
+  const moveEnd = (e: DragEvent) => {
+    const movingFront = e.clientX - move
+    let greaterThanArray: Event[] = []
+    let x: number
+    let nearestEvent: Event
+
+    // day.dayValue.forEach((event, i) => {
+    //   const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
+    //   if (currPosition > movingFront) {
+    //     greaterThanArray.push({ ...event, arrayIndex: i })
+    //   }
+    //   if (state.selectedEvent.arrayIndex === i) {
+
+    //     greaterThanArray.sort((a, b) => a.start - b.start)
+    //     nearestEvent = greaterThanArray[0]
+
+    //     const nearestStart = nearestEvent.start
+    //     x = nearestEvent.arrayIndex
+
+    //     nearestEvent.start = state.selectedEvent.duration + nearestStart 
+
+    //     event.start = nearestStart
+
+    //     // start times not all changed yet
+
+    //     day.dayValue.splice(x, 0, event)
+    //     console.log('inside shit,', day.dayValue, "selected", event, "x", x)
+    //     console.log('nearest', nearestEvent)
+    //     day.dayValue.splice(state.selectedEvent.arrayIndex, 1)
+        
+    //     // day.dayValue[state.selectedEvent.arrayIndex] = nearestEvent
+
+    //     console.log('dayValue', day.dayValue)
+
+    //   }
+    // })
+    
+    
+    dispatch({ type: "moved", dragEvent: e, distanceToFront: move })
+  }
+
 
   return (
     <div id="grid96" className="grid grid-cols-96">
@@ -73,11 +118,12 @@ const EventsBar = ({
             && selectedEvent.dayKey === day.dayKey
             ?
             <><div
+              ref={eventRef}
               key={mapDataEvent.start}
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
-              onDragEnd={(e) => dispatch({ type: "moved", dragEvent: e, distanceToFront: move })}
+              onDragEnd={(e) => moveEnd(e)}
               draggable={true}
             >
                 {
@@ -109,6 +155,7 @@ const EventsBar = ({
               key={mapDataEvent.start}
               className={mapDataEvent.className}
               onClick={() => {
+
                 dispatch({
                 type: "selectEvent",
                 event: mapDataEvent, 

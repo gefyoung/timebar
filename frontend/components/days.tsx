@@ -108,7 +108,7 @@ export default function Days({ data }: { data: UserMonthData }) {
                   <Image width={16} height={16} src="/files.svg" alt="notes icon" />
                 </div>}
               </div>
-              <div>
+              {/* <div> */}
                 {state.selectedEvent.dayKey === day.dayKey
                   && <EventNameBar
                     dispatch={dispatch}
@@ -116,9 +116,10 @@ export default function Days({ data }: { data: UserMonthData }) {
                     events={state.events}
                     dayKey={Number(day.dayKey)}
                   />}
-              </div>
+              {/* </div> */}
 
               <EventsBar
+              state={state}
                 dispatch={dispatch}
                 day={day}
                 monthYear={state.monthYear}

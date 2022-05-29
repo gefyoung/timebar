@@ -276,10 +276,11 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
 
   } else if (event.type === "moved") { // if event moved left
+
     console.log("dragEvent", event.dragEvent)
     const editedArray = [...state.data]
-    let start = 0
-    let selectedEvent: Event = {
+
+    let daySelectedEvent: Event = {
       eventName: "",
       text: "",
       start: 0,
@@ -290,52 +291,52 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
     let x: number
     let nearestEvent: Event
+    let newEventArray: any[] = []
+    let moved = false
+    let movingDayValueEvent: any
     if (event.dragEvent && event.distanceToFront) {
       const movingFront = event.dragEvent.clientX - event.distanceToFront
 
       editedArray.forEach((day) => {
+
         if (state.selectedEvent.dayKey === day.dayKey) {
+          console.log(JSON.parse(JSON.stringify(day.dayValue)))
           const greaterThanArray: Event[] = []
+          movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
+          console.log('movingDayValueEvent', movingDayValueEvent)
 
+          day.dayValue.forEach((eventBox, i) => {
+            const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
+            console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
+            if (!moved) {
+              if (currPosition < movingFront) {
+                newEventArray.push(eventBox)
+              } else {
+                newEventArray.push(movingDayValueEvent, eventBox)
+                moved = true
+              }
+            } else {
+              if (movingDayValueEvent.start !== eventBox.start) {
+                newEventArray.push(eventBox)
+              }
+              
+            }
 
-          day.dayValue.forEach((event, i) => {
-            const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
-            if (currPosition > movingFront) {
-              greaterThanArray.push({ ...event, arrayIndex: i })
-            }
-            if (state.selectedEvent.arrayIndex === i) {
-              selectedEvent = event
-            }
           })
 
-          greaterThanArray.sort((a, b) => a.start - b.start)
-          nearestEvent = greaterThanArray[0]
-
-          const nearestStart = nearestEvent.start
-          x = nearestEvent.arrayIndex
-          start = nearestStart
-          nearestEvent.start = state.selectedEvent.start
-          selectedEvent.start = nearestStart
-
-          console.log('day.dayValue[x]', day.dayValue[x], 
-          'day.dayValue[selectedEvent.arrayIndex]', day.dayValue[state.selectedEvent.arrayIndex])
-          
-          day.dayValue[x] = selectedEvent
-          day.dayValue[state.selectedEvent.arrayIndex] = nearestEvent
-
+          console.log('newEventARray', newEventArray)
+        day.dayValue = newEventArray
         }
 
-
-
-        // its the same value
       })
 
+
     }
-    console.log('selectedEvent', selectedEvent)
+    // console.log('editedArray', editedArray)
     return {
       ...state,
       data: editedArray,
-      selectedEvent: selectedEvent
+      selectedEvent: movingDayValueEvent
       
     }
 

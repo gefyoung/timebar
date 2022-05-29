@@ -72,7 +72,7 @@ const EventNameBar = ({ monthYear, events, dayKey, dispatch }: {
   }
 
   return (
-    <div key={dayKey}>
+    <div>
       {events?.length > 0
         && events.map((event, i) =>
           <>
