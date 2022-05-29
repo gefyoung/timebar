@@ -109,7 +109,6 @@ const EventsBar = ({
               key={mapDataEvent.start}
               className={mapDataEvent.className}
               onClick={() => {
-                console.log(mapDataEvent)
                 dispatch({
                 type: "selectEvent",
                 event: mapDataEvent, 

@@ -15,16 +15,15 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
   const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
 
   const { timezoneOffset }: TimezoneOffset = JSON.parse(event.body ?? '')
-
+  const offsetMilliseconds = timezoneOffset * 60000
   const date = new Date()
-  const offsetDate = new Date(date.getTime() - timezoneOffset)
+  const offsetDate = new Date(date.getTime() - offsetMilliseconds)
   const month = offsetDate.getMonth() + 1
   const year = offsetDate.getFullYear()
   const monthsKey = month + "_" + year
   const day = "" + offsetDate.getDate()
 
-  console.log('day', day)
-  console.log('date', date, 'offsetDate', offsetDate)
+  console.log('date: ', date, ', offsetDate: ', offsetDate)
 
   // const prevMonthYear = // i need to import the previous Event Names
 
