@@ -277,7 +277,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
   } else if (event.type === "moved") { // if event moved left
 
-    console.log("dragEvent", event.dragEvent)
     const editedArray = [...state.data]
 
     let daySelectedEvent: Event = {
@@ -294,44 +293,49 @@ const reducer = (state: State, event: ReducerEvent): State => {
     let newEventArray: any[] = []
     let moved = false
     let movingDayValueEvent: any
-    if (event.dragEvent && event.distanceToFront) {
-      const movingFront = event.dragEvent.clientX - event.distanceToFront
+    // if (event.dragEvent && event.distanceToFront) {
+    //   const movingFront = event.dragEvent.clientX - event.distanceToFront
 
-      editedArray.forEach((day) => {
+      // editedArray.forEach((day) => {
 
-        if (state.selectedEvent.dayKey === day.dayKey) {
-          console.log(JSON.parse(JSON.stringify(day.dayValue)))
-          const greaterThanArray: Event[] = []
-          movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
-          console.log('movingDayValueEvent', movingDayValueEvent)
+      //   if (state.selectedEvent.dayKey === day.dayKey) {
+      //     const greaterThanArray: Event[] = []
+      //     movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
 
-          day.dayValue.forEach((eventBox, i) => {
-            const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
-            console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
-            if (!moved) {
-              if (currPosition < movingFront) {
-                newEventArray.push(eventBox)
-              } else {
-                newEventArray.push(movingDayValueEvent, eventBox)
-                moved = true
-              }
-            } else {
-              if (movingDayValueEvent.start !== eventBox.start) {
-                newEventArray.push(eventBox)
-              }
+      //     day.dayValue.forEach((eventBox, i) => {
+      //       const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
+      //       // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
+      //       if (!moved) {
+      //         if (currPosition < movingFront) {
+      //           eventBox.start = movingDayValueEvent.duration + eventBox.start
+      //           newEventArray.push(eventBox)
+                
+      //         } else {
+      //           movingDayValueEvent.start = eventBox.start
+      //           console.log('eventBox.start', eventBox.start)
+      //           eventBox.start = state.selectedEvent.duration + eventBox.start // not using movingDay cause error
+      //           console.log('state.selectedEvent.duration + eventBox.start', state.selectedEvent.duration,  eventBox.start)
+      //           newEventArray.push(movingDayValueEvent, eventBox)
+                
+      //           moved = true
+      //         }
+      //       } else {
+      //         if (movingDayValueEvent.start !== eventBox.start) {
+      //           eventBox.start = movingDayValueEvent.duration + eventBox.start
+      //           newEventArray.push(eventBox)
+      //         }
               
-            }
+      //       }
 
-          })
+      //     })
+      //   day.dayValue = newEventArray
+      //   movingDayValueEvent.dayKey = day.dayKey
+      //   }
+      // })
+      // console.log('newEventArray', newEventArray)
 
-          console.log('newEventARray', newEventArray)
-        day.dayValue = newEventArray
-        }
 
-      })
-
-
-    }
+    // }
     // console.log('editedArray', editedArray)
     return {
       ...state,

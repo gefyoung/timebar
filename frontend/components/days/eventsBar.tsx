@@ -70,43 +70,42 @@ const EventsBar = ({
 
   const moveEnd = (e: DragEvent) => {
     const movingFront = e.clientX - move
-    let greaterThanArray: Event[] = []
-    let x: number
-    let nearestEvent: Event
+    let newEventArray: any[] = []
+    let moved = false
+    let movingDayValueEvent: any
+    movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
 
-    // day.dayValue.forEach((event, i) => {
-    //   const currPosition = document.getElementById(`${event.start}`)?.offsetLeft ?? 0
-    //   if (currPosition > movingFront) {
-    //     greaterThanArray.push({ ...event, arrayIndex: i })
-    //   }
-    //   if (state.selectedEvent.arrayIndex === i) {
+          day.dayValue.forEach((eventBox, i) => {
+            const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
+            // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
+            if (!moved) {
+              if (currPosition < movingFront) {
+                eventBox.start = movingDayValueEvent.duration + eventBox.start
+                newEventArray.push(eventBox)
+                
+              } else {
+                movingDayValueEvent.start = eventBox.start
+                console.log('eventBox.start', eventBox.start)
+                eventBox.start = state.selectedEvent.duration + eventBox.start // not using movingDay cause error
+                console.log('state.selectedEvent.duration + eventBox.start', state.selectedEvent.duration,  eventBox.start)
+                newEventArray.push(movingDayValueEvent, eventBox)
+                
+                moved = true
+              }
+            } else {
+              if (movingDayValueEvent.start !== eventBox.start) {
+                eventBox.start = movingDayValueEvent.duration + eventBox.start
+                newEventArray.push(eventBox)
+              }
+              
+            }
 
-    //     greaterThanArray.sort((a, b) => a.start - b.start)
-    //     nearestEvent = greaterThanArray[0]
-
-    //     const nearestStart = nearestEvent.start
-    //     x = nearestEvent.arrayIndex
-
-    //     nearestEvent.start = state.selectedEvent.duration + nearestStart 
-
-    //     event.start = nearestStart
-
-    //     // start times not all changed yet
-
-    //     day.dayValue.splice(x, 0, event)
-    //     console.log('inside shit,', day.dayValue, "selected", event, "x", x)
-    //     console.log('nearest', nearestEvent)
-    //     day.dayValue.splice(state.selectedEvent.arrayIndex, 1)
-        
-    //     // day.dayValue[state.selectedEvent.arrayIndex] = nearestEvent
-
-    //     console.log('dayValue', day.dayValue)
-
-    //   }
-    // })
+          })
+        day.dayValue = newEventArray
+        movingDayValueEvent.dayKey = day.dayKey
     
-    
-    dispatch({ type: "moved", dragEvent: e, distanceToFront: move })
+    dispatch({ type: "moved", newDay: day  })
+
   }
 
 

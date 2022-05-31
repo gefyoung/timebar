@@ -9,6 +9,7 @@ interface EventNameEvent {
   dayKey: string
 }[]
 
+
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
   
   try {

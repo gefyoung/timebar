@@ -11,6 +11,7 @@ import EventNameBar from './days/eventNameBar'
 import EventsBar from './days/eventsBar'
 import { UserMonthData } from '../pages/index'
 import reducer from '../lib/daysReducer'
+import EventsDelineator from './days/eventsDelineator'
 
 interface MonthType {
   month: string,
@@ -69,15 +70,15 @@ export default function Days({ data }: { data: UserMonthData }) {
           ? <div>
             <div>{state.selectedEvent.eventName}</div>
             <div>
-              <EventText 
-                dispatch={dispatch} 
-                selectedEvent={state.selectedEvent} 
+              <EventText
+                dispatch={dispatch}
+                selectedEvent={state.selectedEvent}
                 monthYear={state.monthYear} />
             </div>
           </div> : <div className="mt-6">
-            <DayText 
-              dispatch={dispatch} 
-              selectedEvent={state.selectedEvent} 
+            <DayText
+              dispatch={dispatch}
+              selectedEvent={state.selectedEvent}
               monthState={state.monthYear} />
           </div>
         }
@@ -90,41 +91,45 @@ export default function Days({ data }: { data: UserMonthData }) {
       <div className="w-85ch">
         <div className="mb-10 text-xl">{monthToString(Number(month1))}  {year1}</div>
         {
-          state.data.map((day: Day ) =>
+          state.data.map((day: Day) =>
             <div className="max-w-4xl mb-10" key={day.dayKey}>
 
               <div className="flex flex-row" >
                 <div onClick={() => dispatch({
-                  type: "selectDay", 
+                  type: "selectDay",
                   dayKey: day.dayKey,
                   text: day.dayText
-                  })}>
+                })}>
                   {
-                    
-                  (new Date(month1 + " " + day.dayKey + " " + year1))
-                    .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
+
+                    (new Date(month1 + " " + day.dayKey + " " + year1))
+                      .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
                 </div>
                 {day.dayText && <div className="h-4 mt-2 ml-1">
                   <Image width={16} height={16} src="/files.svg" alt="notes icon" />
                 </div>}
               </div>
               {/* <div> */}
-                {state.selectedEvent.dayKey === day.dayKey
-                  && <EventNameBar
-                    dispatch={dispatch}
-                    monthYear={state.monthYear}
-                    events={state.events}
-                    dayKey={Number(day.dayKey)}
-                  />}
+              {state.selectedEvent.dayKey === day.dayKey
+                && <EventNameBar
+                  day={day}
+                  dispatch={dispatch}
+                  monthYear={state.monthYear}
+                  events={state.events}
+                  dayKey={Number(day.dayKey)}
+                />}
               {/* </div> */}
 
               <EventsBar
-              state={state}
+                state={state}
                 dispatch={dispatch}
                 day={day}
                 monthYear={state.monthYear}
                 selectedEvent={state.selectedEvent}
               />
+              {state.selectedEvent.dayKey === day.dayKey &&
+                <EventsDelineator />
+              }
 
 
               <div>

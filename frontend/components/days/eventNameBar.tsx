@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
-import { Event } from '../../lib/types'
+import { Day, Event } from '../../lib/types'
 
 
 type DayValueArr = Event[]
@@ -14,9 +14,10 @@ interface EventAdded {
   eventNameKey: number
 }
 
-const EventNameBar = ({ monthYear, events, dayKey, dispatch }: {
+const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
   monthYear: string,
   events: string[],
+  day: Day,
   dayKey: number,
   dispatch: (e: any) => void
 }) => {
@@ -43,33 +44,45 @@ const EventNameBar = ({ monthYear, events, dayKey, dispatch }: {
     }
   }
 
-  const addEvent = async (event: string, i: number) => {
-    let params
 
-      params = {
+
+  const addEvent = async (day: Day, event: string, eventNameKey: number) => {
+
+    const lastEventPos = day.dayValue.length
+    const lastEvent = day.dayValue[lastEventPos - 1]
+
+    const newEventStart = lastEvent ? lastEvent.start + lastEvent.duration : 1
+
+      const params = {
         body: {
           eventName: event,
           dayKey: dayKey,
           monthYear: monthYear,
-          eventNameKey: i
+          eventNameKey: eventNameKey,
+          start: newEventStart,
+          duration: 6
         }
       }
+      const eventEvent = {...params.body, className: "col-span-" + 6 + " h-8 " + eventKeyToColor(eventNameKey) }
 
     try {
-      const submittedEvent = await API.post(
+
+      dispatch({
+        type: "eventAdded", 
+        event: eventEvent
+      })
+      await API.post(
         process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",
         '/submitEvent',
         params
       )
-      submittedEvent.className = "col-span-" + 6 + " h-8 " + eventKeyToColor(i)
-      dispatch({
-        type: "eventAdded", 
-        event: submittedEvent
-      })
+      
     } catch (err) {
       console.log(err)
     }
   }
+
+
 
   return (
     <div>
@@ -79,7 +92,7 @@ const EventNameBar = ({ monthYear, events, dayKey, dispatch }: {
             <button
               key={i}
               className="px-1 m-1 mr-2 outline-black outline outline-1"
-              onClick={() => addEvent(event, i)}
+              onClick={() => addEvent(day, event, i)}
             >{event}</button>
           </>)
       }{

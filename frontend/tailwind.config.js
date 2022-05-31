@@ -93,6 +93,7 @@ module.exports = {
 
       },
       gridTemplateColumns: {
+        '16': 'repeat(16, minmax(0, 1fr))',
         '96': 'repeat(96, minmax(0, 1fr))',
       },
       spacing: {

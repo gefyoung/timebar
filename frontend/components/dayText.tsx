@@ -21,7 +21,7 @@ interface SelectedEvent {
 export default function DayText({ selectedEvent, dispatch, monthState }: {
   selectedEvent: SelectedEvent
   dispatch: ({ text, type, dayKey }: { text: string, type: string, dayKey: string }) => void
-  monthState: { month: string, year: number, monthYear: string }
+  monthState: string
 }) {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -30,13 +30,14 @@ export default function DayText({ selectedEvent, dispatch, monthState }: {
   const saveText = async (text: string | undefined) => {
     /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
     and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
+    console.log(monthState, 'monthState')
     if (text) {
       const params = {
         body: {
           dayKey: selectedEvent.dayKey,
           start: selectedEvent.start,
           text: textAreaRef.current?.value,
-          monthYear: monthState.monthYear
+          monthYear: monthState
         }
       }
       console.log('savetext', text)
