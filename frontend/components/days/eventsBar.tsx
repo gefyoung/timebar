@@ -6,26 +6,27 @@ import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
 // import { moveEnd } from '../../lib/moveEvent'
 
-const EventsBar = ({ 
+const EventsBar = ({
   state,
   // monthYear,
   // day, 
   // selectedEvent, 
   dispatch,
   dayIndex
- }:
+}:
   {
     state: State
     // monthYear: string,
     // day: Day,
     // selectedEvent: Event,
     dayIndex: number
-    dispatch: ({type, event, dayKey, arrayIndex, dragEvent, distanceToFront, newData}: 
-      {type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent,
+    dispatch: ({ type, event, dayKey, arrayIndex, dragEvent, distanceToFront, newData }:
+      {
+        type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent,
         distanceToFront?: number, newData?: any, movingDayValueEvent?: any, dayArrayIndex?: number
-       }) => void
+      }) => void
   }) => {
-    console.log('state.selectedEvent.dayArrayIndex', state.selectedEvent.dayArrayIndex)
+  console.log('state.selectedEvent.dayArrayIndex', state.selectedEvent.dayArrayIndex)
   const eventRef = useRef(null)
 
   const [initialMoveState, setIniitialMoveState] = useState(0)
@@ -36,7 +37,7 @@ const EventsBar = ({
   }
 
   const day = state.data[dayIndex]
-  
+
   const dragEnd = async (e: DragEvent, duration: number) => {
     e.stopPropagation()
     const params = {
@@ -79,53 +80,50 @@ const EventsBar = ({
     const movingFront = e.clientX - initialMoveState
     let newEventArray: any[] = []
     let moved = false
-    let movingDayValueEvent: any
 
-    movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
-    
-          day.dayValue.forEach((eventBox, i) => {
-            const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
-            // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
-            if (!moved) {
-              if (currPosition < movingFront) {
-                eventBox.start = movingDayValueEvent.duration + eventBox.start
-                newEventArray.push(eventBox)
-                
-              } else {
-                movingDayValueEvent.start = eventBox.start
-                console.log('eventBox.start', eventBox.start)
-                eventBox.start = state.selectedEvent.duration + eventBox.start // not using movingDay cause error
-                console.log('state.selectedEvent.duration + eventBox.start', state.selectedEvent.duration,  eventBox.start)
-                newEventArray.push(movingDayValueEvent, eventBox)
-                
-                moved = true
-              }
-            } else {
-              if (movingDayValueEvent.start !== eventBox.start) {
-                eventBox.start = movingDayValueEvent.duration + eventBox.start
-                newEventArray.push(eventBox)
-              }
-              
-            }
+    day.dayValue.forEach((eventBox, i) => {
+      const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
+      // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
+      if (!moved) {
+        if (currPosition < movingFront) {
+          eventBox.start = state.selectedEvent.duration + eventBox.start
+          newEventArray.push(eventBox)
 
-          })
+        } else {
+          state.selectedEvent.start = eventBox.start
+          console.log('eventBox.start', eventBox.start)
+          eventBox.start = state.selectedEvent.duration + eventBox.start // not using movingDay cause error
+          console.log('state.selectedEvent.duration + eventBox.start', state.selectedEvent.duration, eventBox.start)
+          newEventArray.push(state.selectedEvent, eventBox)
 
-        day.dayValue = newEventArray
-        movingDayValueEvent.dayKey = day.dayKey
+          moved = true
+        }
+      } else {
+        if (state.selectedEvent.start !== eventBox.start) {
+          eventBox.start = state.selectedEvent.duration + eventBox.start
+          newEventArray.push(eventBox)
+        }
+
+      }
+
+    })
+
+    day.dayValue = newEventArray
+    state.selectedEvent.dayKey = day.dayKey
     state.data.forEach((dataDay) => {
       if (dataDay.dayKey === state.selectedEvent.dayKey) {
         dataDay = day
       }
     })
-    dispatch({ type: "moved", newData: state.data, movingDayValueEvent: movingDayValueEvent  })
+    dispatch({ type: "moved", newData: state.data, movingDayValueEvent: state.selectedEvent })
 
   }
 
   const selectEvent = (mapDataEvent: any, i: number) => {
     dispatch({
       type: "selectEvent",
-      event: mapDataEvent, 
-      dayKey: day.dayKey, 
+      event: mapDataEvent,
+      dayKey: day.dayKey,
       arrayIndex: i,
       dayArrayIndex: dayIndex
     })
@@ -136,35 +134,35 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-        {mapDataEvent === state.selectedEvent
+          {mapDataEvent === state.selectedEvent
             ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}
               key={mapDataEvent.start}
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
-              // onDragStart={(e) => moveStart(e)}
-              // onDragEnd={(e) => moveEnd(e)}
+              onDragStart={(e) => moveStart(e)}
+              onDragEnd={(e) => moveEnd(e)}
               draggable={true}
             >
-                {
-                  mapDataEvent.text &&
-                  <div id="chevron" className="mt-2 ">
-                    <Image width={16} height={16} src="/files.svg" alt="notes icon" />
-                  </div>
-                }
-                
-                <div 
-                  onDrag={(e) => drag(e)} 
-                  onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
-                  // onTouchStart={(e) => touchMove(e)}
-                  // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
-                  // onTouchEnd={() => dragEnd(flipEvent.duration)}
-
-                  className="absolute mt-1 -right-3 cursor-ew-resize"
-                >
-                  <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
+              {
+                mapDataEvent.text &&
+                <div id="chevron" className="mt-2 ">
+                  <Image width={16} height={16} src="/files.svg" alt="notes icon" />
                 </div>
+              }
+
+              <div
+                onDrag={(e) => drag(e)}
+                onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
+                // onTouchStart={(e) => touchMove(e)}
+                // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
+                // onTouchEnd={() => dragEnd(flipEvent.duration)}
+
+                className="absolute mt-1 -right-3 cursor-ew-resize"
+              >
+                <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
+              </div>
 
             </div>
 
@@ -189,16 +187,16 @@ const EventsBar = ({
       )}
       {state.selectedEvent.start !== 0 && state.selectedEvent.dayKey === day.dayKey
         && (!deleteState ? <div className="ml-2 col-start-96"><button
-          
-          onClick={() => setDeleteState(true) }
+
+          onClick={() => setDeleteState(true)}
         >delete</button></div>
-      : <div className="ml-2 col-start-96"><button
-          
-      onClick={() => deleteEvent() }
-    >yes</button><button
-          
-      onClick={() => setDeleteState(false) }
-    >no</button></div>)}
+          : <div className="ml-2 col-start-96"><button
+
+            onClick={() => deleteEvent()}
+          >yes</button><button
+
+            onClick={() => setDeleteState(false)}
+          >no</button></div>)}
     </div>
 
   )
