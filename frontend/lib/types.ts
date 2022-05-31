@@ -7,11 +7,13 @@ export interface Event {
   eventNameKey?: number
   dayKey: string
   arrayIndex: number
+  dayArrayIndex: number
 }
 export interface Day {
   dayKey: string
   dayValue: Event[]
   dayText?: string
+
 }
 
 export interface UserData {
@@ -20,6 +22,15 @@ export interface UserData {
   days: Day[]
   events: string[]
 }
+
+export interface State {
+  monthYear: string
+  events: string[]
+  data: Day[]
+  selectedEvent: Event
+}
+
+
 
 declare namespace NodeJS {
   export interface ProcessEnv {

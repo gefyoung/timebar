@@ -2,10 +2,7 @@ import { DragEvent, useEffect, useReducer, useState } from 'react'
 import EventText from './eventText'
 import DayText from './dayText'
 import Image from 'next/image'
-import API from '@aws-amplify/api'
-
-import returnClassName, { returnOneClassName } from '../lib/returnClassName'
-import { Event, Day } from '../lib/types'
+import { State, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
 import EventNameBar from './days/eventNameBar'
 import EventsBar from './days/eventsBar'
@@ -13,27 +10,7 @@ import { UserMonthData } from '../pages/index'
 import reducer from '../lib/daysReducer'
 import EventsDelineator from './days/eventsDelineator'
 
-interface MonthType {
-  month: string,
-  year: number,
-  monthYear: string,
-  events: string[]
-}
 
-interface ReducerEvent {
-  type: string
-  dayKey: string
-  text?: string
-  event?: Event
-  arrayIndex?: number
-}
-
-export interface State {
-  monthYear: string
-  events: string[]
-  data: Day[]
-  selectedEvent: Event
-}
 type Reducer<S, A> = (prevState: S, action: A) => S
 
 export default function Days({ data }: { data: UserMonthData }) {
@@ -49,7 +26,8 @@ export default function Days({ data }: { data: UserMonthData }) {
       className: "",
       arrayIndex: 0,
       duration: 0,
-      dayKey: "0"
+      dayKey: "0",
+      dayArrayIndex: 0
     }
   }
 
@@ -91,7 +69,7 @@ export default function Days({ data }: { data: UserMonthData }) {
       <div className="w-85ch">
         <div className="mb-10 text-xl">{monthToString(Number(month1))}  {year1}</div>
         {
-          state.data.map((day: Day) =>
+          state.data.map((day: Day, i: number) =>
             <div className="max-w-4xl mb-10" key={day.dayKey}>
 
               <div className="flex flex-row" >
@@ -123,9 +101,10 @@ export default function Days({ data }: { data: UserMonthData }) {
               <EventsBar
                 state={state}
                 dispatch={dispatch}
-                day={day}
-                monthYear={state.monthYear}
-                selectedEvent={state.selectedEvent}
+                // day={day}
+                dayIndex={i}
+                // monthYear={state.monthYear}
+                // selectedEvent={state.selectedEvent}
               />
               {state.selectedEvent.dayKey === day.dayKey &&
                 <EventsDelineator />

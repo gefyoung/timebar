@@ -90,7 +90,9 @@ module.exports = {
         'span-94': 'span 94 / span 94',
         'span-95': 'span 95 / span 95',
         'span-96': 'span 96 / span 96'
-
+      },
+      gridColumnStart: {
+        '96': '96'
       },
       gridTemplateColumns: {
         '16': 'repeat(16, minmax(0, 1fr))',

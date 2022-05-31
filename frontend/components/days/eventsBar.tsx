@@ -1,42 +1,49 @@
 
 import { useRef, useState } from 'react'
-import { Day, Event } from "../../lib/types"
+import { Day, Event, State } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
-import { State } from '../../lib/daysReducer'
-
+// import { moveEnd } from '../../lib/moveEvent'
 
 const EventsBar = ({ 
   state,
-  monthYear,
-  day, 
-  selectedEvent, 
+  // monthYear,
+  // day, 
+  // selectedEvent, 
   dispatch,
+  dayIndex
  }:
   {
     state: State
-    monthYear: string,
-    day: Day,
-    selectedEvent: Event,
-    dispatch: ({type, event, dayKey, arrayIndex, dragEvent, distanceToFront}: 
+    // monthYear: string,
+    // day: Day,
+    // selectedEvent: Event,
+    dayIndex: number
+    dispatch: ({type, event, dayKey, arrayIndex, dragEvent, distanceToFront, newData}: 
       {type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent,
-        distanceToFront?: number
+        distanceToFront?: number, newData?: any, movingDayValueEvent?: any, dayArrayIndex?: number
        }) => void
   }) => {
-
+    console.log('state.selectedEvent.dayArrayIndex', state.selectedEvent.dayArrayIndex)
   const eventRef = useRef(null)
 
-  const [move, setMove] = useState(0)
+  const [initialMoveState, setIniitialMoveState] = useState(0)
+  const [deleteState, setDeleteState] = useState(false)
 
+  const drag = (e: DragEvent) => {
+    dispatch({ type: "drag", dragEvent: e })
+  }
+
+  const day = state.data[dayIndex]
   
   const dragEnd = async (e: DragEvent, duration: number) => {
-      e.stopPropagation()
+    e.stopPropagation()
     const params = {
       body: {
-        dayKey: selectedEvent.dayKey,
-        monthYear: monthYear,
-        start: selectedEvent.start,
+        dayKey: state.selectedEvent.dayKey,
+        monthYear: state.monthYear,
+        start: state.selectedEvent.start,
         duration: duration,
       }
     }
@@ -47,9 +54,9 @@ const EventsBar = ({
   const deleteEvent = async () => {
     const params = {
       body: {
-        dayKey: selectedEvent.dayKey,
-        monthYear: monthYear,
-        start: selectedEvent.start
+        dayKey: state.selectedEvent.dayKey,
+        monthYear: state.monthYear,
+        start: state.selectedEvent.start
       }
     }
 
@@ -65,16 +72,17 @@ const EventsBar = ({
   const moveStart = (e: DragEvent) => {
     const selectedLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
     const distanceToFront = e.clientX - selectedLeftPosition
-    setMove(distanceToFront)
+    setIniitialMoveState(distanceToFront)
   }
 
   const moveEnd = (e: DragEvent) => {
-    const movingFront = e.clientX - move
+    const movingFront = e.clientX - initialMoveState
     let newEventArray: any[] = []
     let moved = false
     let movingDayValueEvent: any
-    movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
 
+    movingDayValueEvent = day.dayValue[state.selectedEvent.arrayIndex] // this works
+    
           day.dayValue.forEach((eventBox, i) => {
             const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
             // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
@@ -101,11 +109,26 @@ const EventsBar = ({
             }
 
           })
+
         day.dayValue = newEventArray
         movingDayValueEvent.dayKey = day.dayKey
-    
-    dispatch({ type: "moved", newDay: day  })
+    state.data.forEach((dataDay) => {
+      if (dataDay.dayKey === state.selectedEvent.dayKey) {
+        dataDay = day
+      }
+    })
+    dispatch({ type: "moved", newData: state.data, movingDayValueEvent: movingDayValueEvent  })
 
+  }
+
+  const selectEvent = (mapDataEvent: any, i: number) => {
+    dispatch({
+      type: "selectEvent",
+      event: mapDataEvent, 
+      dayKey: day.dayKey, 
+      arrayIndex: i,
+      dayArrayIndex: dayIndex
+    })
   }
 
 
@@ -113,16 +136,15 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-          {selectedEvent.start === mapDataEvent.start
-            && selectedEvent.dayKey === day.dayKey
-            ?
+        {mapDataEvent === state.selectedEvent
+            ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}
               key={mapDataEvent.start}
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
-              onDragStart={(e) => moveStart(e)}
-              onDragEnd={(e) => moveEnd(e)}
+              // onDragStart={(e) => moveStart(e)}
+              // onDragEnd={(e) => moveEnd(e)}
               draggable={true}
             >
                 {
@@ -133,7 +155,7 @@ const EventsBar = ({
                 }
                 
                 <div 
-                  onDrag={(e) => dispatch({ type: "drag", dragEvent: e })} 
+                  onDrag={(e) => drag(e)} 
                   onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
                   // onTouchStart={(e) => touchMove(e)}
                   // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
@@ -153,15 +175,7 @@ const EventsBar = ({
               id={"" + mapDataEvent.start}
               key={mapDataEvent.start}
               className={mapDataEvent.className}
-              onClick={() => {
-
-                dispatch({
-                type: "selectEvent",
-                event: mapDataEvent, 
-                dayKey: day.dayKey, 
-                arrayIndex: i
-                
-              })}}
+              onClick={() => selectEvent(mapDataEvent, i)}
             >
               {
                 mapDataEvent.text &&
@@ -173,11 +187,18 @@ const EventsBar = ({
           }
         </>
       )}
-      {selectedEvent.start !== 0 && selectedEvent.dayKey === day.dayKey
-        && <button
-          className="ml-2"
-          onClick={() => deleteEvent() }
-        >delete</button>}
+      {state.selectedEvent.start !== 0 && state.selectedEvent.dayKey === day.dayKey
+        && (!deleteState ? <div className="ml-2 col-start-96"><button
+          
+          onClick={() => setDeleteState(true) }
+        >delete</button></div>
+      : <div className="ml-2 col-start-96"><button
+          
+      onClick={() => deleteEvent() }
+    >yes</button><button
+          
+      onClick={() => setDeleteState(false) }
+    >no</button></div>)}
     </div>
 
   )

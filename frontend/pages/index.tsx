@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react'
 import API from '@aws-amplify/api'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import CreateAccount from '../components/createAccount'
 import { Auth } from 'aws-amplify'
@@ -12,7 +11,6 @@ import LogIn from '../components/logIn'
 import '../configureAmplify'
 import { Day, Event } from '../lib/types'
 import returnClassName from '../lib/returnClassName'
-import { State } from '../components/days'
 
 interface IndexProps {
   changePageState: Function,
