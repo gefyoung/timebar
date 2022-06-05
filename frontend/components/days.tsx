@@ -63,7 +63,7 @@ export default function Days({ data }: { data: UserMonthData }) {
       </div>
     )
   }
-
+  console.log('state.selectedEvent.dayKey', state.selectedEvent.dayKey)
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
@@ -79,7 +79,6 @@ export default function Days({ data }: { data: UserMonthData }) {
                   text: day.dayText
                 })}>
                   {
-
                     (new Date(month1 + " " + day.dayKey + " " + year1))
                       .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
                 </div>
@@ -109,8 +108,6 @@ export default function Days({ data }: { data: UserMonthData }) {
               {state.selectedEvent.dayKey === day.dayKey &&
                 <EventsDelineator />
               }
-
-
               <div>
                 {state.selectedEvent.dayKey === day.dayKey
                   && <TextEditor />

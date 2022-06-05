@@ -21,6 +21,10 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
   const month = offsetDate.getMonth() + 1
   const year = offsetDate.getFullYear()
   const monthsKey = month + "_" + year
+  const prevMonthYear = offsetDate.getMonth() 
+    /* if current month is jan, month = 0 */
+    ? offsetDate.getMonth() + "_" + year 
+    : "12_" + (year - 1)
   const day = "" + offsetDate.getDate()
 
   console.log('date: ', date, ', offsetDate: ', offsetDate)
@@ -32,11 +36,15 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       Key: { user: identityId, month: monthsKey },
       TableName: process.env.UserMonths ?? 'noTable'
     }
+    const prevDays = {
+      Key: { user: identityId, month: prevMonthYear },
+      TableName: process.env.UserMonths ?? 'noTable'
+    }
 
     let returnData
 
     const dynamoData = await dynamoDb.get(getDays).promise()
-
+    const prevMonth = dynamoDb.get(prevDays).promise()
     /* if user does not exist */
     if (Object.keys(dynamoData).length === 0) {
 
@@ -76,11 +84,14 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       }
 
       /* if user doesn't have any eventNames saved */
+      const prevMonthArray = await prevMonth 
       const eventArray = dynamoData.Item?.events
-      if (!eventArray) {
+      const prevEvents = prevMonthArray.Item?.events
+      console.log(eventArray.length, 'eventArray')
+      if (eventArray.length === 0) {
         const updateArray = {
           ExpressionAttributeNames: { "#EV": "events" },
-          ExpressionAttributeValues: { ":ev": [] },
+          ExpressionAttributeValues: { ":ev": prevEvents },
           Key: { user: identityId, month: monthsKey },
           ReturnValues: "ALL_NEW",
           TableName: process.env.UserMonths ?? 'noTable',
@@ -89,13 +100,13 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         const updatedArray = await dynamoDb.update(updateArray).promise()
         console.log('updatedArray', updatedArray)
       }
-     
+      
 
       returnData = {
         user: identityId,
         month: monthsKey,
         days: sort(map),
-        events: eventArray
+        events: eventArray.length === 0 ? prevEvents : eventArray
       }
     }
 

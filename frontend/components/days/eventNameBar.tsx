@@ -35,8 +35,8 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
         }
       }
       try {
+        dispatch({type: 'eventNameAdded', eventName: eventInputRef.current.value})
         await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEventName', params)
-        dispatch(eventInputRef.current.value)
         eventInputRef.current.value = 'new event'
       } catch (err) {
         console.log(err)
@@ -56,7 +56,7 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
       const params = {
         body: {
           eventName: event,
-          dayKey: dayKey,
+          dayKey: "" + dayKey,
           monthYear: monthYear,
           eventNameKey: eventNameKey,
           start: newEventStart,
@@ -107,10 +107,11 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
               onClick={() => submitEventName()}
             >✔️</button></>
 
-          : <button
+          : events?.length <= 12 ? <button
             className="px-1 m-1 mr-2"
             onClick={() => setAddingEvent(true)}
-          >+</button>
+          >+</button> 
+          : null
       }
     </div>
   )

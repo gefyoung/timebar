@@ -23,8 +23,11 @@ const reducer = (state: State, event: ReducerEvent): State => {
     console.log("FFFFFF", state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)])
     return {
       ...state,
-      selectedEvent: 
-        state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)]
+      selectedEvent: {
+        ...state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)],
+        dayKey: event.dayKey?? "0"
+      }
+
     }
 
 
@@ -89,9 +92,8 @@ const reducer = (state: State, event: ReducerEvent): State => {
   } else if (event.type === "eventNameAdded") {
     return {
       ...state,
-      events: state.events.concat([event.event?.eventName ?? ""])
+      events: state.events.concat([event.eventName ?? ""])
     }
-
 
 
 
@@ -117,8 +119,17 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
 
     })
-
-    return { ...state, data: editedArray }
+    console.log('eventevent', event.event)
+    return { ...state, data: editedArray, selectedEvent: event.event?? {
+      eventName: "",
+      text: "",
+      start: 0,
+      className: "",
+      arrayIndex: 0,
+      duration: 0,
+      dayKey: "0",
+      dayArrayIndex: 0
+    } }
 
 
 

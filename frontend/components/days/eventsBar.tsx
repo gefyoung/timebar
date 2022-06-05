@@ -8,17 +8,11 @@ import { API } from '@aws-amplify/api'
 
 const EventsBar = ({
   state,
-  // monthYear,
-  // day, 
-  // selectedEvent, 
   dispatch,
   dayIndex
 }:
   {
     state: State
-    // monthYear: string,
-    // day: Day,
-    // selectedEvent: Event,
     dayIndex: number
     dispatch: ({ type, event, dayKey, arrayIndex, dragEvent, distanceToFront, newData }:
       {
@@ -26,7 +20,7 @@ const EventsBar = ({
         distanceToFront?: number, newData?: any, movingDayValueEvent?: any, dayArrayIndex?: number
       }) => void
   }) => {
-  console.log('state.selectedEvent.dayArrayIndex', state.selectedEvent.dayArrayIndex)
+
   const eventRef = useRef(null)
 
   const [initialMoveState, setIniitialMoveState] = useState(0)
@@ -134,7 +128,7 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-          {mapDataEvent === state.selectedEvent
+          {mapDataEvent.start == state.selectedEvent.start
             ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}

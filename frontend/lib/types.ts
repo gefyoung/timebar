@@ -9,11 +9,11 @@ export interface Event {
   arrayIndex: number
   dayArrayIndex: number
 }
+
 export interface Day {
   dayKey: string
   dayValue: Event[]
   dayText?: string
-
 }
 
 export interface UserData {
