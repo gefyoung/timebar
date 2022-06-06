@@ -2,23 +2,6 @@ import { API } from '@aws-amplify/api'
 import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
-interface FlipState {
-  flipEvent: {
-    eventName: string,
-    text: string,
-    start: number
-  },
-  dayKey: number,
-  dayText: string
-}
-
-interface Flip {
-  dayKey: number
-  start: number
-  text?: string
-  dayText?: string
-}
-
 interface SelectedEvent {
   dayKey: string
   start: number
@@ -26,7 +9,6 @@ interface SelectedEvent {
   dayText?: string
   eventName?: string
 }
-
 
 export default function TextArea({ selectedEvent, dispatch, monthYear }: {
   selectedEvent: SelectedEvent

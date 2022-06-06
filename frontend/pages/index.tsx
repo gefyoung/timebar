@@ -57,6 +57,27 @@ const Home: NextPage = () => {
     setState({...state, page: e})
   }
 
+  const date = new Date()
+  const month = date.getMonth() + 1
+  const year = date.getFullYear()
+  const monthYear = month + "_" + year
+
+  const getPreviousMonth = async () => {
+
+    const params = { body: {
+      timezoneOffset: date.getTimezoneOffset(),
+      monthYear: date.getMonth() + "_" + year
+    }}
+    const data: UserMonthData = await API.post(
+      process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
+    )
+    data.days.forEach((dayObj: Day) => {
+      dayObj.dayValue = returnClassName(dayObj.dayValue)
+    })
+    console.log('data1111', data)
+    setState({ page: 'days', auth: true, loading: false, data: data })
+  }
+
   
 
   useEffect(() => {
@@ -65,9 +86,12 @@ const Home: NextPage = () => {
         const user = await Auth.currentCredentials()
         if (user.authenticated) { 
           const params = { body: {
-            timezoneOffset: new Date().getTimezoneOffset()
+            timezoneOffset: date.getTimezoneOffset(),
+            monthYear: monthYear
           }}
-          const data: UserMonthData = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params)
+          const data: UserMonthData = await API.post(
+            process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
+          )
           data.days.forEach((dayObj: Day) => {
             dayObj.dayValue = returnClassName(dayObj.dayValue)
           })
@@ -94,7 +118,11 @@ const Home: NextPage = () => {
         </Head>
 
         { state.page === 'create' && <CreateAccount changePageState={changePageState}/>}
-        { state.page === 'days' && state.data && <Days data={state.data} />}
+        { state.page === 'days' && state.data 
+          && <Days 
+            data={state.data}
+            getPreviousMonth={getPreviousMonth}
+             />}
         { state.page === 'login' && <LogIn changePageState={changePageState}/>}
   
         {/* <footer className={styles.footer}>

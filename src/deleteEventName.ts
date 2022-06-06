@@ -3,32 +3,26 @@ import { APIGatewayProxyEventV2WithRequestContext } from 'aws-lambda'
 import { IAMAuthorizer } from './types'
 const dynamoDb = new DynamoDB.DocumentClient()
 
-interface EventNameEvent {
-  start: number,
-  monthYear: string,
-  dayKey: string
-}[]
-
-
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
   
   try {
-    const { monthYear, dayKey, start }: EventNameEvent = JSON.parse(event.body ?? '')
+    
+    const { eventNameArray, monthYear }: { 
+      eventNameArray: string[], monthYear: string 
+    } = JSON.parse(event.body ?? '')
 
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     
-    console.log('delete event: ', monthYear, dayKey, start)
-
-    const startWithNaN = start === null ? "NaN" : start
-    
-    const updateMap = {
-      ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": "" + startWithNaN },
+    const params = {
+      ExpressionAttributeNames: { "#EV": "events" },
+      ExpressionAttributeValues: { ":arr": eventNameArray },
       Key: { user: identityId, month: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
-      UpdateExpression: "REMOVE #DA.#DK.#ST"
+      UpdateExpression: "SET #EV = :arr"
     }
-    const updatedRes = await dynamoDb.update(updateMap).promise()
+
+    const updatedRes = await dynamoDb.update(params).promise()
 
       return {
         statusCode: 200,

@@ -15,6 +15,8 @@ interface ReducerEvent {
   newData: any
   movingDayValueEvent?: any
   dayArrayIndex?: number
+  eventNameKey?: number
+  eventArray?: string[]
 }
 
 const reducer = (state: State, event: ReducerEvent): State => {
@@ -25,9 +27,9 @@ const reducer = (state: State, event: ReducerEvent): State => {
       ...state,
       selectedEvent: {
         ...state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)],
-        dayKey: event.dayKey?? "0"
+        dayKey: event.dayKey?? "0",
+        arrayIndex: event.arrayIndex?? 0
       }
-
     }
 
 
@@ -131,6 +133,11 @@ const reducer = (state: State, event: ReducerEvent): State => {
       dayArrayIndex: 0
     } }
 
+
+  } else if (event.type === "eventNameDeleted") {
+    if (event.eventArray) {
+      return {...state, events: event.eventArray}
+    }
 
 
   } else if (event.type === "eventDeleted") {

@@ -56,7 +56,7 @@ const EventsBar = ({
     }
 
     dispatch({ type: "eventDeleted" })
-
+    setDeleteState(false)
     try {
       await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)
     } catch (err) {
@@ -113,7 +113,7 @@ const EventsBar = ({
 
   }
 
-  const selectEvent = (mapDataEvent: any, i: number) => {
+  const selectEvent = (mapDataEvent: Event, i: number) => {
     dispatch({
       type: "selectEvent",
       event: mapDataEvent,
@@ -128,7 +128,8 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-          {mapDataEvent.start == state.selectedEvent.start
+          {(mapDataEvent.start === state.selectedEvent.start) 
+          && (day.dayKey === state.selectedEvent.dayKey)
             ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}

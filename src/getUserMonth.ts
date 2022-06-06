@@ -6,21 +6,23 @@ import { IAMAuthorizer } from './types'
 
 const dynamoDb = new DynamoDB.DocumentClient()
 
-interface TimezoneOffset {
-  timezoneOffset: number
-}
 
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
 
   const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
 
-  const { timezoneOffset }: TimezoneOffset = JSON.parse(event.body ?? '')
+  const { timezoneOffset, monthYear }: {
+    timezoneOffset: number, 
+    monthYear: string
+  } = JSON.parse(event.body ?? '')
+
   const offsetMilliseconds = timezoneOffset * 60000
   const date = new Date()
   const offsetDate = new Date(date.getTime() - offsetMilliseconds)
   const month = offsetDate.getMonth() + 1
   const year = offsetDate.getFullYear()
-  const monthsKey = month + "_" + year
+  const monthsKey = monthYear
+  /* prevMonthYear is for getting eventNameArray */
   const prevMonthYear = offsetDate.getMonth() 
     /* if current month is jan, month = 0 */
     ? offsetDate.getMonth() + "_" + year 
@@ -28,8 +30,6 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
   const day = "" + offsetDate.getDate()
 
   console.log('date: ', date, ', offsetDate: ', offsetDate)
-
-  // const prevMonthYear = // i need to import the previous Event Names
 
   try {
     const getDays = {

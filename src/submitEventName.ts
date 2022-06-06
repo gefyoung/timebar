@@ -30,7 +30,6 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       body: JSON.stringify({ eventName: eventName })
     }
 
-
     
   } catch (err) {
 

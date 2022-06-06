@@ -3,26 +3,17 @@ import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
 import { Day, Event } from '../../lib/types'
 
-
-type DayValueArr = Event[]
-
-interface EventAdded {
-  eventName: string
-  dayKey: number
-  monthYear: string
-  start: number
-  eventNameKey: number
-}
-
-const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
+const EventNameBar = ({ monthYear, events: eventNames, day, dayKey, dispatch }: {
   monthYear: string,
   events: string[],
+  // eventNames: string[],
   day: Day,
-  dayKey: number,
+  dayKey: string,
   dispatch: (e: any) => void
 }) => {
 
-  const [addingEvent, setAddingEvent] = useState(false)
+  const [eventNameState, setEventNameState] = useState("")
+  
 
   const eventInputRef = useRef<HTMLInputElement>(null)
 
@@ -36,8 +27,9 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
       }
       try {
         dispatch({type: 'eventNameAdded', eventName: eventInputRef.current.value})
+        setEventNameState("")
         await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/submitEventName', params)
-        eventInputRef.current.value = 'new event'
+        // eventInputRef.current.value = 'new event'
       } catch (err) {
         console.log(err)
       }
@@ -46,58 +38,97 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
 
 
 
-  const addEvent = async (day: Day, event: string, eventNameKey: number) => {
-
-    const lastEventPos = day.dayValue.length
-    const lastEvent = day.dayValue[lastEventPos - 1]
-
-    const newEventStart = lastEvent ? lastEvent.start + lastEvent.duration : 1
-
+  const clickEvent = async (day: Day, eventName: string, i: number, eventNameState: string) => {
+    
+    if (eventNameState === "removing") {
+      const newEventArray = [...eventNames]
+      newEventArray.splice(i, 1)
+      
       const params = {
         body: {
-          eventName: event,
-          dayKey: "" + dayKey,
-          monthYear: monthYear,
-          eventNameKey: eventNameKey,
-          start: newEventStart,
-          duration: 6
+          eventNameArray: newEventArray,
+          monthYear: monthYear
         }
       }
-      const eventEvent = {...params.body, className: "col-span-" + 6 + " h-8 " + eventKeyToColor(eventNameKey) }
 
     try {
 
       dispatch({
-        type: "eventAdded", 
-        event: eventEvent
+        type: "eventNameDeleted", 
+        eventArray: newEventArray
       })
       await API.post(
         process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",
-        '/submitEvent',
+        '/deleteEventName',
         params
       )
       
     } catch (err) {
       console.log(err)
     }
-  }
 
+    } else {
+      /* adding new event to event bar */
+      const lastEventPos = day.dayValue.length
+      const lastEvent = day.dayValue[lastEventPos - 1]
+  
+      const newEventStart = lastEvent ? lastEvent.start + lastEvent.duration : 1
+  
+        const params = {
+          body: {
+            eventName: eventName,
+            dayKey: "" + dayKey,
+            monthYear: monthYear,
+            eventNameKey: i,
+            start: newEventStart,
+            duration: 6
+          }
+        }
+        const eventEvent = 
+        {...params.body, 
+          className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i) }
+  
+      try {
+  
+        dispatch({
+          type: "eventAdded", 
+          event: eventEvent
+        })
+        await API.post(
+          process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",
+          '/submitEvent',
+          params
+        )
+        
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+  }
 
 
   return (
     <div>
-      {events?.length > 0
-        && events.map((event, i) =>
+      
+      
+      { eventNames?.length > 0
+        && eventNames.map((eventName, i) =>
           <>
             <button
               key={i}
-              className="px-1 m-1 mr-2 outline-black outline outline-1"
-              onClick={() => addEvent(day, event, i)}
-            >{event}</button>
+              className={
+                eventNameState === "removing" 
+                ? "bg-red-200 px-1 m-1 mr-2 outline-black outline outline-1" 
+                : "px-1 m-1 mr-2 outline-black outline outline-1"
+              }
+              onClick={() => clickEvent(day, eventName, i, eventNameState)}
+            >{eventName}</button>
           </>)
-      }{
-
-        addingEvent
+      }
+      
+      {
+        eventNameState === "adding"
           ? <><input
             ref={eventInputRef}
             className="w-20 px-1 m-1 mr-2 outline-black outline outline-1"
@@ -107,11 +138,22 @@ const EventNameBar = ({ monthYear, events, day, dayKey, dispatch }: {
               onClick={() => submitEventName()}
             >✔️</button></>
 
-          : events?.length <= 12 ? <button
+          : eventNames?.length < 12 ? <><button
             className="px-1 m-1 mr-2"
-            onClick={() => setAddingEvent(true)}
-          >+</button> 
-          : null
+            onClick={() => setEventNameState("adding")}
+          >+</button> <button
+          className="px-1 m-1 ml-4 mr-2 "
+          onClick={() => eventNameState !== "removing" 
+            ? setEventNameState("removing")
+          : setEventNameState("")}
+        >-</button> </>
+          
+          : <button
+          className="px-1 m-1 ml-4 mr-2 "
+          onClick={() => eventNameState !== "removing" 
+            ? setEventNameState("removing")
+          : setEventNameState("")}
+        >-</button>
       }
     </div>
   )

@@ -13,8 +13,9 @@ import EventsDelineator from './days/eventsDelineator'
 
 type Reducer<S, A> = (prevState: S, action: A) => S
 
-export default function Days({ data }: { data: UserMonthData }) {
-
+export default function Days({ data, getPreviousMonth }: { 
+  data: UserMonthData, getPreviousMonth: () => void }) {
+    console.log('data222', data)
   const initialState: State = {
     monthYear: data.month,
     events: data.events,
@@ -32,7 +33,7 @@ export default function Days({ data }: { data: UserMonthData }) {
   }
 
 
-  const [state, dispatch] = useReducer<Reducer<any, any>>(reducer, initialState)
+  const [state, dispatch] = useReducer<Reducer<State, any>>(reducer, initialState)
 
   const month = data.month.match(/(.*?)_/)
   const year = data.month.match(/_(.*)/)
@@ -63,11 +64,23 @@ export default function Days({ data }: { data: UserMonthData }) {
       </div>
     )
   }
+
+
+
   console.log('state.selectedEvent.dayKey', state.selectedEvent.dayKey)
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
-        <div className="mb-10 text-xl">{monthToString(Number(month1))}  {year1}</div>
+        <div className="flex flex-row">
+        
+        <div className="mb-10 text-xl">
+        <Image onClick={getPreviousMonth} width={12} height={12} src="/leftArrow.svg" alt="previous month" />
+          {monthToString(Number(month1))}  {year1 + " "}
+        {/* <Image width={12} height={12} src="/rightArrow.svg" alt="next month" /> */}
+        </div>
+        
+        </div>
+
         {
           state.data.map((day: Day, i: number) =>
             <div className="max-w-4xl mb-10" key={day.dayKey}>
@@ -93,17 +106,15 @@ export default function Days({ data }: { data: UserMonthData }) {
                   dispatch={dispatch}
                   monthYear={state.monthYear}
                   events={state.events}
-                  dayKey={Number(day.dayKey)}
+                  dayKey={day.dayKey}
+                  
                 />}
               {/* </div> */}
 
               <EventsBar
                 state={state}
                 dispatch={dispatch}
-                // day={day}
                 dayIndex={i}
-                // monthYear={state.monthYear}
-                // selectedEvent={state.selectedEvent}
               />
               {state.selectedEvent.dayKey === day.dayKey &&
                 <EventsDelineator />
