@@ -251,13 +251,19 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
 
   } else if (event.type === "moved") { // if event moved left
-    
-    return {
-      ...state,
-      data: event.newData,
-      selectedEvent: event.movingDayValueEvent
-      
+    if (event.dayArrayIndex && event.newData ) {
+  
+      const dayArray = state.data.map( day =>{ return { ...day } } )
+      dayArray[event.dayArrayIndex] = {
+        ...state.data[event.dayArrayIndex],
+        dayValue: event.newData
+      }
+      return { 
+        ...state,
+        data: dayArray
+      }
     }
+
 
   }
 

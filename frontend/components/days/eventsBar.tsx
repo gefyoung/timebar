@@ -75,41 +75,41 @@ const EventsBar = ({
     let newEventArray: any[] = []
     let moved = false
 
-    day.dayValue.forEach((eventBox, i) => {
-      const currPosition = document.getElementById(`${eventBox.start}`)?.offsetLeft ?? 0
-      // console.log('currentPosition: ', currPosition, ', movingFront: ', movingFront, 'event', eventBox)
-      if (!moved) {
-        if (currPosition < movingFront) {
-          eventBox.start = state.selectedEvent.duration + eventBox.start
-          newEventArray.push(eventBox)
+    const newDayValue = [...day.dayValue].reduce((acc, cur, i) => {
+      const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
 
-        } else {
-          state.selectedEvent.start = eventBox.start
-          console.log('eventBox.start', eventBox.start)
-          eventBox.start = state.selectedEvent.duration + eventBox.start // not using movingDay cause error
-          console.log('state.selectedEvent.duration + eventBox.start', state.selectedEvent.duration, eventBox.start)
-          newEventArray.push(state.selectedEvent, eventBox)
+      if (cur.start === state.selectedEvent.start) {
+        /* tried comparing Events directly, didn't work */
+        console.log('curstart is selectedStart', i, acc)
+        return acc
+      }
 
-          moved = true
-        }
+      else if (moved) {
+        cur.start = cur.start + state.selectedEvent.duration
+        acc.push(cur)
+      }
+
+      else if (currPosition < movingFront) {
+        acc.push(cur)
       } else {
-        if (state.selectedEvent.start !== eventBox.start) {
-          eventBox.start = state.selectedEvent.duration + eventBox.start
-          newEventArray.push(eventBox)
-        }
-
+        moved = true
+        console.log('how many hits')
+        // cur.start = cur.start + state.selectedEvent.duration
+        acc.push(
+          { ...state.selectedEvent, start: cur.start },
+          { ...cur, start: cur.start + state.selectedEvent.duration }
+        )
       }
+      return acc
+    }, [] as Event[])
 
-    })
+    console.log("TESESTESRS", newDayValue)
 
-    day.dayValue = newEventArray
-    state.selectedEvent.dayKey = day.dayKey
-    state.data.forEach((dataDay) => {
-      if (dataDay.dayKey === state.selectedEvent.dayKey) {
-        dataDay = day
-      }
-    })
-    dispatch({ type: "moved", newData: state.data, movingDayValueEvent: state.selectedEvent })
+    dispatch({ 
+      type: "moved", 
+      newData: newDayValue, 
+      movingDayValueEvent: state.selectedEvent,
+      dayArrayIndex: dayIndex })
 
   }
 
