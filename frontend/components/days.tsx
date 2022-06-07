@@ -15,7 +15,7 @@ type Reducer<S, A> = (prevState: S, action: A) => S
 
 export default function Days({ data, getPreviousMonth }: { 
   data: UserMonthData, getPreviousMonth: () => void }) {
-    console.log('data222', data)
+
   const initialState: State = {
     monthYear: data.month,
     events: data.events,
@@ -66,8 +66,6 @@ export default function Days({ data, getPreviousMonth }: {
   }
 
 
-
-  console.log('state.selectedEvent.dayKey', state.selectedEvent.dayKey)
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">

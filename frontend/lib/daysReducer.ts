@@ -166,12 +166,16 @@ const reducer = (state: State, event: ReducerEvent): State => {
     const currentWidth = state.selectedEvent.duration * oneGridWidth
     const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
     let duration = 0
-    console.log('oneGrid', oneGridWidth, 'currentWidth', currentWidth, 'boxLeftPosition', boxLeftPosition)
+    // console.log(
+    //   'oneGridWidth', oneGridWidth,
+    //   'event.dragEvent.clientX', event.dragEvent?.clientX,
+    //   'currentWidth+leftPosition', currentWidth + boxLeftPosition)
 
     if (event.dragEvent) {
-      if (event.dragEvent.clientX - 10 > currentWidth + boxLeftPosition) {
+      if (event.dragEvent.clientX - 5> currentWidth + boxLeftPosition ) {
         /* if mouse moves right, add width */
         editedArray.forEach((dataDay, i) => {
+
           if (state.selectedEvent.dayKey === dataDay.dayKey) {
             const flipArray: Event[] = dataDay.dayValue
 
@@ -192,7 +196,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
               dayValue: flipArray
             }
             editedArray.splice(i, 1, newDay)
-
           }
         })
 
@@ -216,9 +219,10 @@ const reducer = (state: State, event: ReducerEvent): State => {
               if (state.selectedEvent.start === event.start) {
                 if (event.duration > 0) { // if the eventbox is greater than 1, you can remove from it
                   duration = event.duration - 1
+
                   const newEvent = {
                     ...event,
-                    duration: event.duration - 1,
+                    duration: duration ? duration : 1,
                     className: returnOneClassName(event)
                   }
                   flipArray.splice(x, 1, newEvent)

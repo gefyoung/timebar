@@ -20,7 +20,7 @@ const EventsBar = ({
         distanceToFront?: number, newData?: any, movingDayValueEvent?: any, dayArrayIndex?: number
       }) => void
   }) => {
-
+    
   const eventRef = useRef(null)
 
   const [initialMoveState, setIniitialMoveState] = useState(0)
