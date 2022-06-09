@@ -23,7 +23,10 @@ const EventsBar = ({
     
   const eventRef = useRef(null)
 
-  const [initialMoveState, setIniitialMoveState] = useState(0)
+  const [initialMoveState, setInitialMoveState] = useState({
+    front: 0,
+    back: 0
+  })
   const [deleteState, setDeleteState] = useState(false)
 
   const drag = (e: DragEvent) => {
@@ -66,18 +69,33 @@ const EventsBar = ({
 
   const moveStart = (e: DragEvent) => {
     const selectedLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    const selectedRightPosition = document.getElementById("resizeArrow")?.offsetLeft ?? 0
+    console.log('selectedRightPosition', selectedRightPosition)
+    // this returns 0
     const distanceToFront = e.clientX - selectedLeftPosition
-    setIniitialMoveState(distanceToFront)
+    // use resize arrow for boxend location    
+    const distanceToEnd = selectedRightPosition - e.clientX
+    setInitialMoveState({ 
+      front: distanceToFront,
+      back: distanceToEnd
+    })
   }
+  console.log(initialMoveState, 'ININIININ')
 
   const moveEnd = (e: DragEvent) => {
-    const movingFront = e.clientX - initialMoveState
-    let newEventArray: any[] = []
-    let moved = false
+    // if (initialMoveState < e.clientX) {
+    //   console.log('e.clientX', e.clientX, 'initialMoveState', initialMoveState)
+    //   /* going right */
+    //   const movingBack = e.clientX
+    // } else {
+
+    // }
+    const movingFront = e.clientX - initialMoveState.front
+    let moved: boolean
+    console.log('e.clientX', e.clientX, 'movingfront', movingFront)
 
     const newDayValue = [...day.dayValue].reduce((acc, cur, i) => {
       const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
-
       if (cur.start === state.selectedEvent.start) {
         /* tried comparing Events directly, didn't work */
         console.log('curstart is selectedStart', i, acc)
@@ -93,8 +111,6 @@ const EventsBar = ({
         acc.push(cur)
       } else {
         moved = true
-        console.log('how many hits')
-        // cur.start = cur.start + state.selectedEvent.duration
         acc.push(
           { ...state.selectedEvent, start: cur.start },
           { ...cur, start: cur.start + state.selectedEvent.duration }
@@ -153,10 +169,10 @@ const EventsBar = ({
                 // onTouchStart={(e) => touchMove(e)}
                 // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
                 // onTouchEnd={() => dragEnd(flipEvent.duration)}
-
+                id="resizeArrow"
                 className="absolute mt-1 -right-3 cursor-ew-resize"
               >
-                <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
+                <Image  width={16} height={16} src="/rightArrow.svg" alt="resize" />
               </div>
 
             </div>

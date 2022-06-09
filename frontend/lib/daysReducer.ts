@@ -33,6 +33,21 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
 
+  } else if (event.type === "deselectDay") {
+    return {
+      ...state,
+      selectedEvent: {
+        eventName: "",
+        text: "",
+        start: 0,
+        className: "",
+        arrayIndex: 0,
+        duration: 0,
+        dayKey: "0",
+        dayArrayIndex: 0
+      }
+    }
+
   } else if (event.type === "selectDay") {
     console.log('event', event)
     return {

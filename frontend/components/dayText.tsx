@@ -66,7 +66,7 @@ export default function DayText({ selectedEvent, dispatch, monthState }: {
         form-control
         block
         w-full
-        h-24
+        h-28
         px-3
         py-1.5
         text-base

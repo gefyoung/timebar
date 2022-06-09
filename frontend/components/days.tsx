@@ -65,6 +65,19 @@ export default function Days({ data, getPreviousMonth }: {
     )
   }
 
+  const dayClicked = (day: Day) => {
+    if (state.selectedEvent.dayKey === day.dayKey) {
+      dispatch({ type: 'deselectDay' })
+    } else {
+      dispatch({
+        type: "selectDay",
+        dayKey: day.dayKey,
+        text: day.dayText,
+      })
+    }
+  }
+
+
 
   return (
     <div className="flex justify-center mt-10">
@@ -84,11 +97,7 @@ export default function Days({ data, getPreviousMonth }: {
             <div className="max-w-4xl mb-10" key={day.dayKey}>
 
               <div className="flex flex-row" >
-                <div onClick={() => dispatch({
-                  type: "selectDay",
-                  dayKey: day.dayKey,
-                  text: day.dayText
-                })}>
+                <div onClick={() => dayClicked(day)}>
                   {
                     (new Date(month1 + " " + day.dayKey + " " + year1))
                       .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
