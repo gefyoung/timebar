@@ -17,3 +17,16 @@ export interface IAMAuthorizer {
     }
   }
 }
+
+export interface Event {
+  start: number
+  duration: number
+  eventName: string
+  className: string
+  text?: string
+  eventNameKey?: number
+  dayKey: string
+  arrayIndex: number
+  dayArrayIndex: number
+  newStart?: number
+}

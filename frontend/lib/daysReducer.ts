@@ -22,7 +22,7 @@ interface ReducerEvent {
 const reducer = (state: State, event: ReducerEvent): State => {
 
   if (event.type === "selectEvent") {
-    console.log("FFFFFF", state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)])
+    // console.log("FFFFFF", state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)])
     return {
       ...state,
       selectedEvent: {
@@ -189,6 +189,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
     if (event.dragEvent) {
       if (event.dragEvent.clientX - 5> currentWidth + boxLeftPosition ) {
         /* if mouse moves right, add width */
+        
         editedArray.forEach((dataDay, i) => {
 
           if (state.selectedEvent.dayKey === dataDay.dayKey) {
@@ -265,8 +266,8 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
 
-  } else if (event.type === "moved") { // if event moved left
-    if (event.dayArrayIndex && event.newData ) {
+  } else if (event.type === "moved") {
+    if (typeof event.dayArrayIndex === 'number' && event.newData ) {
   
       const dayArray = state.data.map( day =>{ return { ...day } } )
       dayArray[event.dayArrayIndex] = {
@@ -278,8 +279,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
         data: dayArray
       }
     }
-
-
   }
 
   return state

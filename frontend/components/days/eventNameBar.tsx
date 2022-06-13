@@ -71,8 +71,15 @@ const EventNameBar = ({ monthYear, events: eventNames, day, dayKey, dispatch }: 
       /* adding new event to event bar */
       const lastEventPos = day.dayValue.length
       const lastEvent = day.dayValue[lastEventPos - 1]
+
+      let totalDuration = 1
+      day.dayValue.forEach((dayEvent) => {
+        totalDuration = totalDuration + dayEvent.duration
+      })
   
       const newEventStart = lastEvent ? lastEvent.start + lastEvent.duration : 1
+
+
   
         const params = {
           body: {
@@ -80,7 +87,7 @@ const EventNameBar = ({ monthYear, events: eventNames, day, dayKey, dispatch }: 
             dayKey: "" + dayKey,
             monthYear: monthYear,
             eventNameKey: i,
-            start: newEventStart,
+            start: totalDuration,
             duration: 6
           }
         }

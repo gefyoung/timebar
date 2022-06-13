@@ -14,7 +14,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
   
   try {
     const { monthYear, dayKey, start }: EventNameEvent = JSON.parse(event.body ?? '')
-
+    
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     
     console.log('delete event: ', monthYear, dayKey, start)

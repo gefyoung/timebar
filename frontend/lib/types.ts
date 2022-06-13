@@ -8,6 +8,7 @@ export interface Event {
   dayKey: string
   arrayIndex: number
   dayArrayIndex: number
+  newStart?: number
 }
 
 export interface Day {

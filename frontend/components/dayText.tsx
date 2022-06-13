@@ -2,15 +2,6 @@ import { API } from '@aws-amplify/api'
 import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
-interface FlipState {
-
-  eventName: string
-  text: string
-  start: number
-  dayKey: string
-  duration: number
-}
-
 interface SelectedEvent {
   dayKey: string
   start: number

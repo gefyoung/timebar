@@ -4,7 +4,8 @@ import { Day, Event, State } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
-// import { moveEnd } from '../../lib/moveEvent'
+import { moveEnd } from '../../lib/moveEvent'
+import { returnOneClassName } from '../../lib/returnClassName'
 
 const EventsBar = ({
   state,
@@ -14,38 +15,84 @@ const EventsBar = ({
   {
     state: State
     dayIndex: number
-    dispatch: ({ type, event, dayKey, arrayIndex, dragEvent, distanceToFront, newData }:
-      {
-        type: string, event?: Event, dayKey?: string, arrayIndex?: number, dragEvent?: DragEvent,
-        distanceToFront?: number, newData?: any, movingDayValueEvent?: any, dayArrayIndex?: number
-      }) => void
+    dispatch: (e: any) => void
   }) => {
-    
+
   const eventRef = useRef(null)
 
   const [initialMoveState, setInitialMoveState] = useState({
     front: 0,
-    back: 0
+    back: 0,
+    click: 0
   })
   const [deleteState, setDeleteState] = useState(false)
 
-  const drag = (e: DragEvent) => {
-    dispatch({ type: "drag", dragEvent: e })
-  }
-
   const day = state.data[dayIndex]
 
+
+  const drag = (e: DragEvent) => {
+    const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
+    const currentWidth = state.selectedEvent.duration * oneGridWidth
+    const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
+    let newArray: Event[] = []
+
+    if (e.clientX - 5 > currentWidth + boxLeftPosition) {
+      /* drag right */
+      newArray = [...day.dayValue].reduce((acc, cur, i) => {
+        if (cur.start === state.selectedEvent.start) {
+          acc.push({
+            ...cur,
+            duration: cur.duration + 1,
+            className: returnOneClassName(cur)
+          })
+        } else {
+          acc.push(
+            cur
+          )
+        }
+        return acc
+      }, [] as Event[])
+    } else {
+      /* drag left */
+    }
+
+    dispatch({ type: "drag", eventArray: newArray })
+  }
+
+  interface ModifiedEvent extends Event {
+    newStart: number
+  }
+
   const dragEnd = async (e: DragEvent, duration: number) => {
+
+    //get duration change for newSTart, newstarte element wrong
     e.stopPropagation()
+    let totalDuration = 1
+    const modifiedEvents = [...day.dayValue].reduce((acc, curr, i) => {
+      curr.dayKey = day.dayKey
+      totalDuration = totalDuration + curr.duration
+      /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
+      if (i === state.selectedEvent.arrayIndex) {
+
+        acc.push(curr)
+      } else if (i > state.selectedEvent.arrayIndex) {
+        console.log(totalDuration - curr.duration, 'dur;')
+        curr.newStart = totalDuration - curr.duration
+        acc.push(curr)
+      }
+      return acc
+    }, [] as Event[])
+
     const params = {
       body: {
-        dayKey: state.selectedEvent.dayKey,
+        modifiedEvents: modifiedEvents,
+        // dayKey: state.selectedEvent.dayKey,
         monthYear: state.monthYear,
-        start: state.selectedEvent.start,
-        duration: duration,
+        // start: state.selectedEvent.start,
+        // duration: duration,
       }
     }
-    await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
+   await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
 
   }
 
@@ -68,68 +115,44 @@ const EventsBar = ({
   }
 
   const moveStart = (e: DragEvent) => {
-    const selectedLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-    const selectedRightPosition = document.getElementById("resizeArrow")?.offsetLeft ?? 0
-    console.log('selectedRightPosition', selectedRightPosition)
-    // this returns 0
-    const distanceToFront = e.clientX - selectedLeftPosition
-    // use resize arrow for boxend location    
-    const distanceToEnd = selectedRightPosition - e.clientX
-    setInitialMoveState({ 
-      front: distanceToFront,
-      back: distanceToEnd
+    const selectedEventBox = document.getElementById("selectedEventBox")
+    if (!selectedEventBox) {
+      console.log('error')
+    } else {
+      const selectedLeftPosition = selectedEventBox.offsetLeft
+      const selectedRightPosition = selectedLeftPosition + selectedEventBox.offsetWidth
+
+      const distanceToFront = e.clientX - selectedLeftPosition
+      const distanceToEnd = selectedRightPosition - e.clientX
+
+      setInitialMoveState({
+        front: distanceToFront,
+        back: distanceToEnd,
+        click: e.clientX
+      })
+    }
+  }
+
+  const moved = (e: DragEvent) => {
+    const newDayValue = moveEnd(
+      e,
+      initialMoveState,
+      state,
+      day
+    )
+
+    dispatch({
+      type: "moved",
+      newData: newDayValue,
+      movingDayValueEvent: state.selectedEvent,
+      dayArrayIndex: dayIndex
     })
   }
-  console.log(initialMoveState, 'ININIININ')
 
-  const moveEnd = (e: DragEvent) => {
-    // if (initialMoveState < e.clientX) {
-    //   console.log('e.clientX', e.clientX, 'initialMoveState', initialMoveState)
-    //   /* going right */
-    //   const movingBack = e.clientX
-    // } else {
 
-    // }
-    const movingFront = e.clientX - initialMoveState.front
-    let moved: boolean
-    console.log('e.clientX', e.clientX, 'movingfront', movingFront)
-
-    const newDayValue = [...day.dayValue].reduce((acc, cur, i) => {
-      const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
-      if (cur.start === state.selectedEvent.start) {
-        /* tried comparing Events directly, didn't work */
-        console.log('curstart is selectedStart', i, acc)
-        return acc
-      }
-
-      else if (moved) {
-        cur.start = cur.start + state.selectedEvent.duration
-        acc.push(cur)
-      }
-
-      else if (currPosition < movingFront) {
-        acc.push(cur)
-      } else {
-        moved = true
-        acc.push(
-          { ...state.selectedEvent, start: cur.start },
-          { ...cur, start: cur.start + state.selectedEvent.duration }
-        )
-      }
-      return acc
-    }, [] as Event[])
-
-    console.log("TESESTESRS", newDayValue)
-
-    dispatch({ 
-      type: "moved", 
-      newData: newDayValue, 
-      movingDayValueEvent: state.selectedEvent,
-      dayArrayIndex: dayIndex })
-
-  }
 
   const selectEvent = (mapDataEvent: Event, i: number) => {
+    console.log(mapDataEvent, 'event')
     dispatch({
       type: "selectEvent",
       event: mapDataEvent,
@@ -144,8 +167,8 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-          {(mapDataEvent.start === state.selectedEvent.start) 
-          && (day.dayKey === state.selectedEvent.dayKey)
+          {(mapDataEvent.start === state.selectedEvent.start)
+            && (day.dayKey === state.selectedEvent.dayKey)
             ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}
@@ -153,7 +176,7 @@ const EventsBar = ({
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
-              onDragEnd={(e) => moveEnd(e)}
+              onDragEnd={(e) => moved(e)}
               draggable={true}
             >
               {
@@ -172,7 +195,7 @@ const EventsBar = ({
                 id="resizeArrow"
                 className="absolute mt-1 -right-3 cursor-ew-resize"
               >
-                <Image  width={16} height={16} src="/rightArrow.svg" alt="resize" />
+                <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
               </div>
 
             </div>
