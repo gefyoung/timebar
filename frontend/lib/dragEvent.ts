@@ -2,7 +2,7 @@ import { State, Day, Event } from '../lib/types'
 import { DragEvent } from 'react'
 import { returnOneClassName } from './returnClassName'
 
-const onDrag = (e: DragEvent, state: State, day: Day) => {
+const drag = (e: DragEvent, state: State, day: Day) => {
   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
   const currentWidth = state.selectedEvent.duration * oneGridWidth
   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
@@ -26,7 +26,7 @@ const onDrag = (e: DragEvent, state: State, day: Day) => {
       return acc
     }, [] as Event[])
     
-  } else {
+  } else if (e.clientX + 5 < currentWidth + boxLeftPosition) {
     /* drag left */
     console.log('dragleft')
     return [...day.dayValue].reduce((acc, cur, i) => {
@@ -46,4 +46,4 @@ const onDrag = (e: DragEvent, state: State, day: Day) => {
   }
 }
 
-export default onDrag
+export default drag
