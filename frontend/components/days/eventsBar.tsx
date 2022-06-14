@@ -5,7 +5,10 @@ import Image from "next/dist/client/image"
 import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
 import { moveEnd } from '../../lib/moveEvent'
-import { returnOneClassName } from '../../lib/returnClassName'
+import drag from '../../lib/dragEvent'
+
+
+
 
 const EventsBar = ({
   state,
@@ -29,67 +32,39 @@ const EventsBar = ({
 
   const day = state.data[dayIndex]
 
-
-  const drag = (e: DragEvent) => {
-    const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
-    const currentWidth = state.selectedEvent.duration * oneGridWidth
-    const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-    let newArray: Event[] = []
-
-    if (e.clientX - 5 > currentWidth + boxLeftPosition) {
-      /* drag right */
-      newArray = [...day.dayValue].reduce((acc, cur, i) => {
-        if (cur.start === state.selectedEvent.start) {
-          acc.push({
-            ...cur,
-            duration: cur.duration + 1,
-            className: returnOneClassName(cur)
-          })
-        } else {
-          acc.push(
-            cur
-          )
-        }
-        return acc
-      }, [] as Event[])
-    } else {
-      /* drag left */
-    }
-
-    dispatch({ type: "drag", eventArray: newArray })
-  }
-
-  interface ModifiedEvent extends Event {
-    newStart: number
+  const onDrag = (e: DragEvent) => {
+    const newArray = drag(e, state, day)
+    dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
   }
 
   const dragEnd = async (e: DragEvent, duration: number) => {
-
-    //get duration change for newSTart, newstarte element wrong
     e.stopPropagation()
     let totalDuration = 1
-    const modifiedEvents = [...day.dayValue].reduce((acc, curr, i) => {
+
+    const newArray = [...day.dayValue].reduce((acc, curr, i) => {
       curr.dayKey = day.dayKey
       totalDuration = totalDuration + curr.duration
       /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
-      if (i === state.selectedEvent.arrayIndex) {
-
+      
+      if (i > state.selectedEvent.arrayIndex) {
+        console.log(totalDuration, 'totalDuration')
+        curr.start = totalDuration - curr.duration
         acc.push(curr)
-      } else if (i > state.selectedEvent.arrayIndex) {
-        console.log(totalDuration - curr.duration, 'dur;')
-        curr.newStart = totalDuration - curr.duration
+      } else {
         acc.push(curr)
       }
       return acc
+
     }, [] as Event[])
+
+
+    dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
 
     const params = {
       body: {
-        modifiedEvents: modifiedEvents,
-        // dayKey: state.selectedEvent.dayKey,
-        monthYear: state.monthYear,
-        // start: state.selectedEvent.start,
-        // duration: duration,
+        modifiedEvents: newArray,
+        dayKey: state.selectedEvent.dayKey,
+        monthYear: state.monthYear
       }
     }
    await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
@@ -187,7 +162,7 @@ const EventsBar = ({
               }
 
               <div
-                onDrag={(e) => drag(e)}
+                onDrag={(e) => onDrag(e)}
                 onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
                 // onTouchStart={(e) => touchMove(e)}
                 // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
