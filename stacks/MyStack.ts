@@ -48,7 +48,7 @@ export default class MyStack extends sst.Stack {
       routes: {
         "POST /getUserMonth": "src/getUserMonth.handler",
         "POST /saveText": "src/saveText.handler",
-        "POST /saveDuration": "src/saveDuration.handler",
+        "POST /updateEventArray": "src/updateEventArray.handler",
         "POST /submitEventName": "src/submitEventName.handler",
         "POST /submitEvent": "src/submitEvent.handler",
         "POST /deleteEvent": "src/deleteEvent.handler",

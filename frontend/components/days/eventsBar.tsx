@@ -45,7 +45,7 @@ const EventsBar = ({
         monthYear: state.monthYear
       }
     }
-   await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
+   await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
   }
 
   const deleteEvent = async () => {
@@ -85,8 +85,8 @@ const EventsBar = ({
     }
   }
 
-  const moved = (e: DragEvent) => {
-    const newDayValue = moveEnd(
+  const moved = async (e: DragEvent) => {
+    const newArray = moveEnd(
       e,
       initialMoveState,
       state,
@@ -95,10 +95,24 @@ const EventsBar = ({
 
     dispatch({
       type: "moved",
-      newDayValue: newDayValue,
+      newDayValue: newArray,
       // movingDayValueEvent: state.selectedEvent,
       dayArrayIndex: dayIndex
     })
+
+    const params = {
+      body: {
+        modifiedEvents: newArray,
+        dayKey: state.selectedEvent.dayKey,
+        monthYear: state.monthYear
+      }
+    }
+
+    try {
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
+    } catch (err) {
+      throw err
+    }
   }
 
 

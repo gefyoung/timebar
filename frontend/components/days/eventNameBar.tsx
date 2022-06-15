@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react'
 import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
-import { Day, Event } from '../../lib/types'
+import { Day, Event, State } from '../../lib/types'
 
-const EventNameBar = ({ monthYear, events: eventNames, day, dayKey, dispatch }: {
-  monthYear: string,
-  events: string[],
-  // eventNames: string[],
-  day: Day,
-  dayKey: string,
+const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
+  state: State
+  monthYear: string
+  eventNames: string[]
+  day: Day
   dispatch: (e: any) => void
 }) => {
 
@@ -76,24 +75,24 @@ const EventNameBar = ({ monthYear, events: eventNames, day, dayKey, dispatch }: 
       day.dayValue.forEach((dayEvent) => {
         totalDuration = totalDuration + dayEvent.duration
       })
-  
-      const newEventStart = lastEvent ? lastEvent.start + lastEvent.duration : 1
 
-
-  
         const params = {
           body: {
             eventName: eventName,
-            dayKey: "" + dayKey,
+            dayKey: "" + day.dayKey,
             monthYear: monthYear,
             eventNameKey: i,
             start: totalDuration,
-            duration: 6
+            duration: 6,
+
           }
         }
         const eventEvent = 
         {...params.body, 
-          className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i) }
+          className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i),
+          arrayIndex: state.selectedEvent.arrayIndex ,
+          dayArrayIndex: state.selectedEvent.dayArrayIndex
+        }
   
       try {
   

@@ -109,11 +109,11 @@ export default function Days({ data, getPreviousMonth }: {
               {/* <div> */}
               {state.selectedEvent.dayKey === day.dayKey
                 && <EventNameBar
+                  state={state}
                   day={day}
                   dispatch={dispatch}
                   monthYear={state.monthYear}
-                  events={state.events}
-                  dayKey={day.dayKey}
+                  eventNames={state.events}
                   
                 />}
               {/* </div> */}

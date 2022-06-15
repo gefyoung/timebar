@@ -23,7 +23,6 @@ export const moveEnd = (
       const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
       const currentWidth = document.getElementById(`${cur.start}`)?.offsetWidth ?? 0
       const currentTail = currPosition + currentWidth
-      console.log(currentTail, 'ct', movingTail)
 
       accDuration = 
       cur.start === state.selectedEvent.start
@@ -31,12 +30,15 @@ export const moveEnd = (
       : accDuration + cur.duration
 
       if (cur.start === state.selectedEvent.start) {
+        if (day.dayValue.length - 1 === i) { 
+          acc.push(cur)
+        }
         selected = cur
         return acc
       } else if (moved) {
         acc.push(cur) 
       } else if (currentTail > movingTail) {
-            console.log('selected,cr', selected, cur)
+
             moved = true
             selected.start = accDuration
             cur.start = accDuration - cur.duration
