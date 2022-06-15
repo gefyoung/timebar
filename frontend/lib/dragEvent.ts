@@ -2,12 +2,11 @@ import { State, Day, Event } from '../lib/types'
 import { DragEvent } from 'react'
 import { returnOneClassName } from './returnClassName'
 
-const drag = (e: DragEvent, state: State, day: Day) => {
+export const drag = (e: DragEvent, state: State, day: Day) => {
   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
   const currentWidth = state.selectedEvent.duration * oneGridWidth
   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
   let newArray: Event[] = []
-
   
   if (e.clientX - 5 > currentWidth + boxLeftPosition) {
     /* drag right */
@@ -28,7 +27,7 @@ const drag = (e: DragEvent, state: State, day: Day) => {
     
   } else if (e.clientX + 5 < currentWidth + boxLeftPosition) {
     /* drag left */
-    console.log('dragleft')
+
     return [...day.dayValue].reduce((acc, cur, i) => {
       if (cur.start === state.selectedEvent.start) {
         acc.push({
@@ -46,4 +45,24 @@ const drag = (e: DragEvent, state: State, day: Day) => {
   }
 }
 
-export default drag
+
+
+export const dragEnd = (state: State, day: Day) => {
+  let totalDuration = 1
+
+  return [...day.dayValue].reduce((acc, curr, i) => {
+    curr.dayKey = day.dayKey
+    totalDuration = totalDuration + curr.duration
+    /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
+    
+    if (i > state.selectedEvent.arrayIndex) {
+
+      curr.start = totalDuration - curr.duration
+      acc.push(curr)
+    } else {
+      acc.push(curr)
+    }
+    return acc
+
+  }, [] as Event[])
+}

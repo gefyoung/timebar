@@ -176,7 +176,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
   }  else if (event.type === "moved") {
     if (typeof event.dayArrayIndex === 'number' && event.newDayValue ) {
-  
       const dayArray = state.data.map( day => { return { ...day } } )
       dayArray[event.dayArrayIndex] = {
         ...state.data[event.dayArrayIndex],

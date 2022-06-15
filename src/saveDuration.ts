@@ -18,6 +18,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
      = JSON.parse(event.body ?? '')
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     console.log('EE', modifiedEvents)
+    console.log(event.body)
 
     /* convert edited array to whole new daymap */
     const arrToObj = modifiedEvents.reduce((acc, curr) => {

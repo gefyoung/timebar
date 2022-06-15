@@ -5,10 +5,7 @@ import Image from "next/dist/client/image"
 import { DragEvent } from "react"
 import { API } from '@aws-amplify/api'
 import { moveEnd } from '../../lib/moveEvent'
-import drag from '../../lib/dragEvent'
-
-
-
+import { drag, dragEnd } from '../../lib/dragEvent'
 
 const EventsBar = ({
   state,
@@ -37,29 +34,10 @@ const EventsBar = ({
     dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
   }
 
-  const dragEnd = async (e: DragEvent, duration: number) => {
+  const onDragEnd = async (e: DragEvent) => {
     e.stopPropagation()
-    let totalDuration = 1
-
-    const newArray = [...day.dayValue].reduce((acc, curr, i) => {
-      curr.dayKey = day.dayKey
-      totalDuration = totalDuration + curr.duration
-      /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
-      
-      if (i > state.selectedEvent.arrayIndex) {
-        console.log(totalDuration, 'totalDuration')
-        curr.start = totalDuration - curr.duration
-        acc.push(curr)
-      } else {
-        acc.push(curr)
-      }
-      return acc
-
-    }, [] as Event[])
-
-
+    const newArray = dragEnd(state, day)
     dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
-
     const params = {
       body: {
         modifiedEvents: newArray,
@@ -68,7 +46,6 @@ const EventsBar = ({
       }
     }
    await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveDuration', params)
-
   }
 
   const deleteEvent = async () => {
@@ -118,8 +95,8 @@ const EventsBar = ({
 
     dispatch({
       type: "moved",
-      newData: newDayValue,
-      movingDayValueEvent: state.selectedEvent,
+      newDayValue: newDayValue,
+      // movingDayValueEvent: state.selectedEvent,
       dayArrayIndex: dayIndex
     })
   }
@@ -163,7 +140,7 @@ const EventsBar = ({
 
               <div
                 onDrag={(e) => onDrag(e)}
-                onDragEnd={(e) => dragEnd(e, mapDataEvent.duration)}
+                onDragEnd={(e) => onDragEnd(e)}
                 // onTouchStart={(e) => touchMove(e)}
                 // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
                 // onTouchEnd={() => dragEnd(flipEvent.duration)}
