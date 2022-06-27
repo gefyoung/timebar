@@ -2,10 +2,10 @@
 import { useRef, useState } from 'react'
 import { Day, Event, State } from "../../lib/types"
 import Image from "next/dist/client/image"
-import { DragEvent } from "react"
+import { DragEvent, TouchEvent } from "react"
 import { API } from '@aws-amplify/api'
 import { moveEnd } from '../../lib/moveEvent'
-import { drag, dragEnd } from '../../lib/dragEvent'
+import { drag, dragEnd, touchDrag } from '../../lib/dragEvent'
 
 const EventsBar = ({
   state,
@@ -29,12 +29,16 @@ const EventsBar = ({
 
   const day = state.data[dayIndex]
 
-  const onDrag = (e: DragEvent) => {
+  const resize = (e: DragEvent) => {
     const newArray = drag(e, state, day)
     dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
   }
+  const touchResize = (e: TouchEvent) => {
+    const newArray = touchDrag(e, state, day)
+    dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
+  }
 
-  const onDragEnd = async (e: DragEvent) => {
+  const resizeEnd = async (e: DragEvent | TouchEvent) => {
     e.stopPropagation()
     const newArray = dragEnd(state, day)
     dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
@@ -45,7 +49,11 @@ const EventsBar = ({
         monthYear: state.monthYear
       }
     }
-   await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
+    try {
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const deleteEvent = async () => {
@@ -62,11 +70,17 @@ const EventsBar = ({
     try {
       await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)
     } catch (err) {
-      throw err
+      console.log(err)
     }
   }
 
+  // type ConditionalDrag = DragEvent extends DragEvent ? DragEvent : TouchEvent
+  
   const moveStart = (e: DragEvent) => {
+    let clientX = e.clientX
+    // if (e.clientX) 
+    // clientX = e.clientX ? e.clientX : e.changedTouches[0].clientX
+    
     const selectedEventBox = document.getElementById("selectedEventBox")
     if (!selectedEventBox) {
       console.log('error')
@@ -74,13 +88,13 @@ const EventsBar = ({
       const selectedLeftPosition = selectedEventBox.offsetLeft
       const selectedRightPosition = selectedLeftPosition + selectedEventBox.offsetWidth
 
-      const distanceToFront = e.clientX - selectedLeftPosition
-      const distanceToEnd = selectedRightPosition - e.clientX
+      const distanceToFront = clientX - selectedLeftPosition
+      const distanceToEnd = selectedRightPosition - clientX
 
       setInitialMoveState({
         front: distanceToFront,
         back: distanceToEnd,
-        click: e.clientX
+        click: clientX
       })
     }
   }
@@ -111,11 +125,9 @@ const EventsBar = ({
     try {
       await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
     } catch (err) {
-      throw err
+      console.log(err)
     }
   }
-
-
 
   const selectEvent = (mapDataEvent: Event, i: number) => {
     console.log(mapDataEvent, 'event')
@@ -143,6 +155,7 @@ const EventsBar = ({
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
               onDragEnd={(e) => moved(e)}
+              // onTouchStart={(e) => moveStart(e)}
               draggable={true}
             >
               {
@@ -153,17 +166,15 @@ const EventsBar = ({
               }
 
               <div
-                onDrag={(e) => onDrag(e)}
-                onDragEnd={(e) => onDragEnd(e)}
-                // onTouchStart={(e) => touchMove(e)}
-                // onTouchMove={(e) => dispatch({ type: "touchMove", touchEvent: e })} 
-                // onTouchEnd={() => dragEnd(flipEvent.duration)}
+                onDrag={(e) => resize(e)}
+                onDragEnd={(e) => resizeEnd(e)}
+                onTouchMove={(e) => touchResize(e)} 
+                onTouchEnd={(e) => resizeEnd(e)}
                 id="resizeArrow"
                 className="absolute mt-1 -right-3 cursor-ew-resize"
               >
                 <Image width={16} height={16} src="/rightArrow.svg" alt="resize" />
               </div>
-
             </div>
 
             </>

@@ -68,14 +68,19 @@ const Home: NextPage = () => {
       timezoneOffset: date.getTimezoneOffset(),
       monthYear: date.getMonth() + "_" + year
     }}
-    const data: UserMonthData = await API.post(
-      process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
-    )
-    data.days.forEach((dayObj: Day) => {
-      dayObj.dayValue = returnClassName(dayObj.dayValue)
-    })
-    console.log('data1111', data)
-    setState({ page: 'days', auth: true, loading: false, data: data })
+    try {
+      const data: UserMonthData = await API.post(
+        process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
+      )
+      data.days.forEach((dayObj: Day) => {
+        dayObj.dayValue = returnClassName(dayObj.dayValue)
+      })
+      console.log('data1111', data)
+      setState({ page: 'days', auth: true, loading: false, data: data })
+    } catch (err) {
+      console.log(err)
+    }
+
   }
 
   
@@ -89,13 +94,18 @@ const Home: NextPage = () => {
             timezoneOffset: date.getTimezoneOffset(),
             monthYear: monthYear
           }}
-          const data: UserMonthData = await API.post(
-            process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
-          )
-          data.days.forEach((dayObj: Day) => {
-            dayObj.dayValue = returnClassName(dayObj.dayValue)
-          })
-          setState({ page: 'days', auth: true, loading: false, data: data })
+          try {
+            const data: UserMonthData = await API.post(
+              process.env.NEXT_PUBLIC_APIGATEWAY_NAME??"", '/getUserMonth', params
+            )
+            data.days.forEach((dayObj: Day) => {
+              dayObj.dayValue = returnClassName(dayObj.dayValue)
+            })
+            setState({ page: 'days', auth: true, loading: false, data: data })
+          } catch (err) {
+            console.log(err)
+          }
+
         } else {
           setState({...state, auth: false, loading: false, page: 'create' })
         }

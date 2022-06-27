@@ -1,5 +1,4 @@
 import { API } from '@aws-amplify/api'
-import { Autosave } from 'react-autosave'
 import { useRef, useState } from 'react'
 
 interface SelectedEvent {

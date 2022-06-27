@@ -129,14 +129,9 @@ const reducer = (state: State, event: ReducerEvent): State => {
             dayValue: newArray
           }
           editedArray.splice(i, 1, newDay)
-
         }
-
       }
-
-
     })
-    console.log('eventevent', event.event)
     return { ...state, data: editedArray, selectedEvent: event.event?? {
       eventName: "",
       text: "",
@@ -221,91 +216,3 @@ const reducer = (state: State, event: ReducerEvent): State => {
 }
 
 export default reducer
-
-
-
-
-
-
-
-
-
-
-// const touchMove = (e: any) => {
-//   const editedArray = [...dataState]
-//   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
-//   const currentWidth = state.selectedEvent.duration * oneGridWidth
-//   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-//   let duration = 0
-
-//   if (e.changedTouches[0].clientX - 10 > currentWidth + boxLeftPosition) {
-//     /* if mouse moves right, add width */
-//     editedArray.forEach((dataDay, i) => {
-//       if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
-//         const flipArray: Event[] = dataDay.dayValue
-
-//         dataDay.dayValue.forEach((event, x) => {
-//           if (state.selectedEvent.start === event.start) {
-//             duration = event.duration + 1
-//             const newEvent = {
-//               ...event,
-//               duration: event.duration + 1,
-//               className: returnOneClassName(event)
-//             }
-//             flipArray.splice(x, 1, newEvent)
-//           }
-//         })
-
-//         const newDay = {
-//           ...dataDay,
-//           dayValue: flipArray
-//         }
-//         editedArray.splice(i, 1, newDay)
-
-//       }
-//     })
-
-//     setDataState(editedArray)
-//     setSelectedEventState({
-//       ...state.selectedEvent,
-//       flipEvent: {
-//         ...state.selectedEvent,
-//         duration: duration
-//       }
-//     })
-
-//   } else if (e.changedTouches[0].clientX < currentWidth + boxLeftPosition) {
-//     editedArray.forEach((dataDay, i) => {
-//       if (state.selectedEvent.dayKey === Number(dataDay.dayKey)) {
-//         const flipArray: Event[] = dataDay.dayValue
-
-//         dataDay.dayValue.forEach((event, x) => {
-//           if (state.selectedEvent.start === event.start) {
-//             duration = event.duration - 1
-//             const newEvent = {
-//               ...event,
-//               duration: event.duration - 1,
-//               className: returnOneClassName(event)
-//             }
-//             flipArray.splice(x, 1, newEvent)
-//           }
-//         })
-
-//         const newDay = {
-//           ...dataDay,
-//           dayValue: flipArray
-//         }
-//         editedArray.splice(i, 1, newDay)
-
-//       }
-//     })
-//     setDataState(editedArray)
-//     setSelectedEventState({
-//       ...state.selectedEvent,
-//       flipEvent: {
-//         ...state.selectedEvent,
-//         duration: duration
-//       }
-//     })
-//   }
-// }

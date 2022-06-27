@@ -6,6 +6,7 @@ interface InitialMoveState {
   back: number
   click: number
 }
+
 export const moveEnd = (
   e: DragEvent,
   initialMoveState: InitialMoveState,

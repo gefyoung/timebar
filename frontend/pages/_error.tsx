@@ -1,7 +1,7 @@
 import React from 'react'
 import Head from 'next/head'
 
-export const ErrorPage: React.FC<{ statusCode: number }> = ({ statusCode }) => {
+const ErrorPage: React.FC<{ statusCode: number }> = ({ statusCode }) => {
   const title = 'Error'
 
   return (
@@ -25,3 +25,4 @@ export const ErrorPage: React.FC<{ statusCode: number }> = ({ statusCode }) => {
     </>
   )
 }
+export default ErrorPage
