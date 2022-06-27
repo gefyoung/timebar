@@ -4,8 +4,20 @@ import { Day, Event, State } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent, TouchEvent } from "react"
 import { API } from '@aws-amplify/api'
-import { moveEnd } from '../../lib/moveEvent'
-import { drag, dragEnd, touchDrag } from '../../lib/dragEvent'
+import { moved } from '../../lib/moveEvent'
+import { drag, dragEnd } from '../../lib/dragEvent'
+
+function isTouchEvent(e: DragEvent | TouchEvent): e is TouchEvent {
+
+  if (e.type === 'touchstart' 
+    || e.type === 'touchmove'
+    || e.type === 'touchend') {
+    return true
+  } else {
+    return false
+  }
+}
+
 
 const EventsBar = ({
   state,
@@ -29,12 +41,9 @@ const EventsBar = ({
 
   const day = state.data[dayIndex]
 
-  const resize = (e: DragEvent) => {
-    const newArray = drag(e, state, day)
-    dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
-  }
-  const touchResize = (e: TouchEvent) => {
-    const newArray = touchDrag(e, state, day)
+  const resize = (e: DragEvent | TouchEvent) => {
+    const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
+    const newArray = drag(clientX, state, day)
     dispatch({ type: "drag", newDayValue: newArray, dayArrayIndex: dayIndex })
   }
 
@@ -73,13 +82,10 @@ const EventsBar = ({
       console.log(err)
     }
   }
-
-  // type ConditionalDrag = DragEvent extends DragEvent ? DragEvent : TouchEvent
   
-  const moveStart = (e: DragEvent) => {
-    let clientX = e.clientX
-    // if (e.clientX) 
-    // clientX = e.clientX ? e.clientX : e.changedTouches[0].clientX
+  const moveStart = (e: DragEvent | TouchEvent) => {
+
+    const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
     
     const selectedEventBox = document.getElementById("selectedEventBox")
     if (!selectedEventBox) {
@@ -99,9 +105,12 @@ const EventsBar = ({
     }
   }
 
-  const moved = async (e: DragEvent) => {
-    const newArray = moveEnd(
-      e,
+  const moveEnd = async (e: DragEvent | TouchEvent) => {
+    console.log(e)
+    const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
+    console.log('movedendclientx', clientX)
+    const newArray = moved(
+      clientX,
       initialMoveState,
       state,
       day
@@ -154,8 +163,9 @@ const EventsBar = ({
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
-              onDragEnd={(e) => moved(e)}
-              // onTouchStart={(e) => moveStart(e)}
+              onDragEnd={(e) => moveEnd(e)}
+              onTouchStart={(e) => moveStart(e)}
+              onTouchEnd={(e) => moveEnd(e)}
               draggable={true}
             >
               {
@@ -168,7 +178,7 @@ const EventsBar = ({
               <div
                 onDrag={(e) => resize(e)}
                 onDragEnd={(e) => resizeEnd(e)}
-                onTouchMove={(e) => touchResize(e)} 
+                onTouchMove={(e) => resize(e)} 
                 onTouchEnd={(e) => resizeEnd(e)}
                 id="resizeArrow"
                 className="absolute mt-1 -right-3 cursor-ew-resize"

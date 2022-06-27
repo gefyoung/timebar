@@ -7,15 +7,17 @@ interface InitialMoveState {
   click: number
 }
 
-export const moveEnd = (
-  e: DragEvent,
+export const moved = (
+  clientX: number,
   initialMoveState: InitialMoveState,
   state: State,
   day: Day
 ) => {
-  if (initialMoveState.click < e.clientX) {
+  console.log('initialMoveState', initialMoveState)
+  if (initialMoveState.click < clientX) {
+    
     /* move right */
-    const movingTail = e.clientX - initialMoveState.back
+    const movingTail = clientX - initialMoveState.back
     let moved = false
     let accDuration = 1
     let selected: Event
@@ -63,7 +65,7 @@ export const moveEnd = (
 
 
   } else {
-    const movingFront = e.clientX - initialMoveState.front
+    const movingFront = clientX - initialMoveState.front
     let moved: boolean
 
 

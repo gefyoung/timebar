@@ -149,7 +149,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
       return {...state, events: event.eventArray}
     }
 
-
   } else if (event.type === "eventDeleted") {
 
     const editedArray = [...state.data]
