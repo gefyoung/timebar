@@ -88,21 +88,29 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
           }
         }
 
-        const eventEvent = { 
+        const newEvent = { 
           ...params.body, 
           className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i),
-          // arrayIndex: state.selectedEvent.arrayIndex ,
-          dayArrayIndex: dayIndex
+          arrayIndex: day.dayValue.length,
+          dayArrayIndex: dayIndex,
+          monthYear: undefined
         }
 
-        newDay.dayValue.push(eventEvent)
+        newDay.dayValue.push(newEvent)
+        
       try {
   
         dispatch({
           type: "eventAdded",
           day: newDay,
           dayArrayIndex: dayIndex,
-          event: eventEvent
+        })
+        dispatch({
+          type: "selectEvent",
+          event: newEvent,
+          dayKey: day.dayKey,
+          arrayIndex: newDay.dayValue.length - 1,
+          dayArrayIndex: dayIndex
         })
         await API.post(
           process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",

@@ -16,7 +16,6 @@ interface ReducerEvent {
   newDayValue: Event[]
   movingDayValueEvent?: any
   dayArrayIndex?: number
-  eventNameKey?: number
   eventArray?: string[]
 }
 
@@ -28,7 +27,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
       || !event.dayKey) {
       return state
     }
-
     const text = { ...state.data[event.dayArrayIndex].dayValue[event.arrayIndex] }.text ?? ""
     console.log("text", text)
     return {
@@ -113,15 +111,17 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
   } else if (event.type === "eventAdded") {
     const editedArray = JSON.parse(JSON.stringify(state.data))
-    console.log('event', event)
-    if (typeof event.dayArrayIndex !== 'number'
+    if (
+      typeof event.dayArrayIndex !== 'number'
       || !event.day
-      || !event.event) {
+      ) {
       return state
     }
-    console.log('hello event.day', event.day)
     editedArray[event.dayArrayIndex] = event.day
-    return { ...state, data: editedArray, selectedEvent: event.event }
+    return { 
+      ...state, 
+      data: editedArray, 
+    }
 
 
   } else if (event.type === "eventNameDeleted") {
@@ -136,6 +136,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
       || typeof state.selectedEvent.arrayIndex !== 'number') {
       return state
     }
+    console.log('edeteed')
     editedArray[event.dayArrayIndex].dayValue.splice(state.selectedEvent.arrayIndex, 1)
 
     return { ...state, data: editedArray }

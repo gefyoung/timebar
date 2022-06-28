@@ -39,7 +39,7 @@ export default function returnClassName(flipArray: Event[]) {
     
     // width = returnWidth(flipObj).width
     width = flipObj.duration
-    // flipObj.arrayIndex = i
+    flipObj.arrayIndex = i
 
     if (typeof flipObj.eventNameKey === 'number') {
       flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventNameKey)
