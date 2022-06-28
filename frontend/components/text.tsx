@@ -60,9 +60,6 @@ export default function Text({ day, dayIndex, dispatch, state }: {
     setSavedState("")
   }
 
-  console.log("shit", isEvent ? state.selectedEvent.text?? "" : day.dayText?? "")
-  // this is returning blank, but it shouldn't be
-
   return (
     <>
       <textarea

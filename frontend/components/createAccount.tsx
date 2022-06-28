@@ -28,7 +28,7 @@ const CreateAccount = (props: CreateAccountProps) => {
     e.preventDefault();
 
     try {
-      const shit = await Auth.signUp({
+      await Auth.signUp({
         username: "" + loginState.email,
         password: "" + loginState.password,
         attributes: {
@@ -36,7 +36,6 @@ const CreateAccount = (props: CreateAccountProps) => {
         }
       })
       setInputState({...inputState, err: "accepted", account: true})
-      console.log('shit', shit)
     } catch (err) {
       console.log(err)
       // if (err.message === "Username should be an email." || err.code === "UsernameExistsException") {

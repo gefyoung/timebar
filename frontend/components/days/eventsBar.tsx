@@ -105,7 +105,7 @@ const EventsBar = ({
     }
   }
 
-  const moveEnd = async (e: DragEvent | TouchEvent) => {
+  const moveEnd = async (e: DragEvent | TouchEvent, mapDataEvent: Event, i: number) => {
     console.log(e)
     const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
     const newArray = moved(
@@ -161,9 +161,9 @@ const EventsBar = ({
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
-              onDragEnd={(e) => moveEnd(e)}
+              onDragEnd={(e) => moveEnd(e, mapDataEvent, i)}
               onTouchStart={(e) => moveStart(e)}
-              onTouchEnd={(e) => moveEnd(e)}
+              onTouchEnd={(e) => moveEnd(e, mapDataEvent, i)}
               draggable={true}
             >
               {

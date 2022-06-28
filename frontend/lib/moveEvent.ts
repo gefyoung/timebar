@@ -14,15 +14,16 @@ export const moved = (
   day: Day
 ) => {
   console.log('initialMoveState', initialMoveState)
+
   if (initialMoveState.click < clientX) {
-    
+    console.log('helloe0')
     /* move right */
     const movingTail = clientX - initialMoveState.back
     let moved = false
     let accDuration = 1
     let selected: Event
 
-    return [...day.dayValue].reduce((acc, cur, i) => {
+    const hellp = [...day.dayValue].reduce((acc, cur, i) => {
       const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
       const currentWidth = document.getElementById(`${cur.start}`)?.offsetWidth ?? 0
       const currentTail = currPosition + currentWidth
@@ -31,17 +32,19 @@ export const moved = (
       cur.start === state.selectedEvent.start
       ? accDuration
       : accDuration + cur.duration
-
+      
       if (cur.start === state.selectedEvent.start) {
+        
         if (day.dayValue.length - 1 === i) { 
           acc.push(cur)
         }
         selected = cur
         return acc
       } else if (moved) {
+        
         acc.push(cur) 
       } else if (currentTail > movingTail) {
-
+        
             moved = true
             selected.start = accDuration
             cur.start = accDuration - cur.duration
@@ -49,7 +52,7 @@ export const moved = (
 
       } else {
         cur.start = accDuration - cur.duration
-
+       
         acc.push(cur)
 
           if (day.dayValue.length - 1 === i) {
@@ -63,17 +66,20 @@ export const moved = (
       return acc
     }, [] as Event[])
 
+    return hellp
+
 
   } else {
     const movingFront = clientX - initialMoveState.front
     let moved: boolean
-
-
     return [...day.dayValue].reduce((acc, cur, i) => {
       const currPosition = document.getElementById(`${cur.start}`)?.offsetLeft ?? 0
       if (cur.start === state.selectedEvent.start) {
+        // if ( i === state.selectedEvent.arrayIndex) { 
+        //   acc.push(cur)
+        // }
         /* tried comparing Events directly, didn't work */
-
+        console.log('helloe2')
         return acc
       }
       else if (moved) {

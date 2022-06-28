@@ -72,7 +72,8 @@ export default function Days({ data, getPreviousMonth }: {
               <div className="flex flex-row" >
                 <div onClick={() => dayClicked(day)}>
                   {
-                    (new Date(month1 + " " + day.dayKey + " " + year1))
+                    //must be this....................................
+                    (new Date(month1 + "/" + day.dayKey + "/" + year1))
                       .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
                 </div>
                 {day.dayText && <div className="h-4 mt-2 ml-1">
