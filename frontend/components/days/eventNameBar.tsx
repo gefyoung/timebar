@@ -41,6 +41,8 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
   const clickEvent = async (
     day: Day, eventName: string, i: number, eventNameState: string
     ) => {
+
+
     
     if (eventNameState === "removing") {
       const newEventArray = [...eventNames]
@@ -73,6 +75,7 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
       day.dayValue.forEach((dayEvent) => {
         totalDuration = totalDuration + dayEvent.duration
       })
+      const newDay = JSON.parse(JSON.stringify(day))
 
         const params = {
           body: {
@@ -92,13 +95,12 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
           dayArrayIndex: dayIndex
         }
 
-        day.dayValue.push(eventEvent)
-  
+        newDay.dayValue.push(eventEvent)
       try {
   
         dispatch({
           type: "eventAdded",
-          day: day,
+          day: newDay,
           dayArrayIndex: dayIndex,
           event: eventEvent
         })
