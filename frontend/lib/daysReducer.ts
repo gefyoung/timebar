@@ -5,6 +5,7 @@ import { returnOneClassName } from '../lib/returnClassName'
 
 interface ReducerEvent {
   type: string
+  day?: Day
   dayKey?: string
   text?: string
   event?: Event
@@ -22,16 +23,19 @@ interface ReducerEvent {
 const reducer = (state: State, event: ReducerEvent): State => {
 
   if (event.type === "selectEvent") {
-    // console.log("FFFFFF", state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)])
+    if (typeof event.dayArrayIndex !== 'number'
+      || typeof event.arrayIndex !== 'number'
+      || !event.dayKey) { 
+        return state 
+    }
     return {
       ...state,
       selectedEvent: {
-        ...state.data[Number(event.dayArrayIndex)].dayValue[Number(event.arrayIndex)],
-        dayKey: event.dayKey?? "0",
-        arrayIndex: event.arrayIndex?? 0
+        ...state.data[event.dayArrayIndex].dayValue[event.arrayIndex],
+        dayKey: event.dayKey,
+        arrayIndex: event.arrayIndex
       }
     }
-
 
   } else if (event.type === "deselectDay") {
     return {
@@ -49,7 +53,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
   } else if (event.type === "selectDay") {
-    console.log('event', event)
     return {
       ...state,
       selectedEvent: {
@@ -64,7 +67,11 @@ const reducer = (state: State, event: ReducerEvent): State => {
 
     // this mutates
   } else if (event.type === "changeDayText") {
-    const editedArray = state.data
+
+    
+    const editedArray = [...state.data]
+
+    
     state.data.forEach((day, i) => {
       if (state.selectedEvent.dayKey === day.dayKey) {
         console.log('hello', event.text)
@@ -113,35 +120,16 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
 
-
   } else if (event.type === "eventAdded") {
-
     const editedArray = [...state.data]
-    state.data.forEach((dataDay, i) => {
-
-      if (state.selectedEvent.dayKey === "" + dataDay.dayKey) {
-
-        if (event.event) {
-          const newArray = dataDay.dayValue.concat([event.event])
-
-          const newDay = {
-            ...dataDay,
-            dayValue: newArray
-          }
-          editedArray.splice(i, 1, newDay)
-        }
+    if (event.dayArrayIndex 
+      || event.dayArrayIndex !== 0 
+      || !event.day 
+      || !event.event) { 
+        return state 
       }
-    })
-    return { ...state, data: editedArray, selectedEvent: event.event?? {
-      eventName: "",
-      text: "",
-      start: 0,
-      className: "",
-      arrayIndex: 0,
-      duration: 0,
-      dayKey: "0",
-      dayArrayIndex: 0
-    } }
+    editedArray[event.dayArrayIndex] = event.day
+    return { ...state, data: editedArray, selectedEvent: event.event }
 
 
   } else if (event.type === "eventNameDeleted") {
@@ -152,18 +140,11 @@ const reducer = (state: State, event: ReducerEvent): State => {
   } else if (event.type === "eventDeleted") {
 
     const editedArray = [...state.data]
-
-    let params = { body: {} }
-
-    editedArray.forEach(async (dataDay, i) => {
-
-      if (state.selectedEvent.dayKey === dataDay.dayKey) {
-
-        dataDay.dayValue.splice(state.selectedEvent.arrayIndex, 1)
-
+    if (typeof event.dayArrayIndex !== 'number'
+      || typeof state.selectedEvent.arrayIndex !== 'number') {
+      return state 
       }
-    })
-
+    editedArray[event.dayArrayIndex].dayValue.splice(state.selectedEvent.arrayIndex, 1)
 
     return { ...state, data: editedArray }
 
@@ -181,7 +162,9 @@ const reducer = (state: State, event: ReducerEvent): State => {
       }
     }
   } else if ( event.type === "drag") {
-    if (typeof event.dayArrayIndex === 'number' && event.newDayValue ) {
+    if (typeof event.dayArrayIndex === 'number'
+     && event.newDayValue 
+     && typeof state.selectedEvent.arrayIndex === 'number' ) {
       const dayArray = state.data.map( day => { return { ...day } } )
       dayArray[event.dayArrayIndex] = {
         ...state.data[event.dayArrayIndex],

@@ -3,11 +3,12 @@ import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
 import { Day, Event, State } from '../../lib/types'
 
-const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
+const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }: {
   state: State
   monthYear: string
   eventNames: string[]
   day: Day
+  dayIndex: number
   dispatch: (e: any) => void
 }) => {
 
@@ -37,7 +38,9 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
 
 
 
-  const clickEvent = async (day: Day, eventName: string, i: number, eventNameState: string) => {
+  const clickEvent = async (
+    day: Day, eventName: string, i: number, eventNameState: string
+    ) => {
     
     if (eventNameState === "removing") {
       const newEventArray = [...eventNames]
@@ -51,7 +54,6 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
       }
 
     try {
-
       dispatch({
         type: "eventNameDeleted", 
         eventArray: newEventArray
@@ -67,10 +69,6 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
     }
 
     } else {
-      /* adding new event to event bar */
-      const lastEventPos = day.dayValue.length
-      const lastEvent = day.dayValue[lastEventPos - 1]
-
       let totalDuration = 1
       day.dayValue.forEach((dayEvent) => {
         totalDuration = totalDuration + dayEvent.duration
@@ -84,20 +82,24 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dispatch }: {
             eventNameKey: i,
             start: totalDuration,
             duration: 6,
-
           }
         }
-        const eventEvent = 
-        {...params.body, 
+
+        const eventEvent = { 
+          ...params.body, 
           className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i),
-          arrayIndex: state.selectedEvent.arrayIndex ,
-          dayArrayIndex: state.selectedEvent.dayArrayIndex
+          // arrayIndex: state.selectedEvent.arrayIndex ,
+          dayArrayIndex: dayIndex
         }
+
+        day.dayValue.push(eventEvent)
   
       try {
   
         dispatch({
-          type: "eventAdded", 
+          type: "eventAdded",
+          day: day,
+          dayArrayIndex: dayIndex,
           event: eventEvent
         })
         await API.post(

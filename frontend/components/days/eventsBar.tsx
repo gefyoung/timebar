@@ -58,6 +58,7 @@ const EventsBar = ({
         monthYear: state.monthYear
       }
     }
+    
     try {
       await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
     } catch (err) {
@@ -73,8 +74,7 @@ const EventsBar = ({
         start: state.selectedEvent.start
       }
     }
-
-    dispatch({ type: "eventDeleted" })
+    dispatch({ type: "eventDeleted", dayArrayIndex: dayIndex })
     setDeleteState(false)
     try {
       await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/deleteEvent', params)

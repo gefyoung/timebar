@@ -114,6 +114,7 @@ export default function Days({ data, getPreviousMonth }: {
                   dispatch={dispatch}
                   monthYear={state.monthYear}
                   eventNames={state.events}
+                  dayIndex={i}
                   
                 />}
               {/* </div> */}
