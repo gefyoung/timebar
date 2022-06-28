@@ -108,7 +108,6 @@ const EventsBar = ({
   const moveEnd = async (e: DragEvent | TouchEvent) => {
     console.log(e)
     const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
-    console.log('movedendclientx', clientX)
     const newArray = moved(
       clientX,
       initialMoveState,
@@ -139,7 +138,6 @@ const EventsBar = ({
   }
 
   const selectEvent = (mapDataEvent: Event, i: number) => {
-    console.log(mapDataEvent, 'event')
     dispatch({
       type: "selectEvent",
       event: mapDataEvent,

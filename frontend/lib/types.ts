@@ -6,7 +6,7 @@ export interface Event {
   text?: string
   eventNameKey?: number
   dayKey: string
-  arrayIndex?: number
+  arrayIndex: number
   dayArrayIndex: number
   newStart?: number
 }

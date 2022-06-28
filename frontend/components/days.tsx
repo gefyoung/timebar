@@ -1,6 +1,5 @@
 import { DragEvent, useEffect, useReducer, useState } from 'react'
-import EventText from './eventText'
-import DayText from './dayText'
+import Text from './text'
 import Image from 'next/image'
 import { State, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'
@@ -41,30 +40,6 @@ export default function Days({ data, getPreviousMonth }: {
   const month1 = month![1]
   const year1 = year![1]
 
-
-  const TextEditor = () => {
-    return (
-      <div className='bg-gray-100'>
-        {state.selectedEvent.eventName !== ""
-          ? <div>
-            <div>{state.selectedEvent.eventName}</div>
-            <div>
-              <EventText
-                dispatch={dispatch}
-                selectedEvent={state.selectedEvent}
-                monthYear={state.monthYear} />
-            </div>
-          </div> : <div className="mt-6">
-            <DayText
-              dispatch={dispatch}
-              selectedEvent={state.selectedEvent}
-              monthState={state.monthYear} />
-          </div>
-        }
-      </div>
-    )
-  }
-
   const dayClicked = (day: Day) => {
     if (state.selectedEvent.dayKey === day.dayKey) {
       dispatch({ type: 'deselectDay' })
@@ -76,9 +51,7 @@ export default function Days({ data, getPreviousMonth }: {
       })
     }
   }
-
-
-
+  
   return (
     <div className="flex justify-center mt-10">
       <div className="w-85ch">
@@ -129,7 +102,18 @@ export default function Days({ data, getPreviousMonth }: {
               }
               <div>
                 {state.selectedEvent.dayKey === day.dayKey
-                  && <TextEditor />
+                  &&           <div className="mt-6">
+                  {
+                  state.selectedEvent.eventName !== "" 
+                    && <div>{state.selectedEvent.eventName}</div>
+                  }
+                  <Text
+                    day={day}
+                    state={state}
+                    dayIndex={i}
+                    dispatch={dispatch}
+                  />
+                </div>
                 }
               </div>
             </div>

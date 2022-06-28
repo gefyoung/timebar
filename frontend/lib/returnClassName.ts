@@ -35,10 +35,11 @@ export default function returnClassName(flipArray: Event[]) {
   let width = 0
   flipArray.forEach(flip => totalDuration = totalDuration + returnWidth(flip).width)
 
-  return flipArray.map((flipObj) => {
+  return flipArray.map((flipObj, i) => {
     
     // width = returnWidth(flipObj).width
     width = flipObj.duration
+    // flipObj.arrayIndex = i
 
     if (typeof flipObj.eventNameKey === 'number') {
       flipObj.className = "col-span-" + width + " h-8 " + eventKeyToColor(flipObj.eventNameKey)
