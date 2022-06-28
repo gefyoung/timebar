@@ -27,38 +27,6 @@ export const handler = async (event:
 
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
 
-
-    // const getDays = {
-    //   Key: { user: identityId, month: monthYear },
-    //   TableName: process.env.UserMonths ?? 'noTable',
-    //   ProjectExpression: "days"
-    // }
-
-    // const dynamoDay = await dynamoDb.get(getDays).promise()
-
-    // const day: Record<string, EventObj> = dynamoDay.Item?.days[dayKey]
-
-    // let newStart
-    // console.log("OBJECT KEYS", Object.keys(day))
-    // if (Object.keys(day).length === 0) {
-    //   newStart = 1
-    // } else {
-    //   const max = Object.keys(day).reduce((prev, cur) =>
-    //     cur === "NaN" ? prev :
-    //       parseInt(prev) > parseInt(cur) ? prev : cur
-    //   )
-    //   if (max === "NaN") {
-    //     return {
-    //       statusCode: 500
-    //     }
-    //   }
-    //   const lastEvent = day["" + max]
-    //   newStart = lastEvent.duration + Number(max)
-    // }
-
-    
-
-
     const updateMap = {
       ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": "" + start },
       ExpressionAttributeValues: { ":en": { duration: duration, eventName: eventName, eventNameKey: eventNameKey } },
@@ -69,20 +37,7 @@ export const handler = async (event:
     }
     await dynamoDb.update(updateMap).promise()
     console.log('updated')
-    // const res = {
-    //   eventName: eventName,
-    //   monthYear: monthYear,
-    //   dayKey: dayKey,
-    //   start: start,
-    //   eventNameKey: eventNameKey,
-    //   duration: duration
-    // }
-
-    return {
-      // statusCode: 200,
-      // body: JSON.stringify(res)
-    }
-
+    return
   } catch (err) {
 
     console.log(err)

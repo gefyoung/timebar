@@ -136,7 +136,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
       || typeof state.selectedEvent.arrayIndex !== 'number') {
       return state
     }
-    console.log('edeteed')
     editedArray[event.dayArrayIndex].dayValue.splice(state.selectedEvent.arrayIndex, 1)
 
     return { ...state, data: editedArray }

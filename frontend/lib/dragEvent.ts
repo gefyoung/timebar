@@ -6,7 +6,6 @@ export const drag = (clientX: number, state: State, day: Day) => {
   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
   const currentWidth = state.selectedEvent.duration * oneGridWidth
   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-  let newArray: Event[] = []
   
   if (clientX - 5 > currentWidth + boxLeftPosition) {
     /* drag right */
@@ -47,20 +46,27 @@ export const drag = (clientX: number, state: State, day: Day) => {
 
 export const dragEnd = (state: State, day: Day) => {
   let totalDuration = 1
+  if (typeof state.selectedEvent.arrayIndex === 'number') { 
+    const eventIndex = state.selectedEvent.arrayIndex
 
-  return [...day.dayValue].reduce((acc, curr, i) => {
-    curr.dayKey = day.dayKey
-    totalDuration = totalDuration + curr.duration
-    /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
-    
-    if (i > state.selectedEvent.arrayIndex) {
+    return [...day.dayValue].reduce((acc, curr, i) => {
+      curr.dayKey = day.dayKey
+      totalDuration = totalDuration + curr.duration
+      /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
+      
+      if (i > eventIndex) {
+  
+        curr.start = totalDuration - curr.duration
+        acc.push(curr)
+      } else {
+        acc.push(curr)
+      }
+      return acc
+  
+    }, [] as Event[])
+   } else {
+    return state
+   }
 
-      curr.start = totalDuration - curr.duration
-      acc.push(curr)
-    } else {
-      acc.push(curr)
-    }
-    return acc
 
-  }, [] as Event[])
 }
