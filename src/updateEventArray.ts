@@ -25,7 +25,8 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       return { ...acc, [curr.start]: {
         eventName: curr.eventName,
         eventNameKey: curr.eventNameKey,
-        duration: curr.duration
+        duration: curr.duration,
+        text: curr.text
       }}
     }, {})
 

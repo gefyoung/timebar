@@ -10,7 +10,7 @@ export default function Text({ day, dayIndex, dispatch, state }: {
   state: State
 }) {
   const isEvent = state.selectedEvent.eventName !== ""
-  // const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
  
   // if (textAreaRef.current) {
   //   textAreaRef.current.value = state.selectedEvent.text?? ""
@@ -23,25 +23,26 @@ export default function Text({ day, dayIndex, dispatch, state }: {
   const saveText = async () => {
     /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
     and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
-
+    console.log(state)
       const params = !isEvent ? {
         body: {
           dayKey: state.selectedEvent.dayKey,
           start: state.selectedEvent.start,
-          text: isEvent ? state.selectedEvent.text : day.dayText !== "" ? day.dayText : "",
+          text: textAreaRef.current?.value,
           monthYear: state.monthYear
         }
       } : {
         body: {
           dayKey: state.selectedEvent.dayKey,
           start: state.selectedEvent.start,
-          text: isEvent ? state.selectedEvent.text : day.dayText !== "" ? day.dayText : "",
+          text: textAreaRef.current?.value,
           monthYear: state.monthYear,
           eventName: state.selectedEvent.eventName
         }
       }
       try {
         const res = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveText', params)
+        console.log('res', res)
         setSavedState("saved")
       } catch {
         setSavedState("failed")
@@ -66,7 +67,7 @@ export default function Text({ day, dayIndex, dispatch, state }: {
         key={dayIndex + " " + state.selectedEvent.start}
         defaultValue={isEvent ? state.selectedEvent.text : day.dayText !== "" ? day.dayText : ""}
         // value={isEvent ? state.selectedEvent.text?? "" : day.dayText?? ""}
-        // ref={textAreaRef}
+        ref={textAreaRef}
         onChange={(e) => changeText(e)}
         className="
         form-control

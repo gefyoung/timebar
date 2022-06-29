@@ -65,6 +65,7 @@ export const dragEnd = (state: State, day: Day) => {
   
     }, [] as Event[])
    } else {
+    console.log('state', state)
     return state
    }
 
