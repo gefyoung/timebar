@@ -21,8 +21,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       <link rel='apple-touch-icon' sizes='180x180' href='/icons/touch-icon-iphone-retina.png' />
       <link rel='apple-touch-icon' sizes='167x167' href='/icons/touch-icon-ipad-retina.png' /> */}
 
-      <link rel='icon' type='image/png' sizes='32x32' href='/files.svg' />
-      <link rel='icon' type='image/png' sizes='16x16' href='/files.svg' />
+      <link rel='icon' type='image/png' sizes='32x32' href='/pageScreenshot.png' />
+      <link rel='icon' type='image/png' sizes='16x16' href='/pageScreenshot.png' />
       <link rel='manifest' href='/manifest.json' />
       {/* <link rel='mask-icon' href='/icons/safari-pinned-tab.svg' color='#5bbad5' /> */}
       <link rel='shortcut icon' href='/files.svg' />
