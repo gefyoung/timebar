@@ -48,7 +48,7 @@ export const dragEnd = (state: State, day: Day) => {
   let totalDuration = 1
   if (typeof state.selectedEvent.arrayIndex === 'number') { 
     const eventIndex = state.selectedEvent.arrayIndex
-
+    
     return [...day.dayValue].reduce((acc, curr, i) => {
       curr.dayKey = day.dayKey
       totalDuration = totalDuration + curr.duration

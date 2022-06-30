@@ -11,11 +11,6 @@ export default function Text({ day, dayIndex, dispatch, state }: {
 }) {
   const isEvent = state.selectedEvent.eventName !== ""
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
- 
-  // if (textAreaRef.current) {
-  //   textAreaRef.current.value = state.selectedEvent.text?? ""
-  // }
-  
 
   const [savedState, setSavedState] = useState("")
 
