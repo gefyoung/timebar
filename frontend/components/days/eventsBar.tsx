@@ -49,18 +49,21 @@ const EventsBar = ({
 
   const resizeEnd = async (e: DragEvent | TouchEvent) => {
     e.stopPropagation()
+    console.log(state.selectedEvent)
     const newArray = dragEnd(state, day)
     dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
     const params = {
       body: {
-        modifiedEvents: newArray,
+        // modifiedEvents: newArray,
         dayKey: state.selectedEvent.dayKey,
-        monthYear: state.monthYear
+        monthYear: state.monthYear,
+        id: state.selectedEvent.id,
+        duration: state.selectedEvent.duration
       }
     }
     
     try {
-      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateDuration', params)
     } catch (err) {
       console.log(err)
     }
@@ -71,7 +74,7 @@ const EventsBar = ({
       body: {
         dayKey: state.selectedEvent.dayKey,
         monthYear: state.monthYear,
-        start: state.selectedEvent.start
+        id: state.selectedEvent.id
       }
     }
     dispatch({ type: "eventDeleted", dayArrayIndex: dayIndex })
@@ -138,12 +141,14 @@ const EventsBar = ({
   }
 
   const selectEvent = (mapDataEvent: Event, i: number) => {
+    console.log('id', mapDataEvent.id)
     dispatch({
       type: "selectEvent",
       event: mapDataEvent,
       dayKey: day.dayKey,
       arrayIndex: i,
-      dayArrayIndex: dayIndex
+      dayArrayIndex: dayIndex,
+      id: mapDataEvent.id,
     })
   }
 
@@ -152,12 +157,11 @@ const EventsBar = ({
     <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
-          {(mapDataEvent.start === state.selectedEvent.start)
-            && (day.dayKey === state.selectedEvent.dayKey)
+          {(mapDataEvent.id === state.selectedEvent.id)
             ? // this is the rendered selectedEvent
             <><div
               ref={eventRef}
-              key={mapDataEvent.start}
+              key={mapDataEvent.id}
               className={mapDataEvent.className + " relative border-black border-2 flex flex-row"}
               id="selectedEventBox"
               onDragStart={(e) => moveStart(e)}
@@ -189,8 +193,8 @@ const EventsBar = ({
 
 
             : <div
-              id={"" + mapDataEvent.start}
-              key={mapDataEvent.start}
+              id={"" + mapDataEvent.id}
+              key={mapDataEvent.id}
               className={mapDataEvent.className}
               onClick={() => selectEvent(mapDataEvent, i)}
             >
@@ -204,7 +208,7 @@ const EventsBar = ({
           }
         </>
       )}
-      {state.selectedEvent.start !== 0 && state.selectedEvent.dayKey === day.dayKey
+      {state.selectedEvent.id !== "0" && state.selectedEvent.dayKey === day.dayKey
         && (!deleteState ? <div className="ml-2 col-start-96"><button
 
           onClick={() => setDeleteState(true)}

@@ -10,7 +10,7 @@ export const drag = (clientX: number, state: State, day: Day) => {
   if (clientX - 5 > currentWidth + boxLeftPosition) {
     /* drag right */
     return [...day.dayValue].reduce((acc, cur, i) => {
-      if (cur.start === state.selectedEvent.start) {
+      if (cur.id === state.selectedEvent.id) {
         acc.push({
           ...cur,
           duration: cur.duration + 1,
@@ -28,7 +28,7 @@ export const drag = (clientX: number, state: State, day: Day) => {
     /* drag left */
 
     return [...day.dayValue].reduce((acc, cur, i) => {
-      if (cur.start === state.selectedEvent.start) {
+      if (cur.id === state.selectedEvent.id) {
         acc.push({
           ...cur,
           duration: (cur.duration - 1) > 0 ? cur.duration - 1 : 1,
@@ -45,18 +45,18 @@ export const drag = (clientX: number, state: State, day: Day) => {
 }
 
 export const dragEnd = (state: State, day: Day) => {
-  let totalDuration = 1
+  // let totalDuration = 1
   if (typeof state.selectedEvent.arrayIndex === 'number') { 
     const eventIndex = state.selectedEvent.arrayIndex
     
     return [...day.dayValue].reduce((acc, curr, i) => {
       curr.dayKey = day.dayKey
-      totalDuration = totalDuration + curr.duration
+      // totalDuration = totalDuration + curr.duration
       /* dayKey is needed because it doesn't exist int he dayValueEvents, will crash backend */
       
       if (i > eventIndex) {
   
-        curr.start = totalDuration - curr.duration
+        // curr.start = totalDuration - curr.duration
         acc.push(curr)
       } else {
         acc.push(curr)

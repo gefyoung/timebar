@@ -1,6 +1,6 @@
 import { DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyEventV2WithRequestContext } from 'aws-lambda'
-import { IAMAuthorizer } from './types'
+import { IAMAuthorizer } from '../lib/types'
 const dynamoDb = new DynamoDB.DocumentClient()
 
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {

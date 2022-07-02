@@ -17,6 +17,7 @@ interface ReducerEvent {
   movingDayValueEvent?: any
   dayArrayIndex?: number
   eventArray?: string[]
+  id?: string
 }
 
 const reducer = (state: State, event: ReducerEvent): State => {
@@ -24,7 +25,8 @@ const reducer = (state: State, event: ReducerEvent): State => {
   if (event.type === "selectEvent") {
     if (typeof event.dayArrayIndex !== 'number'
       || typeof event.arrayIndex !== 'number'
-      || !event.dayKey) {
+      || !event.dayKey
+      || !event.id) {
       return state
     }
     const text = { ...state.data[event.dayArrayIndex].dayValue[event.arrayIndex] }.text ?? ""
@@ -36,7 +38,8 @@ const reducer = (state: State, event: ReducerEvent): State => {
         dayKey: event.dayKey,
         arrayIndex: event.arrayIndex,
         dayArrayIndex: event.dayArrayIndex,
-        text: text
+        text: text,
+        id: event.id
       }
     }
 
@@ -46,7 +49,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
       selectedEvent: {
         eventName: "",
         text: "",
-        start: 0,
+        id: "0",
         className: "",
         arrayIndex: 0,
         duration: 0,
@@ -61,7 +64,7 @@ const reducer = (state: State, event: ReducerEvent): State => {
       selectedEvent: {
         ...state.selectedEvent,
         eventName: "",
-        start: 0,
+        id: "0",
         dayKey: event.dayKey ?? "0",
         text: event.text
       }

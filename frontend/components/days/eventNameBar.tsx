@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { API } from '@aws-amplify/api'
 import { eventKeyToColor } from '../../lib/returnClassName'
 import { Day, Event, State } from '../../lib/types'
+import { v4 as uuidv4 } from 'uuid'
 
 const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }: {
   state: State
@@ -42,7 +43,7 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
     day: Day, eventName: string, i: number, eventNameState: string
     ) => {
 
-
+    const id = uuidv4()
     
     if (eventNameState === "removing") {
       const newEventArray = [...eventNames]
@@ -76,22 +77,21 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
         totalDuration = totalDuration + dayEvent.duration
       })
       const newDay = JSON.parse(JSON.stringify(day))
-
         const params = {
           body: {
             eventName: eventName,
             dayKey: "" + day.dayKey,
             monthYear: monthYear,
             eventNameKey: i,
-            start: totalDuration,
+            id: id,
             duration: 6,
+            arrayIndex: day.dayValue.length,
           }
         }
 
         const newEvent = { 
           ...params.body, 
           className: "col-span-" + 6 + " h-8 " + eventKeyToColor(i),
-          arrayIndex: day.dayValue.length,
           dayArrayIndex: dayIndex,
           monthYear: undefined
         }
@@ -99,18 +99,19 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
         newDay.dayValue.push(newEvent)
         
       try {
-  
+        console.log('ididi', id)
         dispatch({
           type: "eventAdded",
           day: newDay,
-          dayArrayIndex: dayIndex,
+          dayArrayIndex: dayIndex
         })
         dispatch({
           type: "selectEvent",
           event: newEvent,
           dayKey: day.dayKey,
           arrayIndex: newDay.dayValue.length - 1,
-          dayArrayIndex: dayIndex
+          dayArrayIndex: dayIndex,
+          id: id
         })
         await API.post(
           process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "",

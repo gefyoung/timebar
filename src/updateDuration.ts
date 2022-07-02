@@ -6,27 +6,25 @@ const dynamoDb = new DynamoDB.DocumentClient()
 interface EventNameEvent {
   id: string,
   monthYear: string,
-  dayKey: string
+  dayKey: string,
+  duration: number
 }[]
 
 
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
   
   try {
-    const { monthYear, dayKey, id }: EventNameEvent = JSON.parse(event.body ?? '')
+    const { monthYear, dayKey, id, duration }: EventNameEvent = JSON.parse(event.body ?? '')
     
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
-    
-    console.log('delete event: ', monthYear, dayKey, id)
-
-    // const startWithNaN = start === null ? "NaN" : start
-    
+    console.log('id', id)
     const updateMap = {
-      ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": id },
+      ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": id, "#DU": "duration" },
+      ExpressionAttributeValues: { ":du": duration},
       Key: { user: identityId, month: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
-      UpdateExpression: "REMOVE #DA.#DK.#ST"
+      UpdateExpression: "SET #DA.#DK.#ST.#DU = :du"
     }
     const updatedRes = await dynamoDb.update(updateMap).promise()
 

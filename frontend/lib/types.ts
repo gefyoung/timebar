@@ -1,5 +1,5 @@
 export interface Event {
-  start: number
+  id: string
   duration: number
   eventName: string
   className: string

@@ -29,6 +29,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return <>
     <Head>
+    <script src="https://cdn.usefathom.com/script.js" data-site="PGUABNQP" defer></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
       <meta name='application-name' content='Timebar' />
       <meta name='apple-mobile-web-app-capable' content='yes' />
       <meta name='apple-mobile-web-app-status-bar-style' content='default' />

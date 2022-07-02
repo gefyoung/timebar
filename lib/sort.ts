@@ -1,51 +1,56 @@
-import { FlipEvent } from './types'
+import { Event } from './types'
 
-export default function sort(daysMap: Map<string, Record<string, FlipEvent>>) {
+export default function sort(daysMap: Map<string, Record<string, Event>>) {
 
   const arr = [...daysMap].map(([dayKey, dayValue]) => {
+    
     const returnObj: {
       dayKey: string
-      dayValue: FlipEvent[]
-      dayText?: string
+      dayValue: Event[]
+      dayArrayIndex?: number
     } = {
       dayKey: '',
       dayValue: [],
+      dayArrayIndex: undefined
     }
 
-    const dayArray = Array.from(Object.entries(dayValue)).map(([flipKey, flipValue]) => {
-      if (Number(flipKey) === 0) {
-        returnObj.dayText = flipValue.text
-      }
+   returnObj.dayValue = Array.from(Object.entries(dayValue)).map(([key, value]) => {
+      // if (Number(flipKey) === 0) {
+      //   returnObj.dayText = flipValue.text
+      // }
+      // value.forEach(event => {})
       return {
-        ...flipValue,
-        start: Number(flipKey)
+        ...value,
+        id: key
       }
-    })
-    /* if the flip Obj doesnt have duration, ie, dayText, get rid of it */
-    const no0dayArray = dayArray.filter((flipObj) => {
-      return flipObj.duration
     })
 
+    /* if the flip Obj doesnt have duration, ie, dayText, get rid of it */
+    // const no0dayArray = dayArray.filter((flipObj) => {
+    //   return flipObj.duration
+    // })
+
     returnObj.dayKey = dayKey
-    returnObj.dayValue = no0dayArray
+    // returnObj.dayValue = no0dayArray
     return returnObj
   })
 
   return arr.sort((dayA, dayB) => {
-    dayA.dayValue = Object.values(dayA.dayValue).sort((flipA, flipB) => {
-      if (Number(flipA.start) < Number(flipB.start)) {
+
+    dayA.dayValue = Object.values(dayA.dayValue).sort((eventA, eventB) => {
+      if (Number(eventA.arrayIndex) < Number(eventB.arrayIndex)) {
         return -1
-      } else if (Number(flipB.start) < Number(flipA.start)) {
+      } else if (Number(eventB.arrayIndex) < Number(eventA.arrayIndex)) {
         return 1
       } else {
         return 0
       }
     })
 
-    dayB.dayValue = Object.values(dayB.dayValue).sort((flipA, flipB) => {
-      if (Number(flipA.start) < Number(flipB.start)) {
+    dayB.dayValue = Object.values(dayB.dayValue).sort((eventA, eventB) => {
+      if (Number(eventA.arrayIndex) < Number(eventB.arrayIndex)) {
         return -1
-      } else if (Number(flipB.start) < Number(flipA.start)) {
+      } else if (Number(eventB.arrayIndex) < Number(eventA.arrayIndex)) {
         return 1
       } else {
         return 0
