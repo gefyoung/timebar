@@ -116,11 +116,12 @@ const reducer = (state: State, event: ReducerEvent): State => {
     const editedArray = JSON.parse(JSON.stringify(state.data))
     if (
       typeof event.dayArrayIndex !== 'number'
-      || !event.day
+      || !event.event
+      || typeof event.event.arrayIndex !== 'number'
       ) {
       return state
     }
-    editedArray[event.dayArrayIndex] = event.day
+    editedArray[event.dayArrayIndex].dayValue[event.event.arrayIndex] = event.event
     return { 
       ...state, 
       data: editedArray, 

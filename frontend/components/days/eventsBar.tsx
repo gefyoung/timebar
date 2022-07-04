@@ -49,12 +49,11 @@ const EventsBar = ({
 
   const resizeEnd = async (e: DragEvent | TouchEvent) => {
     e.stopPropagation()
-    console.log(state.selectedEvent)
+
     const newArray = dragEnd(state, day)
     dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
     const params = {
       body: {
-        // modifiedEvents: newArray,
         dayKey: state.selectedEvent.dayKey,
         monthYear: state.monthYear,
         id: state.selectedEvent.id,
@@ -111,6 +110,7 @@ const EventsBar = ({
   const moveEnd = async (e: DragEvent | TouchEvent, mapDataEvent: Event, i: number) => {
     console.log(e)
     const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
+
     const newArray = moved(
       clientX,
       initialMoveState,
@@ -134,7 +134,7 @@ const EventsBar = ({
     }
 
     try {
-      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateArrayIndex', params)
     } catch (err) {
       console.log(err)
     }
@@ -193,7 +193,7 @@ const EventsBar = ({
 
 
             : <div
-              id={"" + mapDataEvent.id}
+              id={mapDataEvent.id}
               key={mapDataEvent.id}
               className={mapDataEvent.className}
               onClick={() => selectEvent(mapDataEvent, i)}

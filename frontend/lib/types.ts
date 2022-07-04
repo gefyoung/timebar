@@ -6,15 +6,13 @@ export interface Event {
   text?: string
   eventNameKey?: number
   dayKey: string
-  arrayIndex?: number
+  arrayIndex: number
   dayArrayIndex: number
-  newStart?: number
 }
 
 export interface Day {
   dayKey: string
   dayValue: Event[]
-  dayText?: string
 }
 
 export interface UserData {

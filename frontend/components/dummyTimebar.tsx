@@ -9,16 +9,23 @@ import { UserMonthData } from '../pages/index'
 import reducer from '../lib/daysReducer'
 import EventsDelineator from './days/eventsDelineator'
 
+// interface DummyState {
 
+// }
 type Reducer<S, A> = (prevState: S, action: A) => S
 
-export default function Days({ data, getPreviousMonth }: { 
-  data: UserMonthData, getPreviousMonth: () => void }) {
+export default function DummyTimebar() {
 
-  const initialState: State = {
-    monthYear: data.month,
-    events: data.events,
-    data: data.days,
+const dateString = new Date().toLocaleString('en-us', { weekday: 'long' }) + " " + new Date().getDay()
+  console.log('dateString', dateString)
+  const initialState = {
+    events: ['Code', 'Type 2 leisure', 'Type 1 leisure', 'Sleep'],
+    data: [{
+      dayKey: dateString,
+      dayValue: [{
+        
+      }]
+    }],
     selectedEvent: {
       eventName: "",
       text: "",
@@ -32,7 +39,7 @@ export default function Days({ data, getPreviousMonth }: {
   }
 
 
-  const [state, dispatch] = useReducer<Reducer<State, any>>(reducer, initialState)
+  const [state, dispatch] = useReducer<Reducer<any, any>>(reducer, initialState)
 
   const month = data.month.match(/(.*?)_/)
   const year = data.month.match(/_(.*)/)
@@ -47,7 +54,7 @@ export default function Days({ data, getPreviousMonth }: {
       dispatch({
         type: "selectDay",
         dayKey: day.dayKey,
-        // text: day.dayText,
+        text: day.dayText,
       })
     }
   }
@@ -75,6 +82,9 @@ export default function Days({ data, getPreviousMonth }: {
                     (new Date(month1 + "/" + day.dayKey + "/" + year1))
                       .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
                 </div>
+                {day.dayText && <div className="h-4 mt-2 ml-1">
+                  <Image width={16} height={16} src="/files.svg" alt="notes icon" />
+                </div>}
               </div>
               {/* <div> */}
               {state.selectedEvent.dayKey === day.dayKey

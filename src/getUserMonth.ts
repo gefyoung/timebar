@@ -70,7 +70,9 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       // for (const [key, value] of Object.entries(dynamoData.Item?.days)) {
       //   newDays.push
       // }
-
+      // Object.entries(dynamoData.Item?.days).forEach(([key, value]) => {
+        
+      // })
       let map: Map<string, Record<string, Event>> = new Map(Object.entries(dynamoData.Item?.days))
 
       /* if user doesn't have today */
@@ -85,7 +87,9 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         }
         const updatedRes = await dynamoDb.update(updateMap).promise()
         map = new Map(Object.entries(updatedRes.Attributes?.days))
+
       }
+      
       // Array.from(map, (key, value) => {console.log('keyVALUAE', key, value)})
       
       // map.forEach((day) => {

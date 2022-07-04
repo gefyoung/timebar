@@ -54,6 +54,7 @@ export default class MyStack extends sst.Stack {
         "POST /deleteEvent": "src/deleteEvent.handler",
         "POST /deleteEventName": "src/deleteEventName.handler",
         "POST /updateDuration": "src/updateDuration.handler",
+        "POST /updateArrayIndex": "src/updateArrayIndex.handler",
       },
     })
 

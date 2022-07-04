@@ -22,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
 
     /* convert edited array to whole new daymap */
     const arrToObj = modifiedEvents.reduce((acc, curr) => {
-      return { ...acc, [curr.start]: {
+      return { ...acc, [curr.id]: {
         eventName: curr.eventName,
         eventNameKey: curr.eventNameKey,
         duration: curr.duration,

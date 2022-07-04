@@ -19,17 +19,11 @@ export default function Text({ day, dayIndex, dispatch, state }: {
     /* This is purposely object oriented because I cannot depend on the flipState for text as it causes a rerender
     and thus the textArea is deselected; I use useRef but if I define flip outside of saveText, dayText is stale */
     console.log(state)
-      const params = !isEvent ? {
+      const params = 
+      {
         body: {
           dayKey: state.selectedEvent.dayKey,
-          start: state.selectedEvent.start,
-          text: textAreaRef.current?.value,
-          monthYear: state.monthYear
-        }
-      } : {
-        body: {
-          dayKey: state.selectedEvent.dayKey,
-          start: state.selectedEvent.start,
+          id: state.selectedEvent.id,
           text: textAreaRef.current?.value,
           monthYear: state.monthYear,
           eventName: state.selectedEvent.eventName
@@ -59,8 +53,8 @@ export default function Text({ day, dayIndex, dispatch, state }: {
   return (
     <>
       <textarea
-        key={dayIndex + " " + state.selectedEvent.start}
-        defaultValue={isEvent ? state.selectedEvent.text : day.dayText !== "" ? day.dayText : ""}
+        key={"TextArea_" + state.selectedEvent.id}
+        defaultValue={isEvent ? state.selectedEvent.text : ""}
         // value={isEvent ? state.selectedEvent.text?? "" : day.dayText?? ""}
         ref={textAreaRef}
         onChange={(e) => changeText(e)}

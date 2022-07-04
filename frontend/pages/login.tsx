@@ -1,13 +1,13 @@
 import React, { useRef, useState,  } from "react";
 import { Auth } from '@aws-amplify/auth'
-import CustomSpinner from "./customSpinner"
+import CustomSpinner from "../components/customSpinner"
 import { useRouter } from 'next/router'
 // import Google from "./google";
+import '../configureAmplify'
 
 interface CreateAccountProps {
   changePageState: (e: string) => void
 }
-
 
 const LogIn = (props: CreateAccountProps) => {
 
@@ -30,8 +30,9 @@ const LogIn = (props: CreateAccountProps) => {
           passInputRef.current.value
         )
         setSubmitting(false)
+        
       }
-      location.reload()
+      router.push('/')
       // setPageState(false)
     } catch (err: any) {
       if (err.code === "UserNotFoundException") {
@@ -46,12 +47,15 @@ const LogIn = (props: CreateAccountProps) => {
 
   return (
     <>
-      <div className="flex flex-col mx-5">
+      <div className="flex justify-center ml-10 mt-28">
+        <div className="w-85ch">
+
+        
         <div className="mb-10 text-3xl">Log In</div>
 
 
         {/* <div className="flex justify-center mt-5"><Google {...props} setPageState={setPageState} /></div> */}
-        <div className="flex justify-center mt-5">Or</div>
+
         <div className="my-5">
           Email
           <div>
@@ -74,8 +78,12 @@ const LogIn = (props: CreateAccountProps) => {
           </div>
         </div>
 
-        <div className="flex flex-row mb-10">
-          <button onClick={userLoginHandler} disabled={isSubmitting}>Log In </button>
+        <div className="flex flex-row mt-6 mb-10">
+          <button 
+            onClick={userLoginHandler} 
+            disabled={isSubmitting}
+            className="px-1 m-1 mr-2 outline-black outline outline-1"
+          >Log In </button>
           <div className="mx-2 mt-1">{isSubmitting && <CustomSpinner />}</div>
         </div>
 
@@ -86,6 +94,7 @@ const LogIn = (props: CreateAccountProps) => {
 
         <div className="mt-10">
           {/* Don&apos;t have an account? <span className="text-blue-500 cursor-pointer" onClick={() => setPageState('signUp')}>SIGN UP</span> */}
+        </div>
         </div>
       </div>
 

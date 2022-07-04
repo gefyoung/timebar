@@ -8,7 +8,7 @@ interface EventNameEvent {
   monthYear: string,
   dayKey: string,
   duration: number
-}[]
+}
 
 
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
@@ -17,7 +17,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     const { monthYear, dayKey, id, duration }: EventNameEvent = JSON.parse(event.body ?? '')
     
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
-    console.log('id', id)
+    console.log('id', id,monthYear, dayKey, duration)
     const updateMap = {
       ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": id, "#DU": "duration" },
       ExpressionAttributeValues: { ":du": duration},

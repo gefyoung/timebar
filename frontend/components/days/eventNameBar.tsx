@@ -99,10 +99,9 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
         newDay.dayValue.push(newEvent)
         
       try {
-        console.log('ididi', id)
         dispatch({
           type: "eventAdded",
-          day: newDay,
+          event: newEvent,
           dayArrayIndex: dayIndex
         })
         dispatch({

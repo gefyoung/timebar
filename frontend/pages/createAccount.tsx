@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Auth } from '@aws-amplify/auth'
 import { useRouter } from 'next/router'
-import CustomSpinner from './customSpinner'
+import CustomSpinner from '../components/customSpinner'
 // import Google from './google'
+import '../configureAmplify'
 
 interface CreateAccountProps {
   changePageState: (e: string) => void
 }
 
-const CreateAccount = (props: CreateAccountProps) => {
-
+const createAccount = (props: CreateAccountProps) => {
+  const router = useRouter()
   const [loginState, setLoginState] = useState({
     username: '',
     email: '',
@@ -63,13 +64,12 @@ const CreateAccount = (props: CreateAccountProps) => {
   }
 
   return (
-    <div className="flex flex-col ">
-      <div className="mb-10 text-3xl ">Create an account</div>
-      {/* <div className="flex justify-center mt-5">
-        <Google {...props} setPageState={setPageState} />
-      </div> */}
-    <div className="flex justify-center mt-5">Or</div>
-      {!inputState.account ? <div className="my-5">
+    <div className="flex justify-center ml-10 mt-28">
+      <div className="w-85ch ">
+        <div className="flex flex-col">
+          <div className="mb-10 text-3xl">Create an account</div>
+
+          {!inputState.account ? <div className="my-5">
         <div className="mb-5">
           Email
           <div>
@@ -100,8 +100,12 @@ const CreateAccount = (props: CreateAccountProps) => {
             {(inputState.err === "passBad") && ' ❌'}
           </div>
         </div>
-        <div className="mb-5">
-          <button disabled={(inputState.err === "accepted")} onClick={userAddHandler}>Submit</button>
+        <div className="mt-6 mb-5">
+          <button 
+            disabled={(inputState.err === "accepted")} 
+            onClick={userAddHandler}
+            className="px-1 m-1 mr-2 outline-black outline outline-1"
+          >Submit</button>
           {(inputState.err === "accepted") && ' ✔️'}
           {inputState.account && <CustomSpinner />}
         </div></div> : <div className="m-5 column">
@@ -110,24 +114,37 @@ const CreateAccount = (props: CreateAccountProps) => {
         <div className="mb-3">
           <input onChange={(event) => setLoginState({ ...loginState, code: '' + event.target.value })} placeholder="Confirmation code"></input>
         </div>
-        <div>
-          <button disabled={inputState.submitting} onClick={userVerifyHandler}>submit</button>
+        <div className="px-1 m-1 mr-2 outline-black outline outline-1">
+          <button 
+            
+            disabled={inputState.submitting} 
+            onClick={userVerifyHandler}
+          >Submit</button>
           {inputState.submitting && <CustomSpinner />}
           {(inputState.confirmation === "accepted") ? <CustomSpinner /> : (inputState.confirmation === "denied") ? ' ❌' : null}
         </div>
 
       </div>}
-      {/* <div className=""><UserAgreement /></div> */}
+      
+        </div>
+
+      {/* <div className="flex justify-center mt-5">
+        <Google {...props} setPageState={setPageState} />
+      </div> */}
       <div className="mt-10 ">
         Already have an account? <span 
           className="text-blue-500 cursor-pointer " 
-          onClick={() => props.changePageState('login')}
+          onClick={() => router.push('/login')}
         >LOG IN</span>
       </div>
+    </div>
+      
+      {/* <div className=""><UserAgreement /></div> */}
+
     </div>
   )
 
 
 }
 
-export default CreateAccount
+export default createAccount

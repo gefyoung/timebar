@@ -32,6 +32,7 @@ export interface IAMAuthorizer {
 }
 
 export interface Event {
+  id: string
   // start: number
   duration: number
   eventName: string

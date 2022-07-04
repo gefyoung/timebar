@@ -20,29 +20,29 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     console.log("FE", textData)
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     console.log('identityId', identityId, 'textdata', textData)
-    if (textData.start === 0) {
-      /* updating dayText overwrites 0 event properties cause text didn't prev exist on it */
-      const params = {
-        ExpressionAttributeNames: {
-          "#DA": "days",
-          "#DI": "" + textData.dayKey,
-          "#ST": "0"
-        },
-        ExpressionAttributeValues: { ":ft": { text: "" + textData.text } },
-        Key: { user: identityId, month: textData.monthYear },
-        ReturnValues: "ALL_NEW",
-        TableName: process.env.UserMonths ?? 'noTable',
-        UpdateExpression: "SET #DA.#DI.#ST = :ft"
-      }
-      const updated = await dynamoDb.update(params).promise()
-      console.log(updated)
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ flipEvent: textData })
-      }
+    // if (textData.start === 0) {
+    //   /* updating dayText overwrites 0 event properties cause text didn't prev exist on it */
+    //   const params = {
+    //     ExpressionAttributeNames: {
+    //       "#DA": "days",
+    //       "#DI": "" + textData.dayKey,
+    //       "#ST": "0"
+    //     },
+    //     ExpressionAttributeValues: { ":ft": { text: "" + textData.text } },
+    //     Key: { user: identityId, month: textData.monthYear },
+    //     ReturnValues: "ALL_NEW",
+    //     TableName: process.env.UserMonths ?? 'noTable',
+    //     UpdateExpression: "SET #DA.#DI.#ST = :ft"
+    //   }
+    //   const updated = await dynamoDb.update(params).promise()
+    //   console.log(updated)
+    //   return {
+    //     statusCode: 200,
+    //     body: JSON.stringify({ flipEvent: textData })
+    //   }
 
 
-    } else {
+    // } else {
       /* updating eventText */
       const params = {
         ExpressionAttributeNames: {
@@ -63,7 +63,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         statusCode: 200,
         body: JSON.stringify({ flipEvent: textData })
       }
-    }
+    // }
 
   } catch (err) {
     console.log(err)
@@ -72,3 +72,4 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     }
   }
 }
+
