@@ -5,56 +5,56 @@ const EventsDelineator = () => {
     <div className="grid grid-cols-16">
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      7
+      6
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      9
+      8
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      11
+      10
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      1
+      12
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      3
+      2
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      5
+      4
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      7
+      6
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />
       </div>
       <div className="col-span-1 mt-2 text-xs">
       {/* <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" /> */}
-      9
+      8
       </div>
       <div className="col-span-1">
       <Image width={4} height={4} src="/verticalLine.svg" alt="1 hour" />

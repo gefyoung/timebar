@@ -11,7 +11,7 @@ import { Day, Event } from '../lib/types'
 import returnClassName from '../lib/returnClassName'
 import { useRouter } from 'next/router'
 import { RouterType } from 'aws-cdk-lib/aws-ec2'
-import DummyTimebar from '../components/dummyTimebar'
+import DummyTimebar from '../components/dummyDay'
 
 interface IndexProps {
   changePageState: Function,
@@ -29,24 +29,6 @@ interface PageState {
   auth: boolean
   loading: boolean
   data: UserMonthData
-}
-
-const Index = (props: IndexProps) => {
-
-  return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>
-        {/* <button
-          className="text-blue-600"
-          onClick={() => props.changePageState('create')}
-        >Start tracking
-        </button> */}
-        {props.loading && <CustomSpinner />}
-      </h1>
-      <div>
-      </div>
-    </main>
-  )
 }
 
 const Home: NextPage = () => {
@@ -121,8 +103,8 @@ const Home: NextPage = () => {
   } else {
     return (
       <div className="">
-        <div className="grid mt-60 place-content-center">
-          <div className="ml-1 text-3xl">Timebar</div>
+        <div className="grid mt-40">
+          <div className="grid mb-10 ml-1 text-3xl place-content-center">Timebar</div>
           { !state?.loading 
           ? <DummyTimebar />
           : <div className="grid mt-4 place-content-center"><CustomSpinner /></div>
@@ -132,11 +114,11 @@ const Home: NextPage = () => {
             onClick={() => router.push('/createAccount')}
           >Create an account
           </div>
-          <div
+          {/* <div
             className="grid mt-12 text-blue-600 cursor-pointer place-content-center"
             onClick={() => router.push('/gty')}
           >Look at my notes
-          </div>
+          </div> */}
         </div>
       </div>
     )

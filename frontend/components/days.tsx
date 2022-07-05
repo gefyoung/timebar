@@ -1,5 +1,5 @@
 import { DragEvent, useEffect, useReducer, useState } from 'react'
-import Text from './text'
+import Text from './days/text'
 import Image from 'next/image'
 import { State, Day } from '../lib/types'
 import { monthToString } from '../lib/convertMonthYear'

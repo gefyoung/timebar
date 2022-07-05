@@ -30,7 +30,6 @@ const reducer = (state: State, event: ReducerEvent): State => {
       return state
     }
     const text = { ...state.data[event.dayArrayIndex].dayValue[event.arrayIndex] }.text ?? ""
-    console.log("text", text)
     return {
       ...state,
       selectedEvent: {

@@ -51,14 +51,15 @@ export default function returnClassName(flipArray: Event[]) {
 
 export function eventKeyToColor (e: number) { switch (e) {
   case 0: return "bg-red-600"
-  case 1: return "bg-yellow-600"
-  case 2: return "bg-orange-600"
+  case 1: return "bg-blue-600"
+  case 2: return "bg-orange-500"
   case 3: return "bg-purple-600"
-  case 4: return "bg-amber-600"
-  case 5: return "bg-lime-600"
+  case 4: return "bg-lime-600"
+  case 5: return "bg-pink-600"
   case 6: return "bg-teal-600"
-  case 7: return "bg-blue-600"
-  case 8: return "bg-pink-600"
+  case 7: return "bg-yellow-400"
+  case 8: return "bg-rose-800"
+  case 9: return "bg-emerald-800"
   default:
     return "bg-white"
 }

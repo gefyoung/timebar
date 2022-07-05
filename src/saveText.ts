@@ -6,7 +6,7 @@ const dynamoDb = new DynamoDB.DocumentClient()
 
 interface EditFlipEvent {
   dayKey: number
-  start: number
+  id: string
   text?: string
   monthYear?: string
   eventName?: string
@@ -48,7 +48,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         ExpressionAttributeNames: {
           "#DA": "days",
           "#DI": "" + textData.dayKey,
-          "#FI": "" + textData.start,
+          "#FI": "" + textData.id,
           "#TX": "text"
         },
         ExpressionAttributeValues: { ":ft": textData.text },

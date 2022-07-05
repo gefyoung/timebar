@@ -80,12 +80,14 @@ export default class MyStack extends sst.Stack {
         NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.cognitoUserPoolClient?.userPoolClientId ?? 'noAppClient',
         NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId,
         NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
+        NEXT_PUBLIC_FATHOM_SITE_ID: scope.stage === "prod" ? 'PGUABNQP' : "",
+        NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS: "timebar.me"
       },
-      // customDomain: {
-      //   domainName: "timebar.me",
-      //   domainAlias: "www.timebar.me",
-      // }
-      customDomain: scope.stage === "prod" ? "timebar.me" : undefined
+      customDomain: scope.stage === "prod" ? {
+        domainName: "timebar.me",
+        domainAlias: "www.timebar.me",
+      } : undefined
+      // customDomain: scope.stage === "prod" ? "timebar.me" : undefined
     })
 
 

@@ -4,32 +4,15 @@ import Head from 'next/head'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import * as Fathom from 'fathom-client'
-
+import FathomHook from '../lib/fathomHook'
 
 function MyApp({ Component, pageProps }: AppProps) {
 
-  const router = useRouter();
-
-  useEffect(() => {
-    Fathom.load('PGUABNQP', {
-      includedDomains: ['timebar.me'],
-    });
-
-    function onRouteChangeComplete() {
-      Fathom.trackPageview();
-    }
-    // Record a pageview when route changes
-    router.events.on('routeChangeComplete', onRouteChangeComplete);
-
-    // Unassign event listener
-    return () => {
-      router.events.off('routeChangeComplete', onRouteChangeComplete);
-    };
-  }, [])
+  FathomHook()
 
   return <>
     <Head>
-    <script src="https://cdn.usefathom.com/script.js" data-site="PGUABNQP" defer></script>
+    {/* <script src="https://cdn.usefathom.com/script.js" data-site="PGUABNQP" defer></script> */}
     <script src="https://apis.google.com/js/platform.js" async defer></script>
       <meta name='application-name' content='Timebar' />
       <meta name='apple-mobile-web-app-capable' content='yes' />

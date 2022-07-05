@@ -1,6 +1,6 @@
 import { API } from '@aws-amplify/api'
 import { ChangeEvent, useRef, useState } from 'react'
-import { Day, State } from '../lib/types'
+import { Day, State } from '../../lib/types'
 
 
 export default function Text({ day, dayIndex, dispatch, state }: {
@@ -29,6 +29,7 @@ export default function Text({ day, dayIndex, dispatch, state }: {
           eventName: state.selectedEvent.eventName
         }
       }
+      console.log('params,', params)
       try {
         const res = await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/saveText', params)
         console.log('res', res)
