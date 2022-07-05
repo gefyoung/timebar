@@ -115,7 +115,7 @@ const EventsBar = ({
 
 
   return (
-    <div id="grid96" className="grid grid-cols-96">
+    <div id="grid96" className="grid grid-cols-96" key="wtf">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
         <>
           {(mapDataEvent.id === state.selectedEvent.id)
