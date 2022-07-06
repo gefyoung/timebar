@@ -31,6 +31,7 @@ export const moved = (
 
       if (cur.id === state.selectedEvent.id) {
         if (day.dayValue.length - 1 === i) {
+          console.log('pushed')
           acc.push(cur)
         }
         selected = cur
@@ -61,10 +62,13 @@ export const moved = (
     const movingFront = clientX - initialMoveState.front
     let moved: boolean
 
-    return [...day.dayValue].reduce((acc, cur, i) => {
+    const newLeftArray = [...day.dayValue].reduce((acc, cur, i) => {
 
       const currPosition = document.getElementById(`${cur.id}`)?.offsetLeft ?? 0
       if (cur.id === state.selectedEvent.id) {
+        if (day.dayValue.length - 1 === i && !moved) {
+          acc.push(cur)
+        }
         return acc
       }
       else if (moved) {
@@ -84,6 +88,8 @@ export const moved = (
       }
       return acc
     }, [] as Event[])
+
+    return newLeftArray
 
   }
 }
