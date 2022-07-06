@@ -33,7 +33,6 @@ interface PageState {
 
 const Home: NextPage = () => {
 
-
   const router = useRouter()
   const [state, setState] = useState<PageState | null>(null)
 

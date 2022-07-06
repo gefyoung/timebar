@@ -9,7 +9,7 @@ const FathomHook = () => {
   const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID
   const excludedDomains = process.env.NEXT_PUBLIC_FATHOM_EXCLUDED_DOMAINS?? ""
   const includedDomains = process.env.NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS?? ""
-
+ 
   useEffect(() => {
     if (nodeEnv !== 'production' || !siteId) return
     let loadOptions: LoadOptions = {}
@@ -21,6 +21,7 @@ const FathomHook = () => {
     if (excludedDomains.length) {
       loadOptions.excludedDomains = excludedDomains.split(',')
     }
+    loadOptions.url = "https://joy-battery.timebar.me/script.js"
 
     load(siteId, loadOptions)
     events.on(eventType, trackPageview)

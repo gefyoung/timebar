@@ -13,79 +13,64 @@ export const moved = (
   state: State,
   day: Day
 ) => {
-  console.log('initialMoveState', initialMoveState)
 
   if (initialMoveState.click < clientX) {
-
-    console.log('moved right')
     /* move right */
     const movingTail = clientX - initialMoveState.back
     let moved = false
-    let accDuration = 1
     let selected: Event
+    let movedIndex: number
 
     const copiedEventArray: Event[] = JSON.parse(JSON.stringify(day.dayValue))
 
-    return copiedEventArray.reduce((acc, cur, i) => {
+    const shit = copiedEventArray.reduce((acc, cur, i) => {
 
       const currPosition = document.getElementById(`${cur.id}`)?.offsetLeft ?? 0
       const currentWidth = document.getElementById(`${cur.id}`)?.offsetWidth ?? 0
       const currentTail = currPosition + currentWidth
 
-      // accDuration = 
-      // cur.start === state.selectedEvent.start
-      // ? accDuration
-      // : accDuration + cur.duration
-      console.log('day', day)
       if (cur.id === state.selectedEvent.id) {
-        if (day.dayValue.length - 1 === i) { 
+        if (day.dayValue.length - 1 === i) {
           acc.push(cur)
         }
         selected = cur
         return acc
       } else if (moved) {
-        
-        acc.push(cur) 
-      } else if (currentTail > movingTail) {
-        
-            moved = true
-            cur.arrayIndex = cur.arrayIndex + 1
-            // selected.start = accDuration
-            // cur.start = accDuration - cur.duration
-            acc.push(cur, selected)
-
-      } else {
-        // cur.start = accDuration - cur.duration
-       cur.arrayIndex = cur.arrayIndex - 1
         acc.push(cur)
-
-          if (day.dayValue.length - 1 === i) {
+      } else if (currentTail > movingTail) {
+        moved = true
+        acc.push(cur, selected)
+      } else {
+        acc.push(cur)
+        if (day.dayValue.length - 1 === i) {
           moved = true
-          // selected.start = accDuration
           acc.push(selected)
         }
-
       }
-
       return acc
     }, [] as Event[])
 
+    shit.forEach((event, i) => {
+      event.arrayIndex = i
+    })
+
+    return shit
+
   } else {
+    /* move left*/
     const movingFront = clientX - initialMoveState.front
     let moved: boolean
 
     return [...day.dayValue].reduce((acc, cur, i) => {
-      
+
       const currPosition = document.getElementById(`${cur.id}`)?.offsetLeft ?? 0
       if (cur.id === state.selectedEvent.id) {
-        // if ( i === state.selectedEvent.arrayIndex) { 
-        //   acc.push(cur)
-        // }
-        /* tried comparing Events directly, didn't work */
         return acc
       }
       else if (moved) {
-        // cur.start = cur.start + state.selectedEvent.duration
+        if (cur.arrayIndex < state.selectedEvent.arrayIndex) {
+          cur.arrayIndex = cur.arrayIndex + 1
+        }
         acc.push(cur)
       }
       else if (currPosition < movingFront) {

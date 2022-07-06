@@ -1,5 +1,5 @@
 
-import { useRef, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { Day, Event, State } from "../../lib/types"
 import Image from "next/dist/client/image"
 import { DragEvent, TouchEvent } from "react"
@@ -115,9 +115,9 @@ const EventsBar = ({
 
 
   return (
-    <div id="grid96" className="grid grid-cols-96" key="wtf">
+    <div id="grid96" className="grid grid-cols-96">
       {day.dayValue.map((mapDataEvent: Event, i: number) =>
-        <>
+        <Fragment key={mapDataEvent.id}>
           {(mapDataEvent.id === state.selectedEvent.id)
             ? // this is the rendered selectedEvent
             <><div
@@ -167,7 +167,7 @@ const EventsBar = ({
             </div>
 
           }
-        </>
+        </Fragment>
       )}
       {state.selectedEvent.id !== "0" && state.selectedEvent.dayKey === day.dayKey
         && (!deleteState ? <div className="ml-2 col-start-96"><button

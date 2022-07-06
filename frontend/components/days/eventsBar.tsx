@@ -141,6 +141,7 @@ const EventsBar = ({
   }
 
   const selectEvent = (mapDataEvent: Event, i: number) => {
+    console.log(mapDataEvent)
     console.log('id', mapDataEvent.id)
     dispatch({
       type: "selectEvent",
