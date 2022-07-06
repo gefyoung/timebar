@@ -5,6 +5,7 @@ const dynamoDb = new DynamoDB.DocumentClient()
 
 
 export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
+  
   try {
     const {
       modifiedEvents, 
@@ -14,8 +15,8 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       modifiedEvents: Event[], 
       monthYear: string,
       dayKey : string
-  }
-     = JSON.parse(event.body ?? '')
+    } = JSON.parse(event.body ?? '')
+    
     const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
     console.log('EE', modifiedEvents)
     console.log(event.body)
@@ -26,9 +27,11 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         eventName: curr.eventName,
         eventNameKey: curr.eventNameKey,
         duration: curr.duration,
-        text: curr.text
+        text: curr.text,
+        arrayIndex: curr.arrayIndex
       }}
     }, {})
+    console.log('arrToObj', arrToObj)
 
     const updateMap = {
       ExpressionAttributeNames: { 
@@ -41,7 +44,8 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #DA.#DK = :dv"
     }
-      await dynamoDb.update(updateMap).promise()
+      const updateReturn = await dynamoDb.update(updateMap).promise()
+    console.log('updateReturn', updateReturn.Attributes?.days[dayKey])
 
     return {
       statusCode: 200,

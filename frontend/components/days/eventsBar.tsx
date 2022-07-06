@@ -132,9 +132,10 @@ const EventsBar = ({
         monthYear: state.monthYear
       }
     }
+    console.log('newArray', newArray)
 
     try {
-      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateArrayIndex', params)
+      await API.post(process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", '/updateEventArray', params)
     } catch (err) {
       console.log(err)
     }
