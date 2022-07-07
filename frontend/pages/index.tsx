@@ -102,8 +102,8 @@ const Home: NextPage = () => {
   } else {
     return (
       <div className="">
-        <div className="grid mt-40">
-          <div className="grid mb-10 ml-1 text-3xl place-content-center">Timebar</div>
+        <div className="flex flex-col mt-40">
+          <div className="flex mb-10 ml-1 text-3xl place-content-center">Timebar</div>
           { !state?.loading 
           ? <DummyTimebar />
           : <div className="grid mt-4 place-content-center"><CustomSpinner /></div>

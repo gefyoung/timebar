@@ -81,7 +81,7 @@ const EventsBar = ({
   }
 
   const moveEnd = async (e: DragEvent | TouchEvent, mapDataEvent: Event, i: number) => {
-    console.log(e)
+
     const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
 
     const newArray = moved(
@@ -139,6 +139,8 @@ const EventsBar = ({
               }
 
               <div
+                // onDragOver={(e) => resize(e)}
+                // onDrop={(e) => resizeEnd(e)}
                 onDrag={(e) => resize(e)}
                 onDragEnd={(e) => resizeEnd(e)}
                 onTouchMove={(e) => resize(e)} 

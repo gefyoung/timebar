@@ -49,7 +49,6 @@ const EventsBar = ({
 
   const resizeEnd = async (e: DragEvent | TouchEvent) => {
     e.stopPropagation()
-
     const newArray = dragEnd(state, day)
     dispatch({ type: "dragEnd", newDayValue: newArray, dayArrayIndex: dayIndex })
     const params = {
@@ -108,7 +107,7 @@ const EventsBar = ({
   }
 
   const moveEnd = async (e: DragEvent | TouchEvent, mapDataEvent: Event, i: number) => {
-    console.log(e)
+    
     const clientX = isTouchEvent(e) ? e.changedTouches[0].clientX : e.clientX
 
     const newArray = moved(

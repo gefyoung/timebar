@@ -6,7 +6,7 @@ export const drag = (clientX: number, state: State, day: Day) => {
   const oneGridWidth = (document.getElementById("grid96")?.offsetWidth ?? 0) / 96
   const currentWidth = state.selectedEvent.duration * oneGridWidth
   const boxLeftPosition = document.getElementById("selectedEventBox")?.offsetLeft ?? 0
-  
+
   if (clientX - 5 > currentWidth + boxLeftPosition) {
     /* drag right */
     return [...day.dayValue].reduce((acc, cur, i) => {
