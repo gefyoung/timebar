@@ -105,7 +105,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
       const eventArray = dynamoData.Item?.events
       const prevEvents = prevMonthArray.Item?.events
       console.log(eventArray.length, 'eventArray')
-      if (eventArray.length === 0) {
+      if (eventArray.length === 0 && prevEvents) {
         const updateArray = {
           ExpressionAttributeNames: { "#EV": "events" },
           ExpressionAttributeValues: { ":ev": prevEvents },

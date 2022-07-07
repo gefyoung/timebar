@@ -45,10 +45,14 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
 
 
     } else {
+      
       let totalDuration = 1
       day.dayValue.forEach((dayEvent) => {
         totalDuration = totalDuration + dayEvent.duration
       })
+      if (totalDuration > 96) { 
+        return
+      }
       const newDay = JSON.parse(JSON.stringify(day))
         const params = {
           body: {

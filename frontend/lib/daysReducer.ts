@@ -105,6 +105,12 @@ const reducer = (state: State, event: ReducerEvent): State => {
     }
 
   } else if (event.type === "eventNameAdded") {
+    if (!state.events) {
+      return {
+        ...state,
+        events: [event.eventName ?? ""]
+      }
+    }
     return {
       ...state,
       events: state.events.concat([event.eventName ?? ""])

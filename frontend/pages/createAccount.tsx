@@ -56,7 +56,7 @@ const createAccount = (props: CreateAccountProps) => {
       await Auth.confirmSignUp(loginState.email, loginState.code)
       setInputState({...inputState, confirmation: "accepted", submitting: false})
       await Auth.signIn(loginState.email, loginState.password)
-      location.reload()
+      router.push('/')
     } catch (err) {
       console.log(err)
       setInputState({...inputState, confirmation: "denied", submitting: false})
@@ -69,7 +69,8 @@ const createAccount = (props: CreateAccountProps) => {
         <div className="flex flex-col">
           <div className="mb-10 text-3xl">Create an account</div>
 
-          {!inputState.account ? <div className="my-5">
+          {!inputState.account ? /* change to asterisk to change page flow back to normal */
+          <div className="my-5">
         <div className="mb-5">
           Email
           <div>
@@ -108,20 +109,24 @@ const createAccount = (props: CreateAccountProps) => {
           >Submit</button>
           {(inputState.err === "accepted") && ' ✔️'}
           {inputState.account && <CustomSpinner />}
-        </div></div> : <div className="m-5 column">
+        </div></div> : <div className="column">
 
         <div className="mb-2">We sent a confirmation code to your email</div>
         <div className="mb-3">
-          <input onChange={(event) => setLoginState({ ...loginState, code: '' + event.target.value })} placeholder="Confirmation code"></input>
+          <input 
+            className="px-2 py-1 bg-blue-50"
+            onChange={(event) => setLoginState({ ...loginState, code: '' + event.target.value })} 
+            placeholder="Confirmation code"
+          ></input>
         </div>
-        <div className="px-1 m-1 mr-2 outline-black outline outline-1">
+        <div className="flex flex-row">
           <button 
-            
+            className="px-1 m-1 mr-2 outline-black outline outline-1"
             disabled={inputState.submitting} 
             onClick={userVerifyHandler}
           >Submit</button>
-          {inputState.submitting && <CustomSpinner />}
-          {(inputState.confirmation === "accepted") ? <CustomSpinner /> : (inputState.confirmation === "denied") ? ' ❌' : null}
+          {inputState.submitting && <CustomSpinner className="mt-1.5 ml-1"/>}
+          {(inputState.confirmation === "accepted") ? <CustomSpinner className="mt-1.5 ml-1"/> : (inputState.confirmation === "denied") ? ' ❌' : null}
         </div>
 
       </div>}

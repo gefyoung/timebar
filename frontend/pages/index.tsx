@@ -28,7 +28,7 @@ export interface UserMonthData {
 interface PageState {
   auth: boolean
   loading: boolean
-  data: UserMonthData
+  data: UserMonthData | null
 }
 
 const Home: NextPage = () => {
@@ -86,6 +86,7 @@ const Home: NextPage = () => {
         setState({ auth: true, loading: false, data: data })
 
       } catch (err) {
+        setState({ auth: false, loading: false, data: null })
         console.log('err', err)
       }
     })()
@@ -104,8 +105,8 @@ const Home: NextPage = () => {
       <div className="">
         <div className="flex flex-col mt-40">
           <div className="flex mb-10 ml-1 text-3xl place-content-center">Timebar</div>
-          { !state?.loading 
-          ? <DummyTimebar />
+          { state && !state.loading && !state.data
+          ? <DummyTimebar pageState={state}/>
           : <div className="grid mt-4 place-content-center"><CustomSpinner /></div>
           }
           <div

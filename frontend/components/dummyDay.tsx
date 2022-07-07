@@ -6,40 +6,64 @@ import DummyNameBar from './days/dummyNameBar'
 import DummyEventsBar from './days/dummyEventsBar'
 import reducer from '../lib/daysReducer'
 import EventsDelineator from './days/eventsDelineator'
+import CustomSpinner from './customSpinner'
 
 // interface DummyState {
 
 // }
 type Reducer<S, A> = (prevState: S, action: A) => S
 
-export default function DummyTimebar() {
+export default function DummyTimebar(pageState: any) {
 
 const dateString = new Date().getDate()
 
   const initialState = {
-    events: ['Code', 'Type 2 leisure', 'Type 1 leisure', 'Sleep'],
+    events: ['Coding', 'Youtube', 'TikTok', 'Exercising'],
     data: [{
       dayKey: dateString,
       dayValue: [{
         id: "1",
-        duration: 6,
+        duration: 8,
         eventName: "Code",
-        className: "col-span-6 h-8 bg-red-600",
-        text: "hello",
+        className: "col-span-8 h-8 bg-blue-600",
+        text: "hello, I write my thoughts here",
         eventNameKey: 0,
         dayKey: dateString,
         arrayIndex: 0,
         dayArrayIndex: 0
-      }]
-    }],
+      },
+      {
+        id: "2",
+        duration: 6,
+        eventName: "Youtube",
+        className: "col-span-6 h-8 bg-red-600",
+        text: "I've created general categories to give my notes context",
+        eventNameKey: 1,
+        dayKey: dateString,
+        arrayIndex: 1,
+        dayArrayIndex: 0
+      },
+      {
+        id: "3",
+        duration: 12,
+        eventName: "Tiktok",
+        className: "col-span-12 h-8 bg-pink-500",
+        text: "I use the time bar below the activity to give it even more context",
+        eventNameKey: 2,
+        dayKey: dateString,
+        arrayIndex: 2,
+        dayArrayIndex: 0
+      }
+    ]}
+  ],
     selectedEvent: {
-      eventName: "",
-      text: "",
-      id: "",
-      className: "",
+      eventName: "Type 2",
+      text: "hello, I write my thoughts here",
+      id: "1",
+      className: "col-span-6 h-8 bg-blue-600",
       arrayIndex: 0,
-      duration: 0,
-      dayKey: "0",
+      duration: 6,
+      dayKey: dateString,
       dayArrayIndex: 0
     }
   }
@@ -63,7 +87,6 @@ const dateString = new Date().getDate()
       <div className="w-85ch">
         <div className="flex flex-row">
     
-      
         </div>
 
         {
@@ -101,6 +124,7 @@ const dateString = new Date().getDate()
                   {
                   state.selectedEvent.eventName !== "" 
                     && <div><div>{state.selectedEvent.eventName}</div>
+                 
                   <DummyText
                     day={day}
                     state={state}

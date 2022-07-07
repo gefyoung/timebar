@@ -37,8 +37,6 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
     }
   }
 
-
-
   const clickEvent = async (
     day: Day, eventName: string, i: number, eventNameState: string
     ) => {
@@ -76,6 +74,9 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
       day.dayValue.forEach((dayEvent) => {
         totalDuration = totalDuration + dayEvent.duration
       })
+      if (totalDuration > 96) { 
+        return
+      }
       const newDay = JSON.parse(JSON.stringify(day))
         const params = {
           body: {
@@ -157,21 +158,24 @@ const EventNameBar = ({ state, monthYear, eventNames, day, dayIndex, dispatch }:
             >✔️</button></>
 
           : eventNames?.length < 12 ? <><button
-            className="px-1 m-1 mr-2"
-            onClick={() => setEventNameState("adding")}
-          >+</button> <button
+          className="px-1 m-1 mr-2"
+          onClick={() => setEventNameState("adding")}
+        >+</button><button
           className="px-1 m-1 ml-4 mr-2 "
           onClick={() => eventNameState !== "removing" 
             ? setEventNameState("removing")
           : setEventNameState("")}
         >-</button> </>
           
-          : <button
+          : <><button
+          className="px-1 m-1 mr-2"
+          onClick={() => setEventNameState("adding")}
+        >+</button><button
           className="px-1 m-1 ml-4 mr-2 "
           onClick={() => eventNameState !== "removing" 
             ? setEventNameState("removing")
           : setEventNameState("")}
-        >-</button>
+        >-</button></>
       }
     </div>
   )
