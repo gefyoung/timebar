@@ -38,10 +38,10 @@ function MyApp({ Component, pageProps }: AppProps) {
       <link rel='shortcut icon' href='/files.svg' />
       <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500' />
 
-      <meta name='twitter:card' content='summary' />
+      <meta name='twitter:card' content='summary_large_image' />
       <meta name='twitter:url' content='https://timebar.me' />
       <meta name='twitter:title' content='Timebar' />
-      {/* <meta name='twitter:description' content='Track your habits, change your life' /> */}
+      <meta name='twitter:description' content='Journaling decreases stress and increases overall wellbeing -Science' />
       <meta name='twitter:image' content='https://timebar.me/pageScreenshot.png' />
       <meta name='twitter:creator' content='@_gty__' />
       <meta property='og:type' content='website' />
