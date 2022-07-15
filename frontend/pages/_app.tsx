@@ -12,6 +12,14 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return <>
     <Head>
+    <meta charSet='utf-8' />
+      <meta httpEquiv='Content-Type' content='text/html; charset=utf-8' />
+      <meta
+        name='viewport'
+        content='width=device-width, initial-scale=1, shrink-to-fit=no'
+      />
+      <meta name='theme-color' content='#EB625A' />
+      <meta property='og:type' content='website' />
     {/* <script src="https://cdn.usefathom.com/script.js" data-site="PGUABNQP" defer></script> */}
     <script src="https://apis.google.com/js/platform.js" async defer></script>
       <meta name='application-name' content='Timebar' />

@@ -47,6 +47,10 @@ export default class MyStack extends sst.Stack {
       defaultAuthorizationType: sst.ApiAuthorizationType.AWS_IAM,
       routes: {
         "POST /getUserMonth": "src/getUserMonth.handler",
+        "POST /getPublicUserMonth": {
+          function: "src/getPublicUserMonth.handler",
+          authorizationType: sst.ApiAuthorizationType.NONE
+        },
         "POST /saveText": "src/saveText.handler",
         "POST /updateEventArray": "src/updateEventArray.handler",
         "POST /submitEventName": "src/submitEventName.handler",
@@ -57,6 +61,8 @@ export default class MyStack extends sst.Stack {
         "POST /updateArrayIndex": "src/updateArrayIndex.handler",
       },
     })
+
+    api.attachPermissionsToRoute("POST /getUserMonth", [])
 
     api.attachPermissions([UserMonths])
 
