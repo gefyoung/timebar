@@ -19,7 +19,6 @@ export default class MyStack extends sst.Stack {
       primaryIndex: { partitionKey: "user", sortKey: "month" }
     })
 
-
     const auth = new sst.Auth(this, "Auth", {
       cognito: {
         userPool: {
@@ -49,7 +48,8 @@ export default class MyStack extends sst.Stack {
         "POST /getUserMonth": "src/getUserMonth.handler",
         "POST /getPublicUserMonth": {
           function: "src/getPublicUserMonth.handler",
-          authorizationType: sst.ApiAuthorizationType.NONE
+          authorizationType: sst.ApiAuthorizationType.NONE,
+          environment: { STAGE: scope.stage }
         },
         "POST /saveText": "src/saveText.handler",
         "POST /updateEventArray": "src/updateEventArray.handler",
@@ -87,7 +87,10 @@ export default class MyStack extends sst.Stack {
         NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId,
         NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
         NEXT_PUBLIC_FATHOM_SITE_ID: scope.stage === "prod" ? 'PGUABNQP' : "",
-        NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS: "timebar.me"
+        NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS: "timebar.me",
+        // NEXT_PUBLIC_PUBLIC_IDENTITY: scope.stage === "prod" 
+        //   ? "us-east-1:b815ff91-0423-41dd-bbbb-8fe18b28badd"
+        //   : "us-east-1:82ed093a-7dae-4f4a-9f13-5adc8472737a"
       },
       customDomain: scope.stage === "prod" ? {
         domainName: "timebar.me",

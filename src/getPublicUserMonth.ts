@@ -6,15 +6,17 @@ import { IAMAuthorizer } from '../lib/types'
 
 const dynamoDb = new DynamoDB.DocumentClient()
 
-export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IAMAuthorizer>) => {
-  console.log('HELLO@@@@@@@@@@@@@@@@@@@@@@@@@@')
-  // const identityId = event.requestContext.authorizer.iam.cognitoIdentity.identityId
+export const handler = async (event: any) => {
 
   const { monthYear }: { monthYear: string } = JSON.parse(event.body ?? '')
 
+  const identity = process.env.STAGE === "prod" 
+    ? "us-east-1:b815ff91-0423-41dd-bbbb-8fe18b28badd"
+    : "us-east-1:82ed093a-7dae-4f4a-9f13-5adc8472737a"
+  
   try {
     const getDays = {
-      Key: { user: "us-east-1:82ed093a-7dae-4f4a-9f13-5adc8472737a", month: monthYear },
+      Key: { user: identity, month: monthYear },
       TableName: process.env.UserMonths ?? 'noTable'
     }
     console.log('getDayts', getDays)

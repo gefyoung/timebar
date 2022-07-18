@@ -5,6 +5,7 @@ import PublicEvents from '../components/days/publicEvents'
 import '../configureAmplify'
 import returnClassName from '../lib/returnClassName'
 import { useState } from 'react'
+
 interface MonthData {
   month: string
   days: Day[]
@@ -61,7 +62,7 @@ export default function UserMonth({ data }: {data: MonthData}) {
 
 export async function getStaticPaths() {
   console.log('hello')
-  if (!process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('noEnvs'); return }
+  // if (!process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('noEnvs'); return }
   const paths: {params: {id: string}}[] = []
   try {
 
@@ -80,14 +81,15 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: { params: { id: string } }) {
 
   const monthYear = '7_2022'
+  console.log('env', process.env)
 
-  if (!process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { return }
+  // if (process.env.NEXT_PUBLIC_APIGATEWAY_NAME process.env.NEXT_PUBLIC_PUBLIC_IDENTITY) { console.log('env error'); return }
 
   try {
     const getUserInit = { body: { monthYear: monthYear } }
 
     const days: Day[] = await API.post(
-      process.env.NEXT_PUBLIC_APIGATEWAY_NAME, "/getPublicUserMonth", getUserInit
+      process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", "/getPublicUserMonth", getUserInit
     )
     days.forEach(({ dayValue }: { dayValue: Event[]}) => {
       dayValue = returnClassName(dayValue)
