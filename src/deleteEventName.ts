@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     const params = {
       ExpressionAttributeNames: { "#EV": "events" },
       ExpressionAttributeValues: { ":arr": eventNameArray },
-      Key: { user: identityId, month: monthYear },
+      Key: { userId: identityId, monthYear: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #EV = :arr"

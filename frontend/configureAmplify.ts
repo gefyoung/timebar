@@ -1,6 +1,5 @@
 import { Amplify } from '@aws-amplify/core'
 
-/* build fails - 'userPoolId wrong' , amplify does not like the temp env vars */
 try {
   const auth = {
     region: process.env.NEXT_PUBLIC_REGION,
@@ -12,8 +11,12 @@ try {
   Amplify.configure({
     Auth: auth,
     API: {
-      endpoints: [{ name: process.env.NEXT_PUBLIC_APIGATEWAY_NAME, endpoint: process.env.NEXT_PUBLIC_API_URL }]
-    }
+      endpoints: [{ 
+        name: process.env.NEXT_PUBLIC_APIGATEWAY_NAME, 
+        endpoint: process.env.NEXT_PUBLIC_API_URL,
+      }]
+    },
+    // ssr: true
   })
 } catch (err) {
   console.log('amplifyConfigErr', err)

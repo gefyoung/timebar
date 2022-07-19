@@ -1,20 +1,26 @@
 import { API } from '@aws-amplify/api'
-import EventsBar from '../components/days/eventsBar'
 import { Day, Event } from '../lib/types'
 import PublicEvents from '../components/days/publicEvents'
 import '../configureAmplify'
 import returnClassName from '../lib/returnClassName'
 import { useState } from 'react'
+import { Amplify } from '@aws-amplify/core'
+
 
 interface MonthData {
   month: string
   days: Day[]
+  error: any
 }
 
 export default function UserMonth({ data }: {data: MonthData}) {
 
   const [selectedDayState, setSelectedDayState] = useState("")
-  console.log(data)
+
+  if (data.error) {
+    console.log("data.error", data.error)
+    return <div>no data</div>
+  }
 
   const month = data.month.match(/(.*?)_/)
   const year = data.month.match(/_(.*)/)
@@ -45,7 +51,7 @@ export default function UserMonth({ data }: {data: MonthData}) {
               {
                 selectedDayState === day.dayKey 
                 && day.dayValue.map(event => 
-                  <div>
+                  <div key={event.id}>
                     <div>{event.eventName}</div>
                     <div className="bg-gray-100">{event.text}</div>
                   </div>
@@ -57,15 +63,13 @@ export default function UserMonth({ data }: {data: MonthData}) {
       {/* </div> */}
       </div>
     )
-    
 }
 
 export async function getStaticPaths() {
-  console.log('hello')
+  console.log('helloSTATICPATHS', process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
   // if (!process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('noEnvs'); return }
   const paths: {params: {id: string}}[] = []
   try {
-
       paths.push({ params: { id: 'gty_7_2022' } }) 
 
   } catch (err) {
@@ -81,29 +85,39 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: { params: { id: string } }) {
 
   const monthYear = '7_2022'
-  console.log('env', process.env)
-
-  // if (process.env.NEXT_PUBLIC_APIGATEWAY_NAME process.env.NEXT_PUBLIC_PUBLIC_IDENTITY) { console.log('env error'); return }
-
+  console.log('@@@@@NEXT_PUBLIC_APIGATEWAY_NAME', process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
+  let data: {
+    error: any
+    month?: string
+    days?: Day[]
+  }
+  // if (process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('env error'); return }
+  
   try {
-    const getUserInit = { body: { monthYear: monthYear } }
+    const getUserInit = { body: { userAlias: 'gty', monthYear: monthYear } }
 
     const days: Day[] = await API.post(
       process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", "/getPublicUserMonth", getUserInit
     )
+    console.log('DAYSSS length', days)
     days.forEach(({ dayValue }: { dayValue: Event[]}) => {
       dayValue = returnClassName(dayValue)
     })
 
-    const data = {
+    data = 
+    {
+      error: null,
       // user: identityId,
       month: monthYear,
-      days: days
+      days: days,
     }
 
-    return { props: { data }, revalidate: 1 } 
+    // return { props: { data }, revalidate: 1 } 
   } catch (err) {
     console.log(err)
-    return { notFound: true }
+    data = { error: "" + Amplify}
+    // return { notFound: true }
   }
+
+  return { props: { data } }
 }

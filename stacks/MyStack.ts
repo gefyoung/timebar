@@ -1,112 +1,97 @@
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as sst from "@serverless-stack/resources"
+import { StackContext, Table, Auth, Api, NextjsSite } from "@serverless-stack/resources"
 
-export default class MyStack extends sst.Stack {
-  constructor(scope: sst.App, id: string, props?: sst.StackProps) {
-    super(scope, id, props)
+export default function MyStack({ stack }: StackContext) {
 
-    // const UserDays = new sst.Table(this, "UserDays", {
-    //   fields: {
-    //     user: sst.TableFieldType.STRING,
-    //   },
-    //   primaryIndex: { partitionKey: "user", /*sortKey: "month"*/ }
-    // })
-    const UserMonths = new sst.Table(this, 'UserMonths', {
-      fields: {
-        user: sst.TableFieldType.STRING,
-        month: sst.TableFieldType.STRING
-      },
-      primaryIndex: { partitionKey: "user", sortKey: "month" }
-    })
 
-    const auth = new sst.Auth(this, "Auth", {
-      cognito: {
-        userPool: {
-          signInAliases: { email: true },
-          passwordPolicy: {
-            minLength: 7,
-            requireSymbols: false,
-            requireUppercase: false
-          }
-        }
-      }
-      // google: {
-      //   clientId: process.env.GOOGLE_AUTH_ID || ''
-      // }
-    })
+  const MonthDays = new Table(stack, 'MonthDays', {
+    fields: {
+      userId: "string",
+      monthYear: "string"
+    },
+    primaryIndex: { partitionKey: "userId", sortKey: "monthYear" }
+  })
+  const UserTable = new Table(stack, 'PublicUsers', {
+    fields: {
+      userAlias: "string",
+    },
+    primaryIndex: { partitionKey: "userAlias" }
+  })
 
-    const api = new sst.Api(this, "Api", {
-      defaultFunctionProps: {
+  const auth = new Auth(stack, "Auth", {
+    login: ["email"],
+  })
+
+  const api = new Api(stack, "Api", {
+
+    defaults: {
+      function: {
         environment: {
-          // UserDays: UserDays.tableName,
-          UserMonths: UserMonths.tableName
-        },
-        timeout: 20
+          UserMonths: MonthDays.tableName,
+          PublicUsers: UserTable.tableName
+        }
       },
-      defaultAuthorizationType: sst.ApiAuthorizationType.AWS_IAM,
-      routes: {
-        "POST /getUserMonth": "src/getUserMonth.handler",
-        "POST /getPublicUserMonth": {
-          function: "src/getPublicUserMonth.handler",
-          authorizationType: sst.ApiAuthorizationType.NONE,
-          environment: { STAGE: scope.stage }
-        },
-        "POST /saveText": "src/saveText.handler",
-        "POST /updateEventArray": "src/updateEventArray.handler",
-        "POST /submitEventName": "src/submitEventName.handler",
-        "POST /submitEvent": "src/submitEvent.handler",
-        "POST /deleteEvent": "src/deleteEvent.handler",
-        "POST /deleteEventName": "src/deleteEventName.handler",
-        "POST /updateDuration": "src/updateDuration.handler",
-        "POST /updateArrayIndex": "src/updateArrayIndex.handler",
+      authorizer: "iam"
+    },
+    routes: {
+      "POST /getUserMonth": "src/getUserMonth.handler",
+      "POST /getPublicUserMonth": {
+        function: "src/getPublicUserMonth.handler",
+        authorizer: "none",
+        environment: { STAGE: stack.stage }
       },
+      "POST /saveText": "src/saveText.handler",
+      "POST /updateEventArray": "src/updateEventArray.handler",
+      "POST /submitEventName": "src/submitEventName.handler",
+      "POST /submitEvent": "src/submitEvent.handler",
+      "POST /deleteEvent": "src/deleteEvent.handler",
+      "POST /deleteEventName": "src/deleteEventName.handler",
+      "POST /updateDuration": "src/updateDuration.handler",
+      "POST /updateArrayIndex": "src/updateArrayIndex.handler",
+    },
+  })
+
+  api.attachPermissionsToRoute("POST /getUserMonth", [])
+
+  api.attachPermissions([MonthDays, UserTable])
+
+  auth.attachPermissionsForAuthUsers(stack, [api])
+  auth.attachPermissionsForUnauthUsers(stack, [
+    new iam.PolicyStatement({
+      actions: ["execute-api:Invoke"],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        `arn:aws:execute-api:${stack.region}:${stack.account}:${api.httpApiId}/getUserMonth`
+      ]
     })
+  ])
 
-    api.attachPermissionsToRoute("POST /getUserMonth", [])
-
-    api.attachPermissions([UserMonths])
-
-    auth.attachPermissionsForAuthUsers([api])
-    auth.attachPermissionsForUnauthUsers([
-      new iam.PolicyStatement({
-        actions: ["execute-api:Invoke"],
-        effect: iam.Effect.ALLOW,
-        resources: [
-          `arn:aws:execute-api:${scope.region}:${scope.account}:${api.httpApi.apiId}/getUserMonth`
-        ]
-      })
-    ])
-
-    const site = new sst.NextjsSite(this, "Site", {
-      path: "frontend",
-      environment: {
-        NEXT_PUBLIC_REGION: scope.region,
-        NEXT_PUBLIC_API_URL: api.url,
-        NEXT_PUBLIC_COGNITO_USER_POOL_ID: auth.cognitoUserPool?.userPoolId ?? 'noPool',
-        NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.cognitoUserPoolClient?.userPoolClientId ?? 'noAppClient',
-        NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId,
-        NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApi.httpApiName ?? 'noAPI',
-        NEXT_PUBLIC_FATHOM_SITE_ID: scope.stage === "prod" ? 'PGUABNQP' : "",
-        NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS: "timebar.me",
-        // NEXT_PUBLIC_PUBLIC_IDENTITY: scope.stage === "prod" 
-        //   ? "us-east-1:b815ff91-0423-41dd-bbbb-8fe18b28badd"
-        //   : "us-east-1:82ed093a-7dae-4f4a-9f13-5adc8472737a"
-      },
-      customDomain: scope.stage === "prod" ? {
-        domainName: "timebar.me",
-        domainAlias: "www.timebar.me",
-      } : undefined
-      // customDomain: scope.stage === "prod" ? "timebar.me" : undefined
-    })
+  const site = new NextjsSite(stack, "Site", {
+    path: "frontend",
+    environment: {
+      NEXT_PUBLIC_REGION: stack.region,
+      NEXT_PUBLIC_API_URL: api.url,
+      NEXT_PUBLIC_COGNITO_USER_POOL_ID: auth.userPoolId,
+      NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.userPoolClientId,
+      NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId ?? "",
+      NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApiId,
+      NEXT_PUBLIC_FATHOM_SITE_ID: stack.stage === "prod" ? process.env.NEXT_PUBLIC_FATHOM_ID ?? "" : "",
+      NEXT_PUBLIC_FATHOM_CUSTOM_URL: stack.stage === "prod" ? process.env.NEXT_PUBLIC_FATHOM_CUSTOM_URL ?? "" : ""
+    },
+    customDomain: stack.stage === "prod" ? {
+      domainName: process.env.DOMAIN_NAME ?? "",
+      domainAlias: process.env.DOMAIN_ALIAS,
+    } : undefined
+  })
 
 
-    this.addOutputs({
-      URL: site.url,
-      ApiEndpoint: api.url,
-      UserPoolId: auth.cognitoUserPool?.userPoolId ?? '',
-      IdentityPoolId: auth.cognitoCfnIdentityPool.ref,
-      UserPoolClientId: auth.cognitoUserPoolClient?.userPoolClientId ?? ""
-    })
-  }
+  stack.addOutputs({
+    URL: site.url,
+    ApiEndpoint: api.url,
+    UserPoolId: auth.userPoolId,
+    IdentityPoolId: auth.cognitoIdentityPoolId ?? "",
+    UserPoolClientId: auth.userPoolClientId
+  })
 }
+// }
 

@@ -39,7 +39,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         "#DK": "" + dayKey
       },
       ExpressionAttributeValues: { ":dv": arrToObj },
-      Key: { user: identityId, month: monthYear },
+      Key: { userId: identityId, monthYear: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #DA.#DK = :dv"

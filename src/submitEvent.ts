@@ -38,7 +38,7 @@ export const handler = async (event:
         eventNameKey: eventNameKey,
         arrayIndex: arrayIndex
       } },
-      Key: { user: identityId, month: monthYear },
+      Key: { userId: identityId, monthYear: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "SET #DA.#DK.#EK = :en"

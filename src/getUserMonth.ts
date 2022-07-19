@@ -30,11 +30,11 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
 
   try {
     const getDays = {
-      Key: { user: identityId, month: monthYear },
+      Key: { userId: identityId, monthYear: monthYear },
       TableName: process.env.UserMonths ?? 'noTable'
     }
     const prevDays = {
-      Key: { user: identityId, month: prevMonthYear },
+      Key: { userId: identityId, monthYear: prevMonthYear },
       TableName: process.env.UserMonths ?? 'noTable'
     }
 
@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     if (Object.keys(dynamoData).length === 0) {
 
       const newUser = {
-        Item: { user: identityId, month: monthYear, days: { [day]: {} }, events: [] },
+        Item: { userId: identityId, monthYear: monthYear, days: { [day]: {} }, events: [] },
         TableName: process.env.UserMonths ?? 'noTable'
       }
       await dynamoDb.put(newUser).promise()
@@ -80,7 +80,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         const updateMap = {
           ExpressionAttributeNames: { "#DA": "days", "#DI": day },
           ExpressionAttributeValues: { ":fa": {} },
-          Key: { user: identityId, month: monthYear },
+          Key: { userId: identityId, monthYear: monthYear },
           ReturnValues: "ALL_NEW",
           TableName: process.env.UserMonths ?? 'noTable',
           UpdateExpression: "SET #DA.#DI = :fa"
@@ -109,7 +109,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
         const updateArray = {
           ExpressionAttributeNames: { "#EV": "events" },
           ExpressionAttributeValues: { ":ev": prevEvents },
-          Key: { user: identityId, month: monthYear },
+          Key: { userId: identityId, monthYear: monthYear },
           ReturnValues: "ALL_NEW",
           TableName: process.env.UserMonths ?? 'noTable',
           UpdateExpression: "SET #EV = :ev"

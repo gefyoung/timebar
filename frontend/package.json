@@ -8,14 +8,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-amplify/api": "^4.0.38",
-    "@aws-amplify/auth": "^4.5.2",
-    "@aws-amplify/core": "^4.5.2",
+    "@aws-amplify/api": "^4.0.45",
+    "@aws-amplify/auth": "^4.5.9",
+    "@aws-amplify/core": "^4.5.9",
     "aws-amplify": "^4.3.14",
     "axios": "^0.24.0",
     "fathom-client": "^3.5.0",
     "ical": "^0.8.0",
-    "next": "^11.1.4",
+    "next": "^12.2.2",
     "next-pwa": "^5.5.2",
     "node-ical": "^0.14.1",
     "react": "17.0.2",
@@ -23,7 +23,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@serverless-stack/static-site-env": "^0.61.3",
+    "@serverless-stack/static-site-env": "^1.5.1",
     "@types/node": "17.0.8",
     "@types/react": "17.0.38",
     "@types/uuid": "^8.3.4",

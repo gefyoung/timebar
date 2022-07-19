@@ -1,4 +1,9 @@
-# Getting Started with Serverless Stack (SST)
+# Timebar: A habit tracking app built with SST and Nextjs
+
+Ensure you have an AWS account set up, and SST installed. 
+Be sure to create a .env and provide the following VARs:
+
+
 
 This project was bootstrapped with [Create Serverless Stack](https://docs.serverless-stack.com/packages/create-serverless-stack).
 
@@ -28,18 +33,5 @@ Deploy all your stacks to AWS. Or optionally deploy a specific stack.
 
 Remove all your stacks and all of their resources from AWS. Or optionally remove a specific stack.
 
-### `npm run test`
-
-Runs your tests using Jest. Takes all the [Jest CLI options](https://jestjs.io/docs/en/cli).
-
 ## Documentation
-
-Learn more about the Serverless Stack.
-
-- [Docs](https://docs.serverless-stack.com)
-- [@serverless-stack/cli](https://docs.serverless-stack.com/packages/cli)
-- [@serverless-stack/resources](https://docs.serverless-stack.com/packages/resources)
-
-## Community
-
-[Follow us on Twitter](https://twitter.com/ServerlessStack) or [post on our forums](https://discourse.serverless-stack.com).
+Serverless Stack docs: https://docs.serverless-stack.com

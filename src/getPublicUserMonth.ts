@@ -8,24 +8,29 @@ const dynamoDb = new DynamoDB.DocumentClient()
 
 export const handler = async (event: any) => {
 
-  const { monthYear }: { monthYear: string } = JSON.parse(event.body ?? '')
+  const { monthYear, userAlias }: { monthYear: string, userAlias: string } = JSON.parse(event.body ?? '')
+  console.log('input', monthYear, userAlias)
+  if (!process.env.PublicUsers) { return }
+  const getDays = {
+    Key: { userAlias: userAlias },
+    TableName: process.env.PublicUsers
+  }
 
-  const identity = process.env.STAGE === "prod" 
-    ? "us-east-1:b815ff91-0423-41dd-bbbb-8fe18b28badd"
-    : "us-east-1:82ed093a-7dae-4f4a-9f13-5adc8472737a"
-  
+  const users = await dynamoDb.get(getDays).promise()
+  const userId = users.Item?.userId
+
+
   try {
+    // i removed ' monthYear: monthYear' to see if i can get back all months'
     const getDays = {
-      Key: { user: identity, month: monthYear },
+      Key: { userId: userId, monthYear: monthYear },
       TableName: process.env.UserMonths ?? 'noTable'
     }
-    console.log('getDayts', getDays)
 
     const dynamoData = await dynamoDb.get(getDays).promise()
-    console.log("dynamoData", dynamoData)
     const map: Map<string, Record<string, Event>> = new Map(Object.entries(dynamoData.Item?.days))
 
-    
+    console.log('returnedPublic::', dynamoData.Item)    
     if (!dynamoData.Item) { return }
 
     return JSON.stringify(sort(map))

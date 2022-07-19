@@ -1,15 +1,7 @@
-// export interface FlipEvent {
-//   dayBegins?: number
-//   start: number
-//   duration: number
-//   summary: string
-//   className: string
-//   text?: string
-// }
+
 export interface Day {
   dayKey: string
   dayValue: Event[]
-  // dayText?: string
 }
 export interface IAMAuthorizer {
   authorizer: {
@@ -33,14 +25,11 @@ export interface IAMAuthorizer {
 
 export interface Event {
   id: string
-  // start: number
   duration: number
   eventName: string
-  // className: string
   text?: string
   eventNameKey?: number
   dayKey: string
   arrayIndex: number
   dayArrayIndex: number
-  // newStart?: number
 }

@@ -64,4 +64,5 @@ yarn-debug.log*
 yarn-error.log*
 
 
-
+cdk.context.json
+sst.json

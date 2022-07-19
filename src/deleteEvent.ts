@@ -23,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
     
     const updateMap = {
       ExpressionAttributeNames: { "#DA": "days", "#DK": dayKey, "#ST": id },
-      Key: { user: identityId, month: monthYear },
+      Key: { userId: identityId, monthYear: monthYear },
       ReturnValues: "ALL_NEW",
       TableName: process.env.UserMonths ?? 'noTable',
       UpdateExpression: "REMOVE #DA.#DK.#ST"

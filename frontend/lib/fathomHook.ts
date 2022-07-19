@@ -7,21 +7,14 @@ const FathomHook = () => {
   const nodeEnv = process.env.NODE_ENV
   const eventType = 'routeChangeComplete'
   const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID
-  const excludedDomains = process.env.NEXT_PUBLIC_FATHOM_EXCLUDED_DOMAINS?? ""
-  const includedDomains = process.env.NEXT_PUBLIC_FATHOM_INCLUDED_DOMAINS?? ""
+  const fathomCustomUrl = process.env.NEXT_PUBLIC_FATHOM_CUSTOM_URL
  
   useEffect(() => {
     if (nodeEnv !== 'production' || !siteId) return
-    let loadOptions: LoadOptions = {}
-
-    if (includedDomains.length) {
-      loadOptions.includedDomains = includedDomains.split(',')
+    
+    let loadOptions: LoadOptions = {
+      url: fathomCustomUrl
     }
-
-    if (excludedDomains.length) {
-      loadOptions.excludedDomains = excludedDomains.split(',')
-    }
-    loadOptions.url = "https://joy-battery.timebar.me/script.js"
 
     load(siteId, loadOptions)
     events.on(eventType, trackPageview)

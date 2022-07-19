@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEventV2WithRequestContext<IA
           "#TX": "text"
         },
         ExpressionAttributeValues: { ":ft": textData.text },
-        Key: { user: identityId, month: textData.monthYear },
+        Key: { userId: identityId, monthYear: textData.monthYear },
         ReturnValues: "ALL_NEW",
         TableName: process.env.UserMonths ?? 'noTable',
         UpdateExpression: "SET #DA.#DI.#FI.#TX = :ft"
