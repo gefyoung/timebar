@@ -1,9 +1,6 @@
 # Timebar: A habit tracking app built with SST and Nextjs
 
-Ensure you have an AWS account set up, and SST installed. 
-Be sure to create a .env and provide the following VARs:
-
-
+Ensure you have an AWS account set up, with CLI, and SST installed. 
 
 This project was bootstrapped with [Create Serverless Stack](https://docs.serverless-stack.com/packages/create-serverless-stack).
 
