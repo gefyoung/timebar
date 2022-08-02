@@ -1,11 +1,11 @@
 import { API } from '@aws-amplify/api'
 import { Day, Event } from '../lib/types'
 import PublicEvents from '../components/days/publicEvents'
+import { amplifyError } from '../configureAmplify'
 import '../configureAmplify'
 import returnClassName from '../lib/returnClassName'
 import { useState } from 'react'
 import { Amplify } from '@aws-amplify/core'
-
 
 interface MonthData {
   month: string
@@ -16,7 +16,7 @@ interface MonthData {
 export default function UserMonth({ data }: {data: MonthData}) {
 
   const [selectedDayState, setSelectedDayState] = useState("")
-
+  console.log(JSON.stringify(data))
   if (data.error) {
     console.log("data.error", data.error)
     return <div>no data</div>
@@ -37,16 +37,16 @@ export default function UserMonth({ data }: {data: MonthData}) {
             <div 
               key={i} 
               className="max-w-4xl mb-10" 
-              onClick={
+
+            >
+              <div               onClick={
                 () => day.dayKey === selectedDayState 
                   ? setSelectedDayState("") 
                   : setSelectedDayState(day.dayKey)
-              } 
-            >{
-              (new Date(month1 + "/" + day.dayKey + "/" + year1))
-              .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey
-            }
-              <PublicEvents day={day}/>
+              } >{(new Date(month1 + "/" + day.dayKey + "/" + year1))
+              .toLocaleString('en-us', { weekday: 'long' }) + " " + day.dayKey}
+            
+              <PublicEvents day={day}/></div>
 
               {
                 selectedDayState === day.dayKey 
@@ -66,15 +66,20 @@ export default function UserMonth({ data }: {data: MonthData}) {
 }
 
 export async function getStaticPaths() {
-  console.log('helloSTATICPATHS', process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
-  // if (!process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('noEnvs'); return }
+  console.log("process.env.NEXT_PUBLIC_APIGATEWAY_NAME", process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
   const paths: {params: {id: string}}[] = []
   try {
-      paths.push({ params: { id: 'gty_7_2022' } }) 
+    const getUserInit = { body: { userAlias: 'gty', monthYear: '7_2022' } }
+
+    await API.post(
+      process.env.NEXT_PUBLIC_APIGATEWAY_NAME?? "", "/getPublicUserMonth", getUserInit
+    )
+    paths.push({ params: { id: 'gty_7_2022' } })
 
   } catch (err) {
-    console.log('getStaticPathsError')
+    console.log(err)
   }
+  console.log('paths', paths)
     return {
       paths,
       fallback: "blocking"
@@ -83,9 +88,9 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { id: string } }) {
-
+  console.log('ENV', process.env.NODE_ENV)
   const monthYear = '7_2022'
-  console.log('@@@@@NEXT_PUBLIC_APIGATEWAY_NAME', process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
+  // console.log('@@@@@NEXT_PUBLIC_APIGATEWAY_NAME', process.env.NEXT_PUBLIC_APIGATEWAY_NAME)
   let data: {
     error: any
     month?: string
@@ -94,16 +99,17 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
   // if (process.env.NEXT_PUBLIC_APIGATEWAY_NAME) { console.log('env error'); return }
   
   try {
+
     const getUserInit = { body: { userAlias: 'gty', monthYear: monthYear } }
 
     const days: Day[] = await API.post(
-      process.env.NEXT_PUBLIC_APIGATEWAY_NAME ?? "", "/getPublicUserMonth", getUserInit
+      process.env.NEXT_PUBLIC_APIGATEWAY_NAME?? "", "/getPublicUserMonth", getUserInit
     )
     console.log('DAYSSS length', days)
     days.forEach(({ dayValue }: { dayValue: Event[]}) => {
       dayValue = returnClassName(dayValue)
     })
-
+    
     data = 
     {
       error: null,
@@ -111,13 +117,12 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
       month: monthYear,
       days: days,
     }
+    return { props: { data }, revalidate: 1 } 
 
-    // return { props: { data }, revalidate: 1 } 
   } catch (err) {
     console.log(err)
-    data = { error: "" + Amplify}
-    // return { notFound: true }
+    // data = { error: amplifyError()}
+    return { notFound: true }
   }
-
-  return { props: { data } }
+  
 }

@@ -10,6 +10,7 @@ export const handler = async (event: any) => {
 
   const { monthYear, userAlias }: { monthYear: string, userAlias: string } = JSON.parse(event.body ?? '')
   console.log('input', monthYear, userAlias)
+  
   if (!process.env.PublicUsers) { return }
   const getDays = {
     Key: { userAlias: userAlias },

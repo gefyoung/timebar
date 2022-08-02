@@ -28,8 +28,9 @@ export default function MyStack({ stack }: StackContext) {
       function: {
         environment: {
           UserMonths: MonthDays.tableName,
-          PublicUsers: UserTable.tableName
-        }
+          PublicUsers: UserTable.tableName,
+        },
+        runtime: "nodejs16.x"
       },
       authorizer: "iam"
     },
@@ -37,7 +38,7 @@ export default function MyStack({ stack }: StackContext) {
       "POST /getUserMonth": "src/getUserMonth.handler",
       "POST /getPublicUserMonth": {
         function: "src/getPublicUserMonth.handler",
-        authorizer: "none",
+        // authorizer: "none",
         environment: { STAGE: stack.stage }
       },
       "POST /saveText": "src/saveText.handler",
@@ -68,11 +69,16 @@ export default function MyStack({ stack }: StackContext) {
 
   const site = new NextjsSite(stack, "Site", {
     path: "frontend",
+    defaults: {
+      function: {
+        runtime: "nodejs16.x"
+      }
+    },
     environment: {
       NEXT_PUBLIC_REGION: stack.region,
       NEXT_PUBLIC_API_URL: api.url,
-      NEXT_PUBLIC_COGNITO_USER_POOL_ID: auth.userPoolId,
-      NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.userPoolClientId,
+      NEXT_PUBLIC_COGNITO_USER_POOL_ID: auth.userPoolId?? "",
+      NEXT_PUBLIC_COGNITO_APP_CLIENT_ID: auth.userPoolClientId?? "",
       NEXT_PUBLIC_COGNITO_IDENTITY: auth.cognitoIdentityPoolId ?? "",
       NEXT_PUBLIC_APIGATEWAY_NAME: api.httpApiId,
       NEXT_PUBLIC_FATHOM_SITE_ID: stack.stage === "prod" ? process.env.NEXT_PUBLIC_FATHOM_ID ?? "" : "",
@@ -88,7 +94,7 @@ export default function MyStack({ stack }: StackContext) {
   stack.addOutputs({
     URL: site.url,
     ApiEndpoint: api.url,
-    UserPoolId: auth.userPoolId,
+    UserPoolId: auth.userPoolId?? "",
     IdentityPoolId: auth.cognitoIdentityPoolId ?? "",
     UserPoolClientId: auth.userPoolClientId
   })

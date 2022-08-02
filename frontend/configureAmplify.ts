@@ -1,4 +1,6 @@
-import { Amplify } from '@aws-amplify/core'
+import { Amplify } from 'aws-amplify'
+
+let error = "none"
 
 try {
   const auth = {
@@ -19,5 +21,10 @@ try {
     // ssr: true
   })
 } catch (err) {
+  error = JSON.stringify(err)
   console.log('amplifyConfigErr', err)
+}
+
+export function amplifyError () { 
+  return error
 }
